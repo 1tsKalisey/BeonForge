@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Install pinned pnpm and Node
+        uses: pnpm/setup@b1e47f6fef0327f62a1c3a39e58605704ac152a5 # v3
+        with:
+          runtime: node@24.19.0
+          require-lockfile: true
+      - name: Check peer dependencies
+        run: pnpm peers check
+      - name: Run project gates
+        run: pnpm check
