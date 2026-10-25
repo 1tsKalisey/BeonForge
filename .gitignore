@@ -1,0 +1,12 @@
+# El vault es una fuente de especificación externa y de solo lectura.
+/knowledge/
+# Preferencias locales del revisor; no forman parte del producto.
+/.claude/
+/node_modules/
+/.pnpm-store/
+/dist/
+/coverage/
+/.env
+.env.*
+!.env.example
+*.log
