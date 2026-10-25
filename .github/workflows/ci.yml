@@ -15,7 +15,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - name: Install pinned pnpm and Node
-        uses: pnpm/setup@b1e47f6fef0327f62a1c3a39e58605704ac152a5 # v3
+        uses: pnpm/setup@fa36a5ef7dcdefc3a7cb25655c122e00cf6e636e # v3.1.2
         with:
           runtime: node@24.19.0
           require-lockfile: true
