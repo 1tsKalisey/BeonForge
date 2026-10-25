@@ -64,7 +64,7 @@ No hubo hallazgos bloqueantes ni defectos de código o alcance adicionales. F-1 
 
 ## Gates no ejecutados, riesgos y límites
 
-- El run remoto requerido fue observado verde. `origin` apunta al repositorio privado `1tsKalisey/BeonForge`; su rama publicada y default actual es `phase/00-foundation`. La rama local `main` no está publicada y no se publicará sin autorización explícita.
+- El run remoto requerido fue observado verde. Con autorización posterior, `main` avanzó por `--ff-only` hasta `629059e`, se publicó sin force y pasó a ser la rama predeterminada. `phase/00-foundation` permanece publicada. El run de `main` [40202841059](https://github.com/1tsKalisey/BeonForge/actions/runs/40202841059) terminó `success` sobre `629059e269db32121758be3258a3f4cad205b108`.
 - No hay demo de kernel, EventStore, ArtifactStore, CLI ni recuperación; pertenecen a Fase 01. El test actual comprueba el entrypoint compilado del paquete de contratos, no comportamiento de orquestación.
 - El threat model documenta controles futuros, no policy enforcement actual. `knowledge/` no está versionado: una copia del repo necesita la especificación por separado.
 - El sandbox de Windows requiere `safe.directory` por comando y permiso adicional para escribir `.git`/store pnpm; no se cambió configuración global.

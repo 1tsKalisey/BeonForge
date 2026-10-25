@@ -11,7 +11,7 @@ Actualizado: 2026-10-25. Leer este archivo antes de cualquier tarea.
 - Siguientes tareas: crear `docs/execution/phases/phase-01.md`; descomponer contratos y errores tipados antes de implementar persistencia o runtime; mantener F-2/F-3 como gates del kernel.
 - Bloqueos: ninguno para planificar Fase 01. No iniciar implementación hasta definir sus milestones, tareas, dependencias, aceptación, gates y rollback.
 - Decisiones pendientes: forma de distribuir o referenciar el vault sin incorporarlo a Git; framework HTTP en fase posterior; estrategia de schema validation del kernel.
-- Último commit válido remoto antes del cierre documental: `84d7328` (`docs: require remote CI for foundation closure`). El commit de cierre se identifica con `git log -1` tras confirmar este estado.
+- Último commit de cierre antes de registrar la promoción: `629059e` (`docs: close foundation milestone`). `main` y `phase/00-foundation` fueron publicados por fast-forward, sin force ni merge commit.
 - Revisión Claude: formal `APPROVE_WITH_FOLLOWUPS` completada; F-1 confirmado y corregido, F-2/F-3 registrados para Fase 01. M00.3 cerrado. Claude Code no se invoca desde aquí.
 
 ## Gates actuales
@@ -24,7 +24,8 @@ Actualizado: 2026-10-25. Leer este archivo antes de cualquier tarea.
 - F00-05: aceptado. Instalación frozen, peers, `pnpm.cmd check` (formato, lint, typecheck, build, 1/1 test), audit sin vulnerabilidades conocidas, YAML parseado, diff y escaneo textual de secretos pasaron. Paquete de revisión preparado.
 - Tras F-1: instalación frozen, peers, `pnpm.cmd check` (1/1 test), audit, YAML/pin, diff y escaneo de secretos pasaron. El SHA de `pnpm/setup` es ahora commit, no tag object.
 - CI remota: run `40202416013`, workflow `CI`, evento `push`, rama `phase/00-foundation`, SHA `84d732845e20576752809c28ec6e3e3b85f6c628`, estado `completed`, conclusión `success`. Pasaron setup, checkout, pnpm/Node, peers y gates. URL: `https://github.com/1tsKalisey/BeonForge/actions/runs/40202416013`.
-- Repositorio remoto: `origin` = `https://github.com/1tsKalisey/BeonForge.git`, privado; rama remota/default actual `phase/00-foundation`. La rama local `main` (`487d5e8`) no está publicada.
+- Repositorio remoto: `origin` = `https://github.com/1tsKalisey/BeonForge.git`, privado. `main` se avanzó exclusivamente por fast-forward hasta `629059e`, se publicó y quedó como rama predeterminada; `phase/00-foundation` también está publicada. Run de `main` `40202841059` sobre `629059e269db32121758be3258a3f4cad205b108`: `completed/success`.
+- Compatibilidad Windows: el checkout de `main` reveló CRLF incompatibles con Prettier; `.gitattributes` fija LF para texto y marca binarios comunes. Tras normalizar, `pnpm.cmd check` y peers volvieron a pasar.
 
 ## Comandos de validación
 
