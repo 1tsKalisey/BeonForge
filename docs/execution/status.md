@@ -5,14 +5,14 @@ Actualizado: 2026-10-25. Leer este archivo antes de cualquier tarea.
 ## Posición
 
 - Fase actual: 00 — Foundation.
-- Milestone actual: M00.3 — preparado para revisión independiente; todavía no cerrado.
-- Última tarea aceptada: F00-05 — AGENTS.md, ADRs y threat model, commit `05b6a51`.
-- Tarea activa: revisión independiente formal de M00.3, pendiente de entrega por el usuario. Paquete: `docs/execution/reviews/current-review-packet.md`.
-- Siguientes tareas: reproducir y clasificar la revisión formal; corregir sólo defectos confirmados en commits separados; rerun de gates; decidir cierre M00.3. Fase 01 sólo después.
-- Bloqueos: revisión formal pendiente; no iniciar siguiente milestone. Git detecta distinto propietario de `.git` bajo el sandbox; usar `git -c safe.directory=C:/Users/ramen/Desktop/Programacion/BeonForge` por comando. Las escrituras a `.git` y al store pnpm pueden requerir escalación.
-- Decisiones pendientes: forma de distribuir o referenciar el vault sin incorporarlo a Git; framework HTTP en fase posterior.
-- Último commit válido de tarea: `05b6a51` (`docs: establish foundation governance`). El commit documental del paquete de revisión se identifica con `git log -1` tras confirmar este estado.
-- Revisión Claude: preliminar recibida sin veredicto; hallazgos clasificados en el paquete. Revisión formal de M00.3 pendiente. Claude Code no se invoca desde aquí.
+- Milestone actual: M00.3 — revisión formal APPROVE_WITH_FOLLOWUPS tratada; cierre pendiente de decisión sobre CI remota.
+- Última tarea aceptada: corrección F-1, commit `dfcbb1d`.
+- Tarea activa: decisión del usuario: aceptar la ausencia de run remoto verde como deuda explícita de M00.3 o exigirlo antes del cierre.
+- Siguientes tareas: con decisión de cierre, registrar ADR/estado y planificar Fase 01; si se exige CI remota, esperar autorización para publicar/conectar repositorio y observar un run, sin publicar por iniciativa propia.
+- Bloqueos: decisión humana sobre gate remoto. Git detecta distinto propietario de `.git` bajo el sandbox; usar `git -c safe.directory=C:/Users/ramen/Desktop/Programacion/BeonForge` por comando. Las escrituras a `.git` y al store pnpm pueden requerir escalación.
+- Decisiones pendientes: cierre con deuda CI remota; forma de distribuir o referenciar el vault sin incorporarlo a Git; framework HTTP en fase posterior.
+- Último commit válido de corrección: `dfcbb1d` (`fix(ci): pin pnpm setup to release commit`).
+- Revisión Claude: formal recibida `APPROVE_WITH_FOLLOWUPS`; F-1 confirmado y corregido, F-2/F-3 confirmados como seguimientos no bloqueantes. Paquete actualizado. Claude Code no se invoca desde aquí.
 
 ## Gates actuales
 
@@ -22,7 +22,8 @@ Actualizado: 2026-10-25. Leer este archivo antes de cualquier tarea.
 - F00-03: aceptado. `pnpm.cmd install --frozen-lockfile`, `pnpm.cmd peers check` y `pnpm.cmd check` pasaron; un `any` deliberado por stdin produjo error de ESLint; 1/1 test pasó. TypeScript pasó de 7.0.2 a 6.0.3 porque `typescript-eslint` declara peer `<6.1.0`. Diff y escaneo textual de secretos sin hallazgos.
 - F00-04: aceptado localmente. YAML parseado con PyYAML, estructura comprobada, `pnpm.cmd peers check` y `pnpm.cmd check` verdes, diff/secret scan limpios. Acciones fijadas por SHA. Ejecución remota no observada; no se afirma CI verde en GitHub.
 - F00-05: aceptado. Instalación frozen, peers, `pnpm.cmd check` (formato, lint, typecheck, build, 1/1 test), audit sin vulnerabilidades conocidas, YAML parseado, diff y escaneo textual de secretos pasaron. Paquete de revisión preparado.
-- Gate pendiente: ejecución remota de CI no observada; no se atribuye resultado verde en GitHub. El milestone permanece abierto hasta la revisión formal y tratamiento de hallazgos.
+- Tras F-1: instalación frozen, peers, `pnpm.cmd check` (1/1 test), audit, YAML/pin, diff y escaneo de secretos pasaron. El SHA de `pnpm/setup` es ahora commit, no tag object.
+- Gate pendiente: ejecución remota de CI no observada; no se atribuye resultado verde en GitHub. M00.3 sigue abierto hasta la decisión humana sobre esta deuda.
 
 ## Comandos de validación
 
@@ -30,7 +31,7 @@ Desde `C:\Users\ramen\Desktop\Programacion\BeonForge` en PowerShell: `git rev-pa
 
 ## Instrucciones exactas para continuar
 
-1. Abrir este archivo y `docs/execution/reviews/current-review-packet.md`; no iniciar Fase 01 antes de la revisión formal entregada por el usuario.
+1. Abrir este archivo y `docs/execution/reviews/current-review-packet.md`; no iniciar Fase 01 antes de la decisión del usuario sobre CI remota.
 2. Ejecutar `git rev-parse --show-toplevel` y comprobar que devuelve exactamente `C:/Users/ramen/Desktop/Programacion/BeonForge`. Usar el prefijo `git -c safe.directory=C:/Users/ramen/Desktop/Programacion/BeonForge` en cada comando Git restante.
-3. Por cada hallazgo nuevo, reproducir, clasificar como confirmado/falso positivo/sugerencia/decisión, corregir sólo confirmados dentro de alcance, añadir tests pertinentes y ejecutar `pnpm.cmd install --frozen-lockfile`, `pnpm.cmd peers check`, `pnpm.cmd check`, diff y secretos.
-4. Actualizar el paquete, este estado, cobertura, decisiones y riesgos. Crear commits cohesivos separados para correcciones. Cerrar M00.3 sólo con evidencia y decisión de revisión documentada; después planificar Fase 01.
+3. Registrar la respuesta del usuario a la deuda CI remota. Si exige run verde, preparar el medio de ejecución autorizado sin publicar ni desplegar por cuenta propia. Si acepta la deuda, cerrar M00.3 dejando CI como `prototipo` y el run remoto como gate posterior explícito.
+4. Mantener F-2 y F-3 en el plan de Fase 01, ejecutar sus gates cuando aparezcan contratos reales y kernel asíncrono. Actualizar paquete, estado, cobertura, decisiones y riesgos antes de avanzar.

@@ -1,6 +1,6 @@
 # Fase 00 — Foundation
 
-Actualizado: 2026-10-25. Estado: preparado para revisión, sin cierre formal. Dependencia PREP-001 satisfecha. F00-01 aceptada en `487d5e8`; F00-02 en `3fc9d52`; F00-03 en `b4d56e4`; F00-04 en `c0dc05f`; F00-05 en `05b6a51`; rama activa `phase/00-foundation`.
+Actualizado: 2026-10-25. Estado: revisión formal `APPROVE_WITH_FOLLOWUPS` tratada; cierre pendiente de decisión del usuario sobre CI remota. Dependencia PREP-001 satisfecha. F00-01 aceptada en `487d5e8`; F00-02 en `3fc9d52`; F00-03 en `b4d56e4`; F00-04 en `c0dc05f`; F00-05 en `05b6a51`; F-1 corregido en `dfcbb1d`; rama activa `phase/00-foundation`.
 
 ## Resultado observable
 
