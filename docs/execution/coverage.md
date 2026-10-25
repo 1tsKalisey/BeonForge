@@ -7,7 +7,7 @@ Actualizado: 2026-10-25. Estados: `catalogada`, `diseñada`, `prototipo`, `verif
 | Repositorio y memoria operativa | diseñada | verificada | Git propio `487d5e8`, seis documentos de ejecución, raíz y diff comprobados; faltan gates del workspace. |
 | pnpm workspace y TypeScript estricto | diseñada | verificada | `3fc9d52`, actualizado por `b4d56e4`; TypeScript 6.0.3, instalación frozen, typecheck y build pasan. |
 | lint, format y tests | diseñada | verificada | `b4d56e4`; ESLint, Prettier, Vitest 1/1 y gate integrado pasan; lint detectó `any` de prueba. |
-| CI inicial | diseñada | catalogada | F00-04; ejecución remota pendiente. |
+| CI inicial | diseñada | prototipo | `c0dc05f`; YAML parseado y comandos equivalentes verdes localmente; ejecución remota pendiente. |
 | ADR, threat model, AGENTS.md | diseñada | catalogada | F00-05. |
 | Contratos versionados, BlockManifest/BlockResult y errores | diseñada | catalogada | Fase 01, schemas y contract tests. |
 | DAG, estados, idempotencia, cancelación | diseñada | catalogada | Fase 01, tests y demo. |

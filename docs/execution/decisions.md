@@ -16,6 +16,7 @@ Actualizado: 2026-10-25. Las decisiones de la especificación se citan, no se at
 | D-010 | Diferida | Versiones de dependencias aún no instaladas, framework HTTP, sandbox por plataforma, motor de evals, licencia/distribución y futura base vectorial/grafo. | Resolver en la fase que lo necesite con evidencia. |
 | D-011 | Sustituida parcialmente | Node 24 (`>=24 <25`) y pnpm `12.15.0` siguen fijados; TypeScript `7.0.2` se usó en F00-02 pero `typescript-eslint` 8.72.0 declara peer `>=4.8.4 <6.1.0`. | Ver D-012. |
 | D-012 | Fijada para Fase 00 | TypeScript `6.0.3`, ESLint `10.13.0`, `@eslint/js` `10.0.1`, `typescript-eslint` `8.72.0`, Prettier `3.9.10` y Vitest `5.0.5`, todos exactos y sin problemas de peer. | Cambios futuros requieren lockfile y gates completos. |
+| D-013 | Fijada para Fase 00 | CI inicial en GitHub Actions con permisos `contents: read`, Ubuntu 24.04, Node 24.19.0, pnpm fijado por manifest, lockfile obligatorio y acciones fijadas por SHA. Sin publicación ni secretos. | Validar primer run remoto; actualizar SHAs mediante tarea de dependencias aislada. |
 
 ## Reglas
 

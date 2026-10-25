@@ -5,13 +5,13 @@ Actualizado: 2026-10-25. Leer este archivo antes de cualquier tarea.
 ## Posición
 
 - Fase actual: 00 — Foundation.
-- Milestone actual: M00.2 — toolchain reproducible.
-- Última tarea aceptada: F00-03 — gates locales y prueba del entrypoint, commit `b4d56e4`.
-- Tarea activa: F00-04 — CI inicial.
-- Siguientes tareas: F00-05 ADR, threat model y AGENTS.md; después paquete de revisión M00.3.
-- Bloqueos: ninguno para F00-04. Git detecta distinto propietario de `.git` bajo el sandbox; usar `git -c safe.directory=C:/Users/ramen/Desktop/Programacion/BeonForge` por comando. Las escrituras a `.git` y al store pnpm pueden requerir escalación.
+- Milestone actual: M00.3 — gobernanza y paquete de revisión.
+- Última tarea aceptada: F00-04 — workflow CI inicial, commit `c0dc05f`.
+- Tarea activa: F00-05 — ADR, threat model, AGENTS.md y paquete M00.3.
+- Siguientes tareas: revisión independiente de M00.3; Fase 01 sólo tras recibirla y tratarla.
+- Bloqueos: ninguno para F00-05. Git detecta distinto propietario de `.git` bajo el sandbox; usar `git -c safe.directory=C:/Users/ramen/Desktop/Programacion/BeonForge` por comando. Las escrituras a `.git` y al store pnpm pueden requerir escalación.
 - Decisiones pendientes: forma de distribuir o referenciar el vault sin incorporarlo a Git; framework HTTP en fase posterior.
-- Último commit válido de tarea: `b4d56e4` (`build: add local quality gates`).
+- Último commit válido de tarea: `c0dc05f` (`ci: run pinned foundation gates`).
 - Revisión Claude: revisión preliminar recibida sin veredicto por ausencia de M00.3. Hallazgos reproducidos; no hay defecto confirmado en los commits revisados. Paquete formal pendiente tras F00-05. Claude Code no se invoca desde aquí.
 
 ## Gates actuales
@@ -20,7 +20,8 @@ Actualizado: 2026-10-25. Leer este archivo antes de cualquier tarea.
 - F00-01: aceptado. `git rev-parse --show-toplevel` apuntó a BeonForge; `git diff --cached --check` pasó; commit limitado a siete archivos; `knowledge/` y `.claude/` ignorados, no modificados.
 - F00-02: aceptado. `pnpm.cmd install --frozen-lockfile`, `pnpm.cmd typecheck`, `pnpm.cmd build` y smoke de importación Node pasaron. `git diff --cached --check` pasó; ocho archivos dentro de alcance; escaneo textual de secretos sin hallazgos.
 - F00-03: aceptado. `pnpm.cmd install --frozen-lockfile`, `pnpm.cmd peers check` y `pnpm.cmd check` pasaron; un `any` deliberado por stdin produjo error de ESLint; 1/1 test pasó. TypeScript pasó de 7.0.2 a 6.0.3 porque `typescript-eslint` declara peer `<6.1.0`. Diff y escaneo textual de secretos sin hallazgos.
-- F00-04: CI localmente consistente con `pnpm.cmd check`; no atribuir ejecución remota hasta verla.
+- F00-04: aceptado localmente. YAML parseado con PyYAML, estructura comprobada, `pnpm.cmd peers check` y `pnpm.cmd check` verdes, diff/secret scan limpios. Acciones fijadas por SHA. Ejecución remota no observada; no se afirma CI verde en GitHub.
+- F00-05: completar ADR, threat model e instrucciones; gates locales completos y paquete de revisión reproducible.
 
 ## Comandos de validación
 
