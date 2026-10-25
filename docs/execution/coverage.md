@@ -5,7 +5,8 @@ Actualizado: 2026-10-25. Estados: `catalogada`, `diseñada`, `prototipo`, `verif
 | Capacidad | Estado del plan | Estado de implementación | Evidencia / próximo gate |
 |---|---|---|---|
 | Repositorio y memoria operativa | diseñada | verificada | Git propio `487d5e8`, seis documentos de ejecución, raíz y diff comprobados; faltan gates del workspace. |
-| pnpm workspace, TS estricto, lint, format, tests, build, CI | diseñada | catalogada | Fase 00, comandos repetibles y CI inicial. |
+| pnpm workspace y TypeScript estricto | diseñada | verificada | `3fc9d52`; instalación frozen, typecheck, build e importación Node pasan. |
+| lint, format, tests y CI | diseñada | catalogada | F00-03 y F00-04; sin gates todavía. |
 | ADR, threat model, AGENTS.md | diseñada | catalogada | F00-05. |
 | Contratos versionados, BlockManifest/BlockResult y errores | diseñada | catalogada | Fase 01, schemas y contract tests. |
 | DAG, estados, idempotencia, cancelación | diseñada | catalogada | Fase 01, tests y demo. |

@@ -13,7 +13,8 @@ Actualizado: 2026-10-25. Las decisiones de la especificación se citan, no se at
 | D-007 | Acordada | Reglas auditables antes de router aprendido; Ollama primer adapter local candidato; OmniRoute restringido y diferido. | Fases 03 y 06. |
 | D-008 | Decisión operativa reversible | Crear Git anidado propio porque el Git visible pertenece al Desktop y contiene cambios ajenos. No modificar su índice ni su historial. | Verificar raíz tras `git init`. |
 | D-009 | Decisión operativa reversible | Ignorar `knowledge/` y `.claude/` en el Git nuevo: son archivos existentes del usuario y el vault es de solo lectura. Documentar la dependencia de especificación externa. | Reconsiderar mediante decisión explícita si se desea distribución autocontenida. |
-| D-010 | Diferida | Versión exacta de dependencias, framework HTTP, sandbox por plataforma, motor de evals, licencia/distribución y futura base vectorial/grafo. | Resolver en la fase que lo necesite con evidencia. |
+| D-010 | Diferida | Versiones de dependencias aún no instaladas, framework HTTP, sandbox por plataforma, motor de evals, licencia/distribución y futura base vectorial/grafo. | Resolver en la fase que lo necesite con evidencia. |
+| D-011 | Fijada para Fase 00 | Node 24 (`>=24 <25`), pnpm `12.15.0` y TypeScript `7.0.2` exactos en manifest/lockfile; el entorno observado usa Node 24.19.0. | Cambiar con tarea aislada, documentación oficial y gates completos. |
 
 ## Reglas
 

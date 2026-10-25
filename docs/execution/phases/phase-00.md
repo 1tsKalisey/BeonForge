@@ -1,6 +1,6 @@
 # Fase 00 — Foundation
 
-Actualizado: 2026-10-25. Estado: en curso. Dependencia PREP-001 satisfecha. F00-01 aceptada en `487d5e8`; rama activa `phase/00-foundation`.
+Actualizado: 2026-10-25. Estado: en curso. Dependencia PREP-001 satisfecha. F00-01 aceptada en `487d5e8`; F00-02 aceptada en `3fc9d52`; rama activa `phase/00-foundation`.
 
 ## Resultado observable
 

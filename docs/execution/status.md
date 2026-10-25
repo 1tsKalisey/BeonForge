@@ -6,20 +6,20 @@ Actualizado: 2026-10-25. Leer este archivo antes de cualquier tarea.
 
 - Fase actual: 00 — Foundation.
 - Milestone actual: M00.2 — toolchain reproducible.
-- Última tarea aceptada: F00-01 — Git propio, rama `main`, baseline documental en `487d5e8` y rama de trabajo `phase/00-foundation`.
-- Tarea activa: F00-02 — workspace mínimo y TypeScript estricto.
-- Siguientes tareas: F00-03 herramientas de formato, lint, test y build; F00-04 CI inicial; F00-05 ADR, threat model y AGENTS.md.
-- Bloqueos: ninguno para F00-02. Git detecta distinto propietario de `.git` bajo el sandbox; usar `git -c safe.directory=C:/Users/ramen/Desktop/Programacion/BeonForge` por comando. Las escrituras a `.git` pueden requerir escalación.
-- Decisiones pendientes: versión fijada de paquetes al crear lockfile; forma de distribuir o referenciar el vault sin incorporarlo a Git; framework HTTP en fase posterior.
-- Último commit válido de tarea: `487d5e8` (`docs: establish BeonForge baseline and execution plan`).
+- Última tarea aceptada: F00-02 — workspace pnpm y TypeScript estricto, commit `3fc9d52`.
+- Tarea activa: F00-03 — gates locales de formato, ESLint y Vitest.
+- Siguientes tareas: F00-04 CI inicial; F00-05 ADR, threat model y AGENTS.md.
+- Bloqueos: ninguno para F00-03. Git detecta distinto propietario de `.git` bajo el sandbox; usar `git -c safe.directory=C:/Users/ramen/Desktop/Programacion/BeonForge` por comando. Las escrituras a `.git` y al store pnpm pueden requerir escalación.
+- Decisiones pendientes: forma de distribuir o referenciar el vault sin incorporarlo a Git; framework HTTP en fase posterior; versiones exactas de ESLint, Prettier y Vitest en F00-03.
+- Último commit válido de tarea: `3fc9d52` (`build: add strict TypeScript workspace`).
 - Revisión Claude: no solicitada; se preparará al terminar un milestone importante. Claude Code no se invoca desde aquí.
 
 ## Gates actuales
 
 - PREP-001: 23/23 documentos del plan leídos; inventario del repo y herramientas completado; no se modificó `knowledge/`.
 - F00-01: aceptado. `git rev-parse --show-toplevel` apuntó a BeonForge; `git diff --cached --check` pasó; commit limitado a siete archivos; `knowledge/` y `.claude/` ignorados, no modificados.
-- F00-02: comprobar `pnpm.cmd install --frozen-lockfile`, `pnpm.cmd typecheck` y `pnpm.cmd build` después de fijar las dependencias; diff y alcance.
-- Gates de formato, lint, typecheck, tests y build: aún no aplicables porque no hay proyecto Node. Su ausencia no acredita calidad del kernel.
+- F00-02: aceptado. `pnpm.cmd install --frozen-lockfile`, `pnpm.cmd typecheck`, `pnpm.cmd build` y smoke de importación Node pasaron. `git diff --cached --check` pasó; ocho archivos dentro de alcance; escaneo textual de secretos sin hallazgos.
+- F00-03: instalar versiones fijadas de ESLint, Prettier y Vitest; añadir gates y una prueba que detecte rotura real de la exportación. Ejecutar formato, lint, typecheck, test y build. CI aún no existe.
 
 ## Comandos de validación
 
