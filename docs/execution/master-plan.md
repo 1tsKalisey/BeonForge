@@ -2,6 +2,8 @@
 
 Actualizado: 2026-10-25. Fuente principal: `knowledge/AI/18 BeonForge Agentic OS/BeonForge Agentic OS MOC.md` y sus 22 documentos, leídos íntegramente antes de la implementación. El vault es de solo lectura y no se incorpora a Git por defecto; una copia del proyecto requiere acceso separado a esa especificación. La auditoría del vault es documental y no acredita código.
 
+Inspección inicial y herramientas: `docs/execution/preparation-report.md`.
+
 ## Resultado y reglas de avance
 
 BeonForge será un plano de control local-first, vendor-neutral, con contratos de bloque versionados, DAG durable, evidencia verificable, recuperación y permisos explícitos. Una capacidad pasa de `catalogada` a `diseñada`, `prototipo`, `verificada` y `producción` sólo con código funcional, contrato, pruebas, documentación, seguridad, observabilidad, demo o evidencia, recuperación y cobertura actualizada. Una fase avanza tras una demo desde entorno limpio y gates satisfechos. Una revisión externa importante pausa el siguiente milestone hasta recibir hallazgos del usuario.
