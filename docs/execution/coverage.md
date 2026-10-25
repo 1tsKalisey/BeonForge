@@ -8,7 +8,8 @@ Actualizado: 2026-10-25. Estados: `catalogada`, `diseñada`, `prototipo`, `verif
 | pnpm workspace y TypeScript estricto | diseñada | verificada | `3fc9d52`, actualizado por `b4d56e4`; TypeScript 6.0.3, instalación frozen, typecheck y build pasan. |
 | lint, format y tests | diseñada | verificada | `b4d56e4`; ESLint, Prettier, Vitest 1/1 y gate integrado pasan; lint detectó `any` de prueba. |
 | CI inicial | diseñada | prototipo | `c0dc05f`; YAML parseado y comandos equivalentes verdes localmente; ejecución remota pendiente. |
-| ADR, threat model, AGENTS.md | diseñada | catalogada | F00-05. |
+| ADR y AGENTS.md | diseñada | verificada | `05b6a51`; instrucciones, plantilla y ADR-0001/0002 revisables. |
+| Threat model inicial | diseñada | diseñada | `05b6a51`; amenazas y controles previstos documentados, enforcement pendiente por fase. |
 | Contratos versionados, BlockManifest/BlockResult y errores | diseñada | catalogada | Fase 01, schemas y contract tests. |
 | DAG, estados, idempotencia, cancelación | diseñada | catalogada | Fase 01, tests y demo. |
 | EventStore SQLite y proyecciones | diseñada | catalogada | Fase 01, recuperación desde eventos. |
