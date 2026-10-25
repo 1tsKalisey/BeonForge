@@ -4,7 +4,7 @@ Actualizado: 2026-10-25. Estados: `catalogada`, `diseñada`, `prototipo`, `verif
 
 | Capacidad | Estado del plan | Estado de implementación | Evidencia / próximo gate |
 |---|---|---|---|
-| Repositorio y memoria operativa | diseñada | prototipo | Seis documentos de ejecución; falta commit de baseline y gates del workspace. |
+| Repositorio y memoria operativa | diseñada | verificada | Git propio `487d5e8`, seis documentos de ejecución, raíz y diff comprobados; faltan gates del workspace. |
 | pnpm workspace, TS estricto, lint, format, tests, build, CI | diseñada | catalogada | Fase 00, comandos repetibles y CI inicial. |
 | ADR, threat model, AGENTS.md | diseñada | catalogada | F00-05. |
 | Contratos versionados, BlockManifest/BlockResult y errores | diseñada | catalogada | Fase 01, schemas y contract tests. |

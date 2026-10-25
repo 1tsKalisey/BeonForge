@@ -1,6 +1,6 @@
 # Fase 00 — Foundation
 
-Actualizado: 2026-10-25. Estado: en curso. Dependencia: informe PREP-001. Rama prevista: `phase/00-foundation` después del primer commit en `main`.
+Actualizado: 2026-10-25. Estado: en curso. Dependencia PREP-001 satisfecha. F00-01 aceptada en `487d5e8`; rama activa `phase/00-foundation`.
 
 ## Resultado observable
 
