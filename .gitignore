@@ -2,10 +2,10 @@
 /knowledge/
 # Preferencias locales del revisor; no forman parte del producto.
 /.claude/
-/node_modules/
+node_modules/
 /.pnpm-store/
-/dist/
-/coverage/
+dist/
+coverage/
 /.env
 .env.*
 !.env.example
