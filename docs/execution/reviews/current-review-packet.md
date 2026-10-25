@@ -1,6 +1,6 @@
 # Paquete de revisión independiente — M00.3 Foundation
 
-Preparado: 2026-10-25. Estado: **revisión formal recibida: APPROVE_WITH_FOLLOWUPS; cierre pendiente de decisión humana sobre CI remota**. No invocar Claude Code desde BeonForge. Alcance: Fase 00; este paquete no afirma que exista kernel durable.
+Preparado: 2026-10-25. Estado: **revisión formal recibida: APPROVE_WITH_FOLLOWUPS; usuario exige run remoto verde antes de cerrar M00.3**. No hay remoto configurado ni autorización de publicación. No invocar Claude Code desde BeonForge. Alcance: Fase 00; este paquete no afirma que exista kernel durable.
 
 ## Objetivo y especificación
 
@@ -63,7 +63,7 @@ No hubo hallazgos bloqueantes ni defectos de código o alcance adicionales. F-1 
 
 ## Gates no ejecutados, riesgos y límites
 
-- No se ha observado un run remoto de GitHub Actions: el YAML y los comandos equivalentes se validaron localmente; el pin F-1 ya apunta a commit. CI permanece `prototipo` en cobertura. No se publica ni abre PR sin autorización. El usuario debe decidir si acepta esta deuda explícita para cerrar M00.3 o exige run remoto verde antes del cierre.
+- No se ha observado un run remoto de GitHub Actions: el YAML y los comandos equivalentes se validaron localmente; el pin F-1 ya apunta a commit. CI permanece `prototipo` en cobertura. El usuario decidió exigir run remoto verde antes del cierre. `git remote -v` está vacío; publicar/conectar repositorio requiere destino y autorización explícita.
 - No hay demo de kernel, EventStore, ArtifactStore, CLI ni recuperación; pertenecen a Fase 01. El test actual comprueba el entrypoint compilado del paquete de contratos, no comportamiento de orquestación.
 - El threat model documenta controles futuros, no policy enforcement actual. `knowledge/` no está versionado: una copia del repo necesita la especificación por separado.
 - El sandbox de Windows requiere `safe.directory` por comando y permiso adicional para escribir `.git`/store pnpm; no se cambió configuración global.
@@ -75,4 +75,4 @@ No hubo hallazgos bloqueantes ni defectos de código o alcance adicionales. F-1 
 2. ¿Alguna configuración de ESLint, TypeScript o Vitest permite que código fuente o tests queden fuera de los gates de forma accidental?
 3. ¿AGENTS.md, ADRs y threat model contradicen el plan, atribuyen controles no implementados o dejan una amenaza crítica sin seguimiento?
 4. ¿Hay archivos fuera de alcance, secretos o cambios al vault entre `487d5e8` y `05b6a51`? Adjuntar ruta y evidencia.
-5. Respondida por la revisión formal: APPROVE_WITH_FOLLOWUPS; cierre condicionado a corregir F-1 (hecho) y a la decisión del usuario sobre CI remota no observada (pendiente).
+5. Respondida por la revisión formal y el usuario: APPROVE_WITH_FOLLOWUPS; F-1 corregido; M00.3 permanece abierto hasta observar un run remoto verde.
