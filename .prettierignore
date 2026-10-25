@@ -1,0 +1,7 @@
+knowledge/
+.claude/
+docs/
+node_modules/
+dist/
+coverage/
+pnpm-lock.yaml
