@@ -18,6 +18,7 @@ Actualizado: 2026-10-25. Las decisiones de la especificación se citan, no se at
 | D-012 | Fijada para Fase 00 | TypeScript `6.0.3`, ESLint `10.13.0`, `@eslint/js` `10.0.1`, `typescript-eslint` `8.72.0`, Prettier `3.9.10` y Vitest `5.0.5`, todos exactos y sin problemas de peer. | Cambios futuros requieren lockfile y gates completos. |
 | D-013 | Fijada para Fase 00 | CI inicial en GitHub Actions con permisos `contents: read`, Ubuntu 24.04, Node 24.19.0, pnpm fijado por manifest, lockfile obligatorio y acciones fijadas por SHA. Sin publicación ni secretos. | Validar primer run remoto; actualizar SHAs mediante tarea de dependencias aislada. |
 | D-014 | Decidida por el usuario | M00.3 sólo puede cerrarse tras observar un run remoto verde. La deuda explícita no basta. F-1 ya fue corregido. | No cerrar ni iniciar Fase 01 antes de guardar evidencia del run; no publicar sin autorización específica. |
+| D-015 | Ejecutada | Repositorio remoto privado `1tsKalisey/BeonForge`; `origin` configurado y sólo `phase/00-foundation` publicada. Run `40202416013` verde satisface D-014 y cierra M00.3. | `main` permanece local hasta autorización explícita; preservar visibilidad privada salvo decisión del usuario. |
 
 ## Reglas
 

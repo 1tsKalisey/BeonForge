@@ -1,6 +1,6 @@
 # Fase 00 — Foundation
 
-Actualizado: 2026-10-25. Estado: revisión formal `APPROVE_WITH_FOLLOWUPS` tratada; usuario exige run remoto verde antes del cierre, sin remoto configurado. Dependencia PREP-001 satisfecha. F00-01 aceptada en `487d5e8`; F00-02 en `3fc9d52`; F00-03 en `b4d56e4`; F00-04 en `c0dc05f`; F00-05 en `05b6a51`; F-1 corregido en `dfcbb1d`; rama activa `phase/00-foundation`.
+Actualizado: 2026-10-25. Estado: **cerrada**. Revisión formal `APPROVE_WITH_FOLLOWUPS` tratada; F-1 corregido en `dfcbb1d`; run remoto `40202416013` verde sobre `84d7328`; M00.3 aceptado. F00-01 aceptada en `487d5e8`; F00-02 en `3fc9d52`; F00-03 en `b4d56e4`; F00-04 en `c0dc05f`; F00-05 en `05b6a51`.
 
 ## Resultado observable
 

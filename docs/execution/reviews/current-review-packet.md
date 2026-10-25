@@ -1,6 +1,6 @@
 # Paquete de revisión independiente — M00.3 Foundation
 
-Preparado: 2026-10-25. Estado: **revisión formal recibida: APPROVE_WITH_FOLLOWUPS; usuario exige run remoto verde antes de cerrar M00.3**. No hay remoto configurado ni autorización de publicación. No invocar Claude Code desde BeonForge. Alcance: Fase 00; este paquete no afirma que exista kernel durable.
+Preparado: 2026-10-25. Estado: **M00.3 cerrado** tras revisión formal `APPROVE_WITH_FOLLOWUPS`, corrección F-1 y run remoto verde. No invocar Claude Code desde BeonForge. Alcance: Fase 00; este paquete no afirma que exista kernel durable.
 
 ## Objetivo y especificación
 
@@ -34,6 +34,7 @@ Desde `C:\Users\ramen\Desktop\Programacion\BeonForge` en Windows:
 6. PyYAML `BaseLoader` parseó `.github/workflows/ci.yml`; comprobó triggers `push`/`pull_request`, permiso `contents: read` y cuatro pasos.
 7. `git -c safe.directory=C:/Users/ramen/Desktop/Programacion/BeonForge diff --check` y escaneo textual de secretos sobre archivos nuevos → sin hallazgos. Un `any` inyectado por stdin a ESLint falló con `no-explicit-any`, confirmando que el gate detecta el caso.
 8. Tras `dfcbb1d` se repitieron instalación frozen, peers, `pnpm.cmd check` (1/1 test), audit, parse YAML, comprobación de SHA de 40 caracteres, diff y escaneo de secretos: todos pasaron localmente.
+9. Evidencia remota verificada con GitHub CLI: [run 40202416013](https://github.com/1tsKalisey/BeonForge/actions/runs/40202416013), `completed/success`, rama `phase/00-foundation`, SHA `84d732845e20576752809c28ec6e3e3b85f6c628`. Pasaron checkout, `pnpm/setup` con el commit corregido, peers y `pnpm check`.
 
 ## Revisión preliminar de Claude Code, recibida antes del milestone
 
@@ -63,7 +64,7 @@ No hubo hallazgos bloqueantes ni defectos de código o alcance adicionales. F-1 
 
 ## Gates no ejecutados, riesgos y límites
 
-- No se ha observado un run remoto de GitHub Actions: el YAML y los comandos equivalentes se validaron localmente; el pin F-1 ya apunta a commit. CI permanece `prototipo` en cobertura. El usuario decidió exigir run remoto verde antes del cierre. `git remote -v` está vacío; publicar/conectar repositorio requiere destino y autorización explícita.
+- El run remoto requerido fue observado verde. `origin` apunta al repositorio privado `1tsKalisey/BeonForge`; su rama publicada y default actual es `phase/00-foundation`. La rama local `main` no está publicada y no se publicará sin autorización explícita.
 - No hay demo de kernel, EventStore, ArtifactStore, CLI ni recuperación; pertenecen a Fase 01. El test actual comprueba el entrypoint compilado del paquete de contratos, no comportamiento de orquestación.
 - El threat model documenta controles futuros, no policy enforcement actual. `knowledge/` no está versionado: una copia del repo necesita la especificación por separado.
 - El sandbox de Windows requiere `safe.directory` por comando y permiso adicional para escribir `.git`/store pnpm; no se cambió configuración global.
@@ -75,4 +76,4 @@ No hubo hallazgos bloqueantes ni defectos de código o alcance adicionales. F-1 
 2. ¿Alguna configuración de ESLint, TypeScript o Vitest permite que código fuente o tests queden fuera de los gates de forma accidental?
 3. ¿AGENTS.md, ADRs y threat model contradicen el plan, atribuyen controles no implementados o dejan una amenaza crítica sin seguimiento?
 4. ¿Hay archivos fuera de alcance, secretos o cambios al vault entre `487d5e8` y `05b6a51`? Adjuntar ruta y evidencia.
-5. Respondida por la revisión formal y el usuario: APPROVE_WITH_FOLLOWUPS; F-1 corregido; M00.3 permanece abierto hasta observar un run remoto verde.
+5. Respondida: F-1 corregido y run remoto verde observado. M00.3 puede cerrarse y queda cerrado en este paquete.
