@@ -16,7 +16,13 @@ export type TaskState = (typeof TASK_STATES)[number];
 
 export const TASK_TRANSITIONS = {
   queued: ['running', 'cancelled'],
-  running: ['awaiting_approval', 'succeeded', 'failed', 'cancelled', 'uncertain'],
+  running: [
+    'awaiting_approval',
+    'succeeded',
+    'failed',
+    'cancelled',
+    'uncertain',
+  ],
   awaiting_approval: ['succeeded', 'failed', 'cancelled'],
   succeeded: [],
   failed: ['queued'],
@@ -36,7 +42,8 @@ export class InvalidTaskTransitionError extends Error {
 
 export function isTaskState(value: unknown): value is TaskState {
   return (
-    typeof value === 'string' && (TASK_STATES as readonly string[]).includes(value)
+    typeof value === 'string' &&
+    (TASK_STATES as readonly string[]).includes(value)
   );
 }
 
