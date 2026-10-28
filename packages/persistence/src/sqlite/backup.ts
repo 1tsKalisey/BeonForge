@@ -126,6 +126,7 @@ export async function createBackup(
   const validatedSnapshot = new SqliteDatabase(
     target.databasePath,
     target.artifactRoot,
+    'backup',
   );
   validatedSnapshot.close(); // Construction performs the complete integrity/reference/prefix validation once.
   // Seal the standalone snapshot before hashing; never copy the live .db or ignore active WAL.
@@ -207,6 +208,10 @@ export async function restoreBackup(
     target = location(destinationParent, 'beonforge-restore-');
     const root = new SafeDirectory(target.directory);
     root.writeExclusive('beonforge-restore-incomplete', new Uint8Array());
+    root.writeExclusive(
+      'beonforge-restore.json',
+      Buffer.from(JSON.stringify({ schemaVersion: 1 })),
+    );
     await backup(sourceDb, root.file('events.sqlite'));
     const restoredArtifacts = new ArtifactFiles(target.artifactRoot);
     for (const { bytes } of entries) restoredArtifacts.put(bytes);
@@ -217,7 +222,7 @@ export async function restoreBackup(
     const restored = new SqliteDatabase(
       target.databasePath,
       target.artifactRoot,
-      true,
+      'restore',
     );
     try {
       if (restored.sequence() !== contents.sequence)

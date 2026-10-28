@@ -1,5 +1,6 @@
 import { DatabaseSync, backup, type SQLOutputValue } from 'node:sqlite';
-import { dirname, join } from 'node:path';
+import { realpathSync } from 'node:fs';
+import { basename, dirname, join, relative } from 'node:path';
 import process from 'node:process';
 import {
   ContractValidationError,
@@ -11,7 +12,7 @@ import {
   type ArtifactReference,
 } from '@beonforge/contracts';
 import type { WorkflowCheckpoint } from '../recovery.js';
-import { ArtifactFiles, entryExists } from './artifacts.js';
+import { ArtifactFiles, SafeDirectory, entryExists } from './artifacts.js';
 import {
   PersistenceError,
   type AttemptIdentity,
@@ -23,6 +24,71 @@ import { requireRuntime } from './runtime.js';
 type Row = Record<string, SQLOutputValue>;
 type VerifiedBlobs = Map<string, Uint8Array>;
 const applicationId = 0x42464f52;
+
+/** Reserved recovery roots never silently become fresh writable databases. */
+function checkLocation(
+  path: string,
+  artifactRoot: string,
+  validation?: 'backup' | 'restore',
+): number | undefined {
+  const parent = dirname(path);
+  const backup =
+    basename(parent).startsWith('beonforge-backup-') ||
+    ['manifest.json', 'beonforge-backup-incomplete'].some((name) =>
+      entryExists(join(parent, name)),
+    );
+  if (backup && validation !== 'backup')
+    throw new PersistenceError('integrity_failure');
+  const restoring = entryExists(join(parent, 'beonforge-restore-incomplete'));
+  if (restoring && validation !== 'restore')
+    throw new PersistenceError('integrity_failure');
+  if (validation) return undefined; // Only internal validation of a newly allocated copy, never public open.
+  const restored =
+    basename(parent).startsWith('beonforge-restore-') ||
+    ['beonforge-restore.json', 'restore-ready.json'].some((name) =>
+      entryExists(join(parent, name)),
+    );
+  if (!restored) return undefined;
+  if (
+    basename(path) !== 'events.sqlite' ||
+    !entryExists(path) ||
+    !entryExists(artifactRoot) ||
+    !entryExists(join(parent, 'restore-ready.json')) ||
+    relative(
+      realpathSync.native(artifactRoot),
+      join(realpathSync.native(parent), 'events.sqlite.artifacts'),
+    ) !== ''
+  )
+    throw new PersistenceError('integrity_failure');
+  const root = new SafeDirectory(parent);
+  try {
+    const value: unknown = JSON.parse(
+      Buffer.from(root.read('restore-ready.json')).toString('utf8'),
+    );
+    if (
+      typeof value !== 'object' ||
+      value === null ||
+      Object.keys(value).sort().join(',') !== 'schemaVersion,sequence' ||
+      !('schemaVersion' in value) ||
+      value.schemaVersion !== 1 ||
+      !('sequence' in value) ||
+      typeof value.sequence !== 'number' ||
+      !Number.isSafeInteger(value.sequence) ||
+      value.sequence < 0
+    )
+      throw new PersistenceError('integrity_failure');
+    if (entryExists(root.file('beonforge-restore.json'))) {
+      const intent: unknown = JSON.parse(
+        Buffer.from(root.read('beonforge-restore.json')).toString('utf8'),
+      );
+      if (JSON.stringify(intent) !== JSON.stringify({ schemaVersion: 1 }))
+        throw new PersistenceError('integrity_failure');
+    }
+    return value.sequence;
+  } catch {
+    throw new PersistenceError('integrity_failure');
+  }
+}
 
 export function normalizeError(error: unknown): PersistenceError {
   if (error instanceof PersistenceError) return error;
@@ -121,7 +187,7 @@ export class SqliteDatabase {
   constructor(
     path: string,
     artifactRoot = `${path}.artifacts`,
-    allowIncompleteRestore = false,
+    validation?: 'backup' | 'restore',
   ) {
     requireRuntime(process.versions.node);
     const probe = new DatabaseSync(':memory:');
@@ -133,12 +199,11 @@ export class SqliteDatabase {
     } finally {
       probe.close();
     }
-    if (
-      !allowIncompleteRestore &&
-      entryExists(join(dirname(path), 'beonforge-restore-incomplete'))
-    )
-      throw new PersistenceError('integrity_failure');
-    this.artifacts = new ArtifactFiles(artifactRoot);
+    const restoredSequence = checkLocation(path, artifactRoot, validation);
+    this.artifacts = new ArtifactFiles(
+      artifactRoot,
+      restoredSequence === undefined,
+    );
     this.db = new DatabaseSync(path, {
       timeout: 100,
       allowExtension: false,
@@ -153,6 +218,13 @@ export class SqliteDatabase {
         this.db.prepare('PRAGMA application_id').get() ?? {},
         'application_id',
       );
+      if (
+        restoredSequence !== undefined &&
+        (version !== 2 ||
+          brand !== applicationId ||
+          restoredSequence > this.sequence())
+      )
+        throw new PersistenceError('integrity_failure');
       if (
         version > 2 ||
         (version > 0 && brand !== applicationId) ||

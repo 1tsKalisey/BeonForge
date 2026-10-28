@@ -105,6 +105,7 @@ try {
   } finally {
     await store.close();
   }
-} catch {
+} catch (error) {
+  process.stderr.write(`${String(error)}\n`);
   process.exitCode = 1;
 }

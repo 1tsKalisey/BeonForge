@@ -31,3 +31,13 @@ SqliteTimeoutPolicy es aditivo: openSqlitePersistence tercer argumento, openSqli
 Regresiones: cola expirada sin escritura, deadline real con lock SQLite/estado incierto sin retries, apertura configurable, restauración, configuración inválida, prefijos iguales/antiguos y longitudes contradictorias bajo SHA compartido. F-6/F-7 siguen abiertos hasta sus commits separados.
 
 Gates F-5: frozen, peers y check completos verdes, 62 contratos + 57 persistencia + 7 spike = 126 tests. Formato detectó inicialmente la tabla Markdown nueva; corregido antes del check verde. Diff/alcance y secretos revisados. El volumen además restaura y reabre 800 eventos/40 checkpoints; el resto de integraciones de corrupción/crash continúa verde.
+
+## F-6 — Apertura de conjuntos de recuperación
+
+Reproducción antes del cambio: 9/9 regresiones rojas; se aceptaban backups completos/incompletos, restores sin ready o con ready inválido/futuro/adelantado, sin DB/CAS y directorios reservados vacíos. El rechazo ahora sucede antes de inicializar CAS/SQLite. Backups se identifican por nombre reservado, manifest o marcador incompleto y nunca son stores públicos. La validación interna de copias usa un modo privado distinto de la apertura pública.
+
+Restores requieren ready JSON estricto v1, DB/CAS existentes, nombres de DB/CAS esperados, schema/application_id válidos y head al menos igual al prefijo ready. No se migra/inicializa una copia identificada como restore. Se conserva un marcador de origen para identificarla incluso renombrada; no es firma ni autorización frente al propietario privilegiado. Restores v1 anteriores con ready válido siguen admitidos sin exigir el nuevo marcador. Incomplete siempre falla cerrado; ready no es checkpoint de ejecución ni head futuro del store.
+
+11 regresiones nuevas verdes: incluyen renombrado sin ready, intento de DB/CAS alternativos sin residuos y reapertura de restore válido después de appends. Los kills previos de backup/restore y la copia de volumen se mantienen. F-7 sigue pendiente de su corrección separada.
+
+Gates F-6: frozen/peers/check verdes, 62 + 68 + 7 = 137 tests. El primer check detectó dos fallos de reapertura con CAS explícito por alias Windows 8.3 frente a nombre largo; comparación corregida con realpath nativo y pruebas completas posteriores verdes. Sin cambios a contratos/dependencias ni datos reales.

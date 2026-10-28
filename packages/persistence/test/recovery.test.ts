@@ -164,6 +164,103 @@ async function killedAt(
 }
 
 describe('content-addressed artifacts, workflow checkpoints and isolated recovery', () => {
+  it.each(['complete', 'incomplete'] as const)(
+    'F-6 rejects opening %s backup without modifying it',
+    async (kind) => {
+      const files = fixture();
+      const store = await files.open();
+      await store.putArtifact(bytes);
+      await store.append(start(), 'start');
+      const bundle = await store.createBackup(files.copies);
+      if (kind === 'incomplete')
+        writeFileSync(
+          join(bundle.directory, 'beonforge-backup-incomplete'),
+          '',
+        );
+      const before = readFileSync(bundle.databasePath);
+      const names = readdirSync(bundle.directory);
+      await expect(
+        files.open(bundle.databasePath, bundle.artifactRoot),
+      ).rejects.toMatchObject({ code: 'integrity_failure' });
+      expect(readFileSync(bundle.databasePath)).toEqual(before);
+      expect(readdirSync(bundle.directory)).toEqual(names);
+    },
+  );
+
+  it.each([
+    'missing',
+    'malformed',
+    'future',
+    'ahead',
+    'missing-db',
+    'missing-cas',
+  ] as const)('F-6 rejects restore with %s ready state', async (damage) => {
+    const files = fixture();
+    const store = await files.open();
+    const bundle = await store.createBackup(files.copies);
+    const restored = await restoreSqliteBackup(bundle.directory, files.copies);
+    const ready = join(restored.directory, 'restore-ready.json');
+    if (damage === 'missing') unlinkSync(ready);
+    if (damage === 'malformed') writeFileSync(ready, '{}');
+    if (damage === 'future')
+      writeFileSync(ready, '{"schemaVersion":2,"sequence":0}');
+    if (damage === 'ahead')
+      writeFileSync(ready, '{"schemaVersion":1,"sequence":1}');
+    if (damage === 'missing-db') unlinkSync(restored.databasePath);
+    if (damage === 'missing-cas')
+      renameSync(restored.artifactRoot, `${restored.artifactRoot}.saved`);
+    const names = readdirSync(restored.directory);
+    await expect(
+      files.open(restored.databasePath, restored.artifactRoot),
+    ).rejects.toMatchObject({ code: 'integrity_failure' });
+    expect(readdirSync(restored.directory)).toEqual(names);
+  });
+
+  it('F-6 rejects unmarked reserved restore roots instead of initializing a new database', async () => {
+    const files = fixture();
+    const root = join(files.copies, 'beonforge-restore-not-ready');
+    mkdirSync(root, { mode: 0o700 });
+    await expect(files.open(join(root, 'events.sqlite'))).rejects.toMatchObject(
+      { code: 'integrity_failure' },
+    );
+    expect(readdirSync(root)).toEqual([]);
+  });
+
+  it('F-6 keeps restore identity after rename and rejects alternate database/CAS initialization', async () => {
+    const files = fixture();
+    const store = await files.open();
+    const bundle = await store.createBackup(files.copies);
+    const restored = await restoreSqliteBackup(bundle.directory, files.copies);
+    const alternate = join(restored.directory, 'new.sqlite');
+    await expect(files.open(alternate)).rejects.toMatchObject({
+      code: 'integrity_failure',
+    });
+    expect(existsSync(alternate)).toBe(false);
+    await expect(
+      files.open(restored.databasePath, `${restored.artifactRoot}.alternate`),
+    ).rejects.toMatchObject({ code: 'integrity_failure' });
+    expect(existsSync(`${restored.artifactRoot}.alternate`)).toBe(false);
+    unlinkSync(join(restored.directory, 'restore-ready.json'));
+    const renamed = join(files.copies, 'renamed-recovery');
+    renameSync(restored.directory, renamed);
+    await expect(
+      files.open(join(renamed, 'events.sqlite')),
+    ).rejects.toMatchObject({ code: 'integrity_failure' });
+  });
+
+  it('F-6 accepts a valid restore after later appends without confusing ready prefix with current head', async () => {
+    const files = fixture();
+    const store = await files.open();
+    const bundle = await store.createBackup(files.copies);
+    const restored = await restoreSqliteBackup(bundle.directory, files.copies);
+    let copy = await files.open(restored.databasePath);
+    await copy.putArtifact(bytes);
+    await copy.append(start(), 'start');
+    await files.close(copy);
+    copy = await files.open(restored.databasePath);
+    expect(await copy.readEvents()).toHaveLength(1);
+  });
+
   it('publishes blobs, checks a known SHA-256 and reads empty content', async () => {
     const files = fixture();
     const store = await files.open();
