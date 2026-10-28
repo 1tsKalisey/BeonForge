@@ -16,13 +16,17 @@ describe('task lifecycle contract', () => {
   it('accepts only declared transitions', () => {
     for (const from of TASK_STATES) {
       for (const to of TASK_STATES) {
-        const expected = (TASK_TRANSITIONS[from] as readonly string[]).includes(to);
+        const expected = (TASK_TRANSITIONS[from] as readonly string[]).includes(
+          to,
+        );
         expect(canTransition(from, to)).toBe(expected);
 
         if (expected) {
           expect(transitionTask(from, to)).toBe(to);
         } else {
-          expect(() => transitionTask(from, to)).toThrow(InvalidTaskTransitionError);
+          expect(() => transitionTask(from, to)).toThrow(
+            InvalidTaskTransitionError,
+          );
         }
       }
     }
