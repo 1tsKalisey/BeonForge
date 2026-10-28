@@ -285,6 +285,199 @@ it('rejects legacy filter sections before executing Git', async () => {
   ).rejects.toMatchObject({ code: 'unsafe_path' });
   expect(snapshot(f.repo)).toEqual(before);
 });
+
+async function configFixture(location: 'config' | 'config.worktree') {
+  const f = await fixture();
+  writeFileSync(join(f.repo, '.gitattributes'), 'tracked.txt filter=x\n');
+  git(f.repo, 'add', '.gitattributes');
+  git(f.repo, 'commit', '-qm', 'fixture attributes');
+  let repo = f.repo;
+  let config = join(repo, '.git', 'config');
+  let policy = f.policy;
+  if (location === 'config.worktree') {
+    git(repo, 'config', 'extensions.worktreeConfig', 'true');
+    repo = join(f.root, 'checkout');
+    git(f.repo, 'worktree', 'add', '--detach', '-q', repo);
+    const gitDir = git(repo, 'rev-parse', '--absolute-git-dir');
+    config = join(gitDir, 'config.worktree');
+    writeFileSync(config, '[core]\n logAllRefUpdates = true\n');
+    policy = {
+      roots: [repo],
+      gitDirectories: [gitDir],
+      commonDirectories: [join(f.repo, '.git')],
+    };
+  }
+  const marker = join(f.root, 'filter-marker');
+  const script = join(f.root, 'filter.mjs');
+  writeFileSync(
+    script,
+    "import { writeFileSync } from 'node:fs'; writeFileSync(new URL('./filter-marker', import.meta.url), 'ran'); process.stdin.pipe(process.stdout);\n",
+  );
+  const command = `"${process.execPath.replaceAll('\\', '/')}" "${script.replaceAll('\\', '/')}"`;
+  const filter = `\n clean = ${JSON.stringify(command)}\n required = true\n`;
+  const included = join(f.root, 'included.config');
+  writeFileSync(included, `[filter "x"]${filter}`);
+  // Dirty tracked content forces Git to check the clean filter if validation is bypassed.
+  // Keep its size: Git otherwise detects the size change without running conversion.
+  writeFileSync(join(repo, 'tracked.txt'), 'changed');
+  return {
+    ...f,
+    repo,
+    config,
+    policy,
+    marker,
+    filter,
+    included,
+    original: readFileSync(config, 'utf8'),
+  };
+}
+const forbiddenConfigs = [
+  { label: 'filter', header: '[filter "x"]', include: false },
+  { label: 'adjacent-filter', header: '[core][filter "x"]', include: false },
+  { label: 'adjacent-include', header: '[core][include]', include: true },
+  { label: 'includeIf', header: '[includeIf "gitdir:**"]', include: true },
+  {
+    label: 'mixed-adjacent-includeIf',
+    header: '[core][InClUdEiF "gitdir:**"]',
+    include: true,
+  },
+  {
+    label: 'mixed-adjacent-filter',
+    header: '[core][FiLtEr "x"]',
+    include: false,
+  },
+] as const;
+const configCases = (['config', 'config.worktree'] as const).flatMap(
+  (location) =>
+    (['register', 'inspect'] as const).flatMap((operation) =>
+      forbiddenConfigs.map((config) => ({ location, operation, ...config })),
+    ),
+);
+it.each(configCases)(
+  'P1 rejects $label in $location during $operation without executing filters',
+  async ({ location, operation, header, include }) => {
+    const f = await configFixture(location);
+    const ref =
+      operation === 'inspect'
+        ? await registerProject(f.repo, f.policy, f.store)
+        : undefined;
+    const inode = lstatSync(f.config, { bigint: true }).ino;
+    writeFileSync(
+      f.config,
+      f.original +
+        '\n' +
+        header +
+        (include
+          ? `\n path = ${JSON.stringify(f.included.replaceAll('\\', '/'))}\n`
+          : f.filter),
+    );
+    expect(lstatSync(f.config, { bigint: true }).ino).toBe(inode);
+    const before = snapshot(f.repo);
+    const mainBefore = snapshot(join(f.root, 'repo'));
+    const includedBefore = readFileSync(f.included);
+    const result: unknown = await (
+      ref
+        ? inspectProject(ref, f.policy, f.store)
+        : registerProject(f.repo, f.policy, f.store)
+    ).then(
+      () => null,
+      (error: unknown) => error,
+    );
+    expect(existsSync(f.marker), 'external filter must never execute').toBe(
+      false,
+    );
+    expect(result).toMatchObject({ code: 'unsafe_path' });
+    expect(snapshot(f.repo)).toEqual(before);
+    expect(snapshot(join(f.root, 'repo'))).toEqual(mainBefore);
+    expect(readFileSync(f.included)).toEqual(includedBefore);
+  },
+);
+it('P1 fixture proves the harmless clean filter would execute on an unguarded Git status', async () => {
+  const f = await configFixture('config');
+  writeFileSync(f.config, f.original + '\n[core][filter "x"]' + f.filter);
+  git(
+    f.repo,
+    '--no-optional-locks',
+    '-c',
+    'core.fsmonitor=false',
+    'status',
+    '--porcelain=v1',
+    '--untracked-files=no',
+    '--ignore-submodules=all',
+  );
+  expect(readFileSync(f.marker, 'utf8')).toBe('ran');
+});
+it.each(['config', 'config.worktree'] as const)(
+  'P1 accepts valid adjacent sections in %s',
+  async (location) => {
+    const f = await configFixture(location);
+    writeFileSync(
+      f.config,
+      f.original + '\n[core][BeOnFoRgE "a.b"]\n harmless = true\n',
+    );
+    const before = snapshot(f.repo);
+    const ref = await registerProject(f.repo, f.policy, f.store);
+    expect((await inspectProject(ref, f.policy, f.store)).trackedChanges).toBe(
+      1,
+    );
+    expect(existsSync(f.marker)).toBe(false);
+    expect(snapshot(f.repo)).toEqual(before);
+  },
+);
+it.each(
+  (['config', 'config.worktree'] as const).flatMap((location) =>
+    (['register', 'inspect'] as const).map((operation) => ({
+      location,
+      operation,
+    })),
+  ),
+)(
+  'P1 rejects malformed $location during $operation',
+  async ({ location, operation }) => {
+    const f = await configFixture(location);
+    const ref =
+      operation === 'inspect'
+        ? await registerProject(f.repo, f.policy, f.store)
+        : undefined;
+    writeFileSync(f.config, f.original + '\n[broken\n');
+    const before = snapshot(f.repo);
+    await expect(
+      ref
+        ? inspectProject(ref, f.policy, f.store)
+        : registerProject(f.repo, f.policy, f.store),
+    ).rejects.toMatchObject({ code: 'git_failure' });
+    expect(existsSync(f.marker)).toBe(false);
+    expect(snapshot(f.repo)).toEqual(before);
+  },
+);
+it.each(['config', 'config.worktree'] as const)(
+  'P1 preserves continuation rejection in %s',
+  async (location) => {
+    const f = await configFixture(location);
+    writeFileSync(
+      f.config,
+      f.original + '\n[fixture]\n value = first\\\n second\n',
+    );
+    await expect(
+      registerProject(f.repo, f.policy, f.store),
+    ).rejects.toMatchObject({ code: 'unsafe_path' });
+    expect(existsSync(f.marker)).toBe(false);
+  },
+);
+it('P1 rejects expanded config key output beyond the existing Git output limit', async () => {
+  const f = await configFixture('config');
+  writeFileSync(
+    f.config,
+    f.original + `\n[${'a'.repeat(200)}]\n` + ' key\n'.repeat(6000),
+  );
+  expect(lstatSync(f.config).size).toBeLessThan(262144);
+  const before = snapshot(f.repo);
+  await expect(
+    registerProject(f.repo, f.policy, f.store),
+  ).rejects.toMatchObject({ code: 'git_limit' });
+  expect(snapshot(f.repo)).toEqual(before);
+  expect(existsSync(f.marker)).toBe(false);
+});
 it('rejects metadata junctions without following their contents', async () => {
   const f = await fixture();
   const refs = join(f.repo, '.git', 'refs');

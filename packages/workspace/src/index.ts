@@ -165,11 +165,25 @@ async function layout(
   for (const file of [config, join(gitDirectory, 'config.worktree')])
     if (await exists(file)) {
       const content = await small(file);
-      if (
-        /^\s*\[\s*(?:include(?:if)?|filter)(?:\s|\]|\.)/im.test(content) ||
-        /\\\r?\n/.test(content)
-      )
-        throw new ProjectError('unsafe_path');
+      if (/\\\r?\n/.test(content)) throw new ProjectError('unsafe_path');
+      // Only Git's parser determines keys: adjacent section headers are valid Git syntax.
+      // --no-includes prevents reading referenced files; no status/filter-capable command yet.
+      const { output } = await git(root, ['config', file]);
+      if (output !== '' && !output.endsWith('\0'))
+        throw new ProjectError('git_failure');
+      const keys = output === '' ? [] : output.slice(0, -1).split('\0');
+      for (const key of keys) {
+        const separator = key.indexOf('.');
+        if (separator <= 0 || key.endsWith('.'))
+          throw new ProjectError('git_failure');
+        const section = key.slice(0, separator).toLowerCase();
+        if (
+          section === 'include' ||
+          section === 'includeif' ||
+          section === 'filter'
+        )
+          throw new ProjectError('unsafe_path');
+      }
       if (file !== config) pins.push(await pin(file));
     }
   // Metadata traversal only: no worktree, ignored, private source contents or other checkout scan.
@@ -233,8 +247,20 @@ const commands = {
 } as const;
 async function git(
   root: string,
-  command: keyof typeof commands,
+  command: keyof typeof commands | readonly ['config', string],
 ): Promise<{ code: number; output: string }> {
+  const args =
+    typeof command === 'string'
+      ? commands[command]
+      : [
+          'config',
+          '--file',
+          command[1],
+          '--no-includes',
+          '--list',
+          '--name-only',
+          '-z',
+        ];
   const nullFile = process.platform === 'win32' ? 'NUL' : '/dev/null';
   const env: NodeJS.ProcessEnv = {
     PATH: process.env.PATH,
@@ -265,7 +291,7 @@ async function git(
         `core.attributesFile=${nullFile}`,
         '-C',
         root,
-        ...commands[command],
+        ...args,
       ],
       {
         env,
