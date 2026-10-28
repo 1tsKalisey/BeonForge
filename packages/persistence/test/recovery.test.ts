@@ -166,6 +166,87 @@ async function killedAt(
 }
 
 describe('content-addressed artifacts, workflow checkpoints and isolated recovery', () => {
+  it.each([
+    'source-root',
+    'source-blobs',
+    'source-child',
+    'active-db',
+    'active-cas',
+    'active-blobs',
+    'active-staging',
+    'custom-cas',
+    'custom-db',
+  ] as const)(
+    'F7-R2 rejects restore destination %s without residues and preserves future backups',
+    async (kind) => {
+      const files = fixture();
+      const customCas = kind.startsWith('custom-')
+        ? join(files.root, 'custom-cas')
+        : undefined;
+      const store = await files.open(files.path, customCas);
+      await store.putArtifact(bytes);
+      await store.append(start(), 'start');
+      const bundle = await store.createBackup(files.copies);
+      const child = join(bundle.directory, 'child');
+      mkdirSync(child, { mode: 0o700 });
+      const cas = customCas ?? files.artifacts;
+      const destinations = {
+        'source-root': bundle.directory,
+        'source-blobs': join(bundle.artifactRoot, 'blobs'),
+        'source-child': child,
+        'active-db': dirname(files.path),
+        'active-cas': cas,
+        'active-blobs': join(cas, 'blobs'),
+        'active-staging': join(cas, 'staging'),
+        'custom-cas': cas,
+        'custom-db': dirname(files.path),
+      };
+      const parent = destinations[kind];
+      const before = readdirSync(parent, { recursive: true }).sort();
+      await expect(
+        restoreSqliteBackup(bundle.directory, parent),
+      ).rejects.toMatchObject({ code: 'unsafe_path' });
+      expect(readdirSync(parent, { recursive: true }).sort()).toEqual(before);
+      const restored = await restoreSqliteBackup(
+        bundle.directory,
+        files.copies,
+      );
+      const copy = await files.open(restored.databasePath);
+      expect(await copy.readEvents()).toHaveLength(1);
+      await store.createBackup(files.copies);
+      expect(Buffer.from(await store.readArtifact(reference))).toEqual(bytes);
+    },
+  );
+
+  it.each(['closed-db', 'closed-cas', 'junction'] as const)(
+    'F7-R2 protects %s destination without residues',
+    async (kind) => {
+      const files = fixture();
+      const store = await files.open();
+      const bundle = await store.createBackup(files.copies);
+      await files.close(store);
+      let parent =
+        kind === 'closed-db'
+          ? dirname(files.path)
+          : join(files.artifacts, 'blobs');
+      if (kind === 'junction') {
+        parent = join(files.root, 'alias');
+        symlinkSync(
+          files.copies,
+          parent,
+          process.platform === 'win32' ? 'junction' : 'dir',
+        );
+      }
+      const before = readdirSync(parent, { recursive: true }).sort();
+      await expect(
+        restoreSqliteBackup(bundle.directory, parent),
+      ).rejects.toMatchObject({ code: 'unsafe_path' });
+      expect(readdirSync(parent, { recursive: true }).sort()).toEqual(before);
+      const reopened = await files.open();
+      await reopened.createBackup(files.copies);
+    },
+  );
+
   it('reports unexpected blob inventory entries without leaking names or removing them', async () => {
     const files = fixture();
     const store = await files.open();

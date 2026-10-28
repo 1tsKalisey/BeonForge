@@ -7,8 +7,9 @@ import {
   constants,
   unlinkSync,
   realpathSync,
+  readdirSync,
 } from 'node:fs';
-import { join, dirname, relative, isAbsolute, sep } from 'node:path';
+import { join, dirname, basename, relative, isAbsolute, sep } from 'node:path';
 import {
   parseArtifactReference,
   type ArtifactReference,
@@ -185,9 +186,42 @@ export async function createBackup(
 export async function restoreBackup(
   backupDirectory: string,
   destinationParent: string,
+  protectedDirectories: readonly string[] = [],
 ): Promise<RecoveryLocation> {
   requireRuntime(process.versions.node);
   const sourceRoot = new SafeDirectory(backupDirectory);
+  // Before allocating anything: no copies inside their source, a protected writer directory,
+  // or an identifiable CAS/recovery tree, including closed stores and custom CAS layouts.
+  const authorizedParent = directory(destinationParent);
+  const destination = realpathSync.native(authorizedParent);
+  for (const root of [sourceRoot.path, ...protectedDirectories]) {
+    const child = relative(realpathSync.native(directory(root)), destination);
+    if (
+      child === '' ||
+      (!isAbsolute(child) && child !== '..' && !child.startsWith(`..${sep}`))
+    )
+      throw new PersistenceError('unsafe_path');
+  }
+  for (let current = destination; ; current = dirname(current)) {
+    if (
+      basename(current).endsWith('.artifacts') ||
+      (entryExists(join(current, 'blobs')) &&
+        entryExists(join(current, 'staging'))) ||
+      [
+        'beonforge-backup-incomplete',
+        'beonforge-restore-incomplete',
+        'beonforge-restore.json',
+        'restore-ready.json',
+      ].some((name) => entryExists(join(current, name))) ||
+      readdirSync(current).some(
+        (name) =>
+          name.endsWith('.artifacts') &&
+          entryExists(join(current, name.slice(0, -10))),
+      )
+    )
+      throw new PersistenceError('unsafe_path');
+    if (dirname(current) === current) break;
+  }
   if (entryExists(sourceRoot.file('beonforge-backup-incomplete')))
     throw new PersistenceError('integrity_failure');
   const contents = manifest(sourceRoot.read('manifest.json'));
@@ -226,7 +260,7 @@ export async function restoreBackup(
         contents.sequence
     )
       throw new PersistenceError('integrity_failure');
-    target = location(destinationParent, 'beonforge-restore-');
+    target = location(authorizedParent, 'beonforge-restore-');
     const root = new SafeDirectory(target.directory);
     root.writeExclusive('beonforge-restore-incomplete', new Uint8Array());
     root.writeExclusive(

@@ -21,7 +21,12 @@ export type Command =
   | { kind: 'create-checkpoint'; checkpointId: string }
   | { kind: 'load-checkpoint'; checkpointId: string }
   | { kind: 'backup'; destinationParent: string }
-  | { kind: 'restore'; backupDirectory: string; destinationParent: string }
+  | {
+      kind: 'restore';
+      backupDirectory: string;
+      destinationParent: string;
+      protectedDirectories: readonly string[];
+    }
   | { kind: 'close' };
 export interface Request {
   id: number;

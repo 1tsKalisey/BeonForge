@@ -259,6 +259,7 @@ class WorkerEventStore implements DurableStore {
       kind: 'restore',
       backupDirectory,
       destinationParent,
+      protectedDirectories: [...activePaths].map((path) => dirname(path)),
     });
     if (reply.kind !== 'location')
       throw new PersistenceError('storage_failure');

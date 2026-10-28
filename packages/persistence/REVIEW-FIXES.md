@@ -1,5 +1,13 @@
 # M01.2 — Correcciones de revisión
 
+Segunda revisión recibida: APPROVE_WITH_FOLLOWUPS. F-5 validado, implementación excluida de cambios. Trabajo actual limitado a destinos de restore F-7/P2, artifactRoot de backups F-6/P3 y clasificación de manifest ajeno/P3. Archivos: guardas de rutas/marcadores existentes, canal privado sólo si necesita transmitir raíces activas, regresiones y evidencias. Sin rediseño, dependencias, schema nuevo ni B02b-03. Cada defecto exige test rojo con build fuente actual, corrección mínima, gates completos y commit separado. Aceptación: rechazo sin residuos/contaminación y backup posterior funcional, backups protegidos ante putArtifact externo y manifests ajenos compatibles sin aceptar copias manipuladas. Rollback: revert puntual conservando datos. Cierre sólo tras verificar correcciones y registrar la aceptación recibida.
+
+## Segunda revisión — F-7/P2 restore
+
+Ocho regresiones rojas sobre build nuevo: destino dentro del bundle fuente, blobs de fuente y almacenamiento activo, staging, CAS y CAS personalizado. Guardas previas a cualquier creación: componentes lstat sin symlinks/junctions, realpath nativo y parentesco contra origen/directorios de escritores ya registrados; ancestros reconocidos por layout CAS, sufijo .artifacts, parejas SQLite/CAS y marcadores de recuperación. El canal privado sólo comunica los directorios activos del proceso; sin registro distribuido, cambios a timeouts, replay o cachés de F-5.
+
+12 regresiones verdes con stores cerrados, CAS fuera del directorio SQL y SQL con CAS personalizado, junctions y reintentos válidos. Se comprueba inventario sin residuos y backups posteriores. Frozen/peers/check verdes: 62 contratos + 94 persistencia + 7 spike = 163 tests, incluida carga 800/40 sin modificar su implementación. Diff/secretos revisados; siempre temporales controlados. Las raíces CAS cerradas arbitrarias sólo son reconocibles por sus nombres/layout; se conserva la condición de rutas privadas, no una autenticación contra dueño privilegiado.
+
 Veredicto recibido: REQUEST_CHANGES. M01.2 permanece abierto; B02b-03 excluido.
 
 Objetivo: reproducir y corregir F-5 (P1, validación/timeout), F-6 (P2, apertura de copias) y F-7 (P2, destinos anidados), un commit por hallazgo. Dependencia: B02b-02. Archivos: adaptador SQLite/worker, tests y registro de ejecución; contratos de dominio, dependencias, GC, streaming y runtime excluidos.

@@ -21,6 +21,7 @@ async function execute(command: Command): Promise<Reply> {
       location: await restoreBackup(
         command.backupDirectory,
         command.destinationParent,
+        command.protectedDirectories,
       ),
     };
   }
