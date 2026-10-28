@@ -16,6 +16,10 @@ import {
 
 async function main(): Promise<void> {
   const [subject, command, ...args] = process.argv.slice(2);
+  if (subject === 'project' && command === 'worktree') {
+    await (await import('./worktree-cli.js')).runWorktreeCli(args);
+    return;
+  }
   if (
     subject !== 'project' ||
     (command !== 'register' && command !== 'inspect')

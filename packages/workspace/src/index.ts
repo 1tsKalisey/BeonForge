@@ -5,9 +5,20 @@ import {
   readdir,
   mkdtemp,
   rmdir,
+  mkdir,
+  open,
 } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { resolve, relative, isAbsolute, parse, join, sep } from 'node:path';
+import {
+  resolve,
+  relative,
+  isAbsolute,
+  parse,
+  join,
+  sep,
+  dirname,
+} from 'node:path';
+import { parseArtifactReference } from '@beonforge/contracts';
 import { createHash } from 'node:crypto';
 import { spawn } from 'node:child_process';
 import process from 'node:process';
@@ -255,23 +266,46 @@ const commands = {
 } as const;
 async function git(
   root: string,
-  command: keyof typeof commands | readonly ['config', string],
-): Promise<{ code: number; output: string }> {
+  command:
+    | keyof typeof commands
+    | readonly ['config' | 'tree' | 'blob' | 'commit' | 'index', string]
+    | readonly ['add', string, string, string],
+): Promise<{ code: number; output: string; data: Buffer }> {
   const args =
     typeof command === 'string'
       ? commands[command]
-      : [
-          'config',
-          '--file',
-          command[1],
-          '--no-includes',
-          '--list',
-          '--name-only',
-          '-z',
-        ];
+      : command[0] === 'config'
+        ? [
+            'config',
+            '--file',
+            command[1],
+            '--no-includes',
+            '--list',
+            '--name-only',
+            '-z',
+          ]
+        : command[0] === 'tree'
+          ? ['ls-tree', '-r', '-z', command[1]]
+          : command[0] === 'blob'
+            ? ['cat-file', 'blob', command[1]]
+            : command[0] === 'commit'
+              ? ['cat-file', '-t', command[1]]
+              : command[0] === 'index'
+                ? ['read-tree', command[1]]
+                : [
+                    'worktree',
+                    'add',
+                    '--detach',
+                    '--no-checkout',
+                    '--lock',
+                    '--reason',
+                    command[3]!,
+                    command[1],
+                    command[2]!,
+                  ];
   const nullFile = process.platform === 'win32' ? 'NUL' : '/dev/null';
   const parserDirectory =
-    typeof command !== 'string'
+    typeof command !== 'string' && command[0] === 'config'
       ? await mkdtemp(join(await realpath(tmpdir()), 'beonforge-config-'))
       : undefined;
   const env: NodeJS.ProcessEnv = {
@@ -293,7 +327,12 @@ async function git(
         }
       : {}),
   };
-  return new Promise<{ code: number; output: string }>(
+  const hooks =
+    typeof command !== 'string' &&
+    (command[0] === 'add' || command[0] === 'index')
+      ? await mkdtemp(join(await realpath(tmpdir()), 'beonforge-hooks-'))
+      : undefined;
+  return new Promise<{ code: number; output: string; data: Buffer }>(
     (resolveResult, reject) => {
       const child = spawn(
         'git',
@@ -308,6 +347,7 @@ async function git(
           `core.excludesFile=${nullFile}`,
           '-c',
           `core.attributesFile=${nullFile}`,
+          ...(hooks ? ['-c', `core.hooksPath=${hooks}`] : []),
           ...(parserDirectory ? [] : ['-C', root]),
           ...args,
         ],
@@ -319,7 +359,7 @@ async function git(
           stdio: ['ignore', 'pipe', 'pipe'],
         },
       );
-      let output = '';
+      const chunks: Buffer[] = [];
       let bytes = 0;
       let exceeded = false;
       const timer = setTimeout(() => {
@@ -331,7 +371,7 @@ async function git(
         if (bytes > 1048576) {
           exceeded = true;
           child.kill('SIGKILL');
-        } else output += chunk.toString('utf8');
+        } else chunks.push(chunk);
       });
       child.stderr.on('data', (chunk: Buffer) => {
         bytes += chunk.length;
@@ -351,12 +391,17 @@ async function git(
           code === 0 ||
           ((command === 'head' || command === 'branch') && code === 1)
         )
-          resolveResult({ code: code ?? -1, output });
+          resolveResult({
+            code: code ?? -1,
+            output: Buffer.concat(chunks).toString('utf8'),
+            data: Buffer.concat(chunks),
+          });
         else reject(new ProjectError('git_failure'));
       });
     },
   ).finally(async () => {
     if (parserDirectory) await rmdir(parserDirectory);
+    if (hooks) await rmdir(hooks);
   });
 }
 async function inspect(
@@ -441,4 +486,362 @@ export async function inspectProject(
   if (JSON.stringify(value) !== JSON.stringify(actual))
     throw new ProjectError('identity_changed');
   return inspect(actual, policy);
+}
+
+export interface WorktreePolicy extends ProjectPolicy {
+  readonly executionRoots: readonly string[];
+  readonly metadataWriteRoots: readonly string[];
+  readonly storageRoot: string;
+}
+interface WorktreeIntent {
+  schemaVersion: 1;
+  kind: 'worktree-intent';
+  project: ArtifactReference;
+  commit: string;
+  execution: Pin;
+  reservation: Pin;
+}
+export interface WorktreeReport {
+  readonly state: 'prepared' | 'pending' | 'uncertain' | 'confirmed';
+  readonly intent: ArtifactReference;
+  readonly destination: string;
+  readonly receipt?: ArtifactReference;
+}
+const activeWorktrees = new Set<string>();
+async function json(
+  store: ArtifactStore,
+  ref: ArtifactReference,
+): Promise<unknown> {
+  try {
+    return JSON.parse(
+      Buffer.from(await store.readArtifact(ref)).toString('utf8'),
+    ) as unknown;
+  } catch {
+    throw new ProjectError('invalid_descriptor');
+  }
+}
+async function source(
+  ref: ArtifactReference,
+  policy: ProjectPolicy,
+  store: ArtifactStore,
+): Promise<ProjectDescriptor> {
+  await inspectProject(ref, policy, store);
+  return (await json(store, ref)) as ProjectDescriptor;
+}
+async function tree(root: string, oid: string) {
+  if (
+    !/^(?:[a-f0-9]{40}|[a-f0-9]{64})$/.test(oid) ||
+    (await git(root, ['commit', oid])).output.trim() !== 'commit'
+  )
+    throw new ProjectError('invalid_project');
+  const output = (await git(root, ['tree', oid])).output;
+  if (output && !output.endsWith('\0')) throw new ProjectError('git_failure');
+  const names = new Map<string, string>();
+  let total = 0;
+  const files: { name: string; mode: string; oid: string; data: Buffer }[] = [];
+  for (const entry of output ? output.slice(0, -1).split('\0') : []) {
+    const match =
+      /^(100644|100755) blob ([a-f0-9]{40}|[a-f0-9]{64})\t(.+)$/.exec(entry);
+    if (!match?.[1] || !match[2] || !match[3])
+      throw new ProjectError('unsafe_path');
+    const name = match[3];
+    const parts = name.split('/');
+    if (
+      parts.length > 16 ||
+      parts.some(
+        (p) =>
+          !/^[A-Za-z0-9_. -]+$/.test(p) ||
+          /[. ]$/.test(p) ||
+          /^\.git/i.test(p) ||
+          /^(?:con|prn|aux|nul|com[0-9]|lpt[0-9])(?:\.|$)/i.test(p),
+      )
+    )
+      throw new ProjectError('unsafe_path');
+    for (let i = 1; i <= parts.length; i++) {
+      const original = parts.slice(0, i).join('/');
+      const key = original.toLowerCase();
+      if (
+        (names.has(key) && names.get(key) !== original) ||
+        files.some((f) => f.name.toLowerCase() === key)
+      )
+        throw new ProjectError('unsafe_path');
+      names.set(key, original);
+    }
+    const data = (await git(root, ['blob', match[2]])).data;
+    total += data.length;
+    if (files.length >= 512 || total > 33554432)
+      throw new ProjectError('git_limit');
+    files.push({ name, mode: match[1], oid: match[2], data });
+  }
+  return files;
+}
+async function writeExclusive(
+  path: string,
+  data: Uint8Array,
+  mode = 0o600,
+): Promise<void> {
+  const file = await open(path, 'wx', mode);
+  try {
+    await file.writeFile(data);
+    await file.sync();
+  } finally {
+    await file.close();
+  }
+}
+async function executionRoot(
+  path: string,
+  d: ProjectDescriptor,
+  policy: WorktreePolicy,
+): Promise<Pin> {
+  const execution = await pin(path);
+  if (execution.kind !== 'directory') throw new ProjectError('unsafe_path');
+  const permissions = await lstat(execution.path);
+  if (
+    process.platform !== 'win32' &&
+    ((permissions.mode & 0o077) !== 0 || permissions.uid !== process.getuid?.())
+  )
+    throw new ProjectError('unsafe_path');
+  await permitted(execution.path, policy.executionRoots);
+  await permitted(d.gitDirectory, policy.metadataWriteRoots);
+  await permitted(d.commonDirectory, policy.metadataWriteRoots);
+  for (const other of [
+    d.root,
+    d.gitDirectory,
+    d.commonDirectory,
+    await canonical(policy.storageRoot),
+  ])
+    if (contains(other, execution.path) || contains(execution.path, other))
+      throw new ProjectError('unsafe_path');
+  for (let parent = execution.path; ; parent = dirname(parent)) {
+    for (const marker of [
+      'blobs',
+      'staging',
+      'manifest.json',
+      'beonforge-backup.json',
+      'restore-source.json',
+    ])
+      if (await exists(join(parent, marker)))
+        throw new ProjectError('unsafe_path');
+    if (dirname(parent) === parent) break;
+  }
+  return execution;
+}
+export async function prepareWorktree(
+  project: ArtifactReference,
+  commit: string,
+  root: string,
+  policy: WorktreePolicy,
+  store: ArtifactStore,
+): Promise<ArtifactReference> {
+  const d = await source(project, policy, store);
+  const execution = await executionRoot(root, d, policy);
+  await tree(d.root, commit);
+  const reservation = await pin(
+    await mkdtemp(join(execution.path, 'beonforge-worktree-')),
+  );
+  return store.putArtifact(
+    Buffer.from(
+      JSON.stringify({
+        schemaVersion: 1,
+        kind: 'worktree-intent',
+        project,
+        commit,
+        execution,
+        reservation,
+      } satisfies WorktreeIntent),
+    ),
+  );
+}
+async function loadIntent(
+  ref: ArtifactReference,
+  policy: WorktreePolicy,
+  store: ArtifactStore,
+) {
+  const raw = await json(store, ref);
+  if (typeof raw !== 'object' || raw === null)
+    throw new ProjectError('invalid_descriptor');
+  const value = raw as Partial<WorktreeIntent>;
+  if (
+    Object.keys(value).sort().join() !==
+      'commit,execution,kind,project,reservation,schemaVersion' ||
+    value.schemaVersion !== 1 ||
+    value.kind !== 'worktree-intent' ||
+    typeof value.commit !== 'string' ||
+    !/^(?:[a-f0-9]{40}|[a-f0-9]{64})$/.test(value.commit) ||
+    typeof value.execution?.path !== 'string' ||
+    typeof value.reservation?.path !== 'string'
+  )
+    throw new ProjectError('invalid_descriptor');
+  const project = parseArtifactReference(value.project);
+  const d = await source(project, policy, store);
+  const execution = await executionRoot(value.execution.path, d, policy);
+  const reservation = await pin(value.reservation.path);
+  if (
+    reservation.kind !== 'directory' ||
+    JSON.stringify(execution) !== JSON.stringify(value.execution) ||
+    JSON.stringify(reservation) !== JSON.stringify(value.reservation) ||
+    dirname(reservation.path) !== execution.path ||
+    !reservation.path.startsWith(join(execution.path, 'beonforge-worktree-'))
+  )
+    throw new ProjectError('identity_changed');
+  return {
+    commit: value.commit,
+    project,
+    d,
+    destination: join(reservation.path, 'checkout'),
+    reservation,
+  };
+}
+export async function inspectWorktree(
+  ref: ArtifactReference,
+  policy: WorktreePolicy,
+  store: ArtifactStore,
+): Promise<WorktreeReport> {
+  const { commit, d, destination, reservation } = await loadIntent(
+    ref,
+    policy,
+    store,
+  );
+  const base = { intent: ref, destination };
+  const dispatched = join(reservation.path, 'dispatch.json');
+  if (!(await exists(dispatched)))
+    return {
+      ...base,
+      state: (await exists(destination)) ? 'uncertain' : 'prepared',
+    };
+  if ((await small(dispatched)) !== ref.sha256)
+    throw new ProjectError('identity_changed');
+  if (activeWorktrees.has(d.commonDirectory))
+    return { ...base, state: 'pending' };
+  try {
+    const targetPolicy = {
+      ...policy,
+      roots: [destination],
+      gitDirectories: [join(d.commonDirectory, 'worktrees')],
+      commonDirectories: [d.commonDirectory],
+    };
+    const descriptor = await layout(destination, targetPolicy);
+    if (
+      (await small(join(descriptor.gitDirectory, 'locked'))).trim() !==
+      `beonforge:${ref.sha256}`
+    )
+      throw new ProjectError('identity_changed');
+    const files = await tree(d.root, commit);
+    const expected = new Set(['.git', ...files.map((f) => f.name)]);
+    for (const f of files) {
+      let dir = dirname(f.name);
+      while (dir !== '.') {
+        expected.add(dir.replaceAll('\\', '/'));
+        dir = dirname(dir);
+      }
+    }
+    async function checkEntries(dir: string, prefix = ''): Promise<void> {
+      for (const name of await readdir(dir)) {
+        const relativeName = prefix + name;
+        if (!expected.has(relativeName))
+          throw new ProjectError('identity_changed');
+        const stat = await lstat(join(dir, name));
+        if (stat.isSymbolicLink()) throw new ProjectError('unsafe_path');
+        if (stat.isDirectory())
+          await checkEntries(join(dir, name), relativeName + '/');
+      }
+    }
+    await checkEntries(destination);
+    for (const f of files) {
+      const path = await canonical(join(destination, f.name));
+      const stat = await lstat(path);
+      if (!stat.isFile() || stat.size !== f.data.length)
+        throw new ProjectError('identity_changed');
+      if (!(await readFile(path)).equals(f.data))
+        throw new ProjectError('identity_changed');
+    }
+    const entries = (await git(destination, 'modules')).output
+      .split('\0')
+      .filter(Boolean)
+      .sort();
+    if (
+      JSON.stringify(entries) !==
+      JSON.stringify(files.map((f) => `${f.mode} ${f.oid} 0\t${f.name}`).sort())
+    )
+      throw new ProjectError('identity_changed');
+    const inspection = await inspect(descriptor, targetPolicy);
+    if (
+      !inspection.detached ||
+      inspection.head !== commit ||
+      inspection.trackedChanges !== 0
+    )
+      throw new ProjectError('identity_changed');
+    const project = await store.putArtifact(
+      Buffer.from(JSON.stringify(descriptor)),
+    );
+    const receipt = await store.putArtifact(
+      Buffer.from(
+        JSON.stringify({
+          schemaVersion: 1,
+          kind: 'worktree-receipt',
+          intent: ref,
+          project,
+          commit,
+        }),
+      ),
+    );
+    return { ...base, state: 'confirmed', receipt };
+  } catch {
+    return { ...base, state: 'uncertain' };
+  }
+}
+export async function createWorktree(
+  ref: ArtifactReference,
+  policy: WorktreePolicy,
+  store: ArtifactStore,
+): Promise<WorktreeReport> {
+  const { commit, project, d, destination, reservation } = await loadIntent(
+    ref,
+    policy,
+    store,
+  );
+  if (activeWorktrees.has(d.commonDirectory))
+    throw new ProjectError('permission_denied');
+  if (
+    (await exists(join(reservation.path, 'dispatch.json'))) ||
+    (await exists(destination))
+  )
+    throw new ProjectError('invalid_project');
+  const files = await tree(d.root, commit);
+  await source(project, policy, store);
+  await loadIntent(ref, policy, store);
+  // Recheck after awaits: only one operation per common-dir in this process.
+  if (activeWorktrees.has(d.commonDirectory))
+    throw new ProjectError('permission_denied');
+  activeWorktrees.add(d.commonDirectory);
+  try {
+    await writeExclusive(
+      join(reservation.path, 'dispatch.json'),
+      Buffer.from(ref.sha256),
+    );
+    await git(d.root, ['add', destination, commit, `beonforge:${ref.sha256}`]);
+    const targetPolicy = {
+      roots: [destination],
+      gitDirectories: [join(d.commonDirectory, 'worktrees')],
+      commonDirectories: [d.commonDirectory],
+    };
+    const targetIdentity = await layout(destination, targetPolicy);
+    for (const f of files) {
+      const path = join(destination, f.name);
+      await mkdir(dirname(path), { recursive: true, mode: 0o700 });
+      await canonical(dirname(path));
+      await writeExclusive(path, f.data, f.mode === '100755' ? 0o700 : 0o600);
+    }
+    if (
+      JSON.stringify(await layout(destination, targetPolicy)) !==
+      JSON.stringify(targetIdentity)
+    )
+      throw new ProjectError('identity_changed');
+    await git(destination, ['index', commit]);
+  } catch {
+    return { intent: ref, destination, state: 'uncertain' };
+  } finally {
+    activeWorktrees.delete(d.commonDirectory);
+  }
+  return inspectWorktree(ref, policy, store);
 }
