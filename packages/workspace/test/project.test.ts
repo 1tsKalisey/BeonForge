@@ -14,6 +14,8 @@ import {
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { execFileSync, spawnSync } from 'node:child_process';
+import childProcess from 'node:child_process';
+import { syncBuiltinESMExports } from 'node:module';
 import { createHash } from 'node:crypto';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
@@ -347,6 +349,50 @@ const forbiddenConfigs = [
     include: false,
   },
 ] as const;
+it('R039 parser has a private discovery boundary (delegates real Git)', async () => {
+  const f = await fixture();
+  const original = childProcess.spawn;
+  const boundaries: boolean[] = [];
+  childProcess.spawn = ((...args: Parameters<typeof original>) => {
+    const argv = args[1];
+    const options = args[2];
+    if (Array.isArray(argv) && argv.includes('--file'))
+      boundaries.push(
+        !argv.includes('-C') &&
+          typeof options?.cwd === 'string' &&
+          options.env?.GIT_CEILING_DIRECTORIES === options.cwd &&
+          options.cwd !== f.repo,
+      );
+    return original(...args);
+  }) as typeof original;
+  syncBuiltinESMExports();
+  try {
+    await registerProject(f.repo, f.policy, f.store);
+    expect(boundaries.length).toBeGreaterThan(0);
+    expect(boundaries.every(Boolean)).toBe(true);
+  } finally {
+    childProcess.spawn = original;
+    syncBuiltinESMExports();
+  }
+});
+it.each(['config', 'config.worktree'] as const)(
+  'R039 does not discover includes while parsing %s',
+  async (location) => {
+    const f = await configFixture(location);
+    writeFileSync(f.included, '[broken\n');
+    writeFileSync(
+      f.config,
+      f.original +
+        `\n[core][include]\n path = ${JSON.stringify(f.included.replaceAll('\\', '/'))}\n`,
+    );
+    const before = snapshot(f.repo);
+    await expect(
+      registerProject(f.repo, f.policy, f.store),
+    ).rejects.toMatchObject({ code: 'unsafe_path' });
+    expect(snapshot(f.repo)).toEqual(before);
+    expect(existsSync(f.marker)).toBe(false);
+  },
+);
 const configCases = (['config', 'config.worktree'] as const).flatMap(
   (location) =>
     (['register', 'inspect'] as const).flatMap((operation) =>

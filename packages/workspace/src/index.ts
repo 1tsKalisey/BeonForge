@@ -1,4 +1,12 @@
-import { lstat, realpath, readFile, readdir } from 'node:fs/promises';
+import {
+  lstat,
+  realpath,
+  readFile,
+  readdir,
+  mkdtemp,
+  rmdir,
+} from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { resolve, relative, isAbsolute, parse, join, sep } from 'node:path';
 import { createHash } from 'node:crypto';
 import { spawn } from 'node:child_process';
@@ -262,6 +270,10 @@ async function git(
           '-z',
         ];
   const nullFile = process.platform === 'win32' ? 'NUL' : '/dev/null';
+  const parserDirectory =
+    typeof command !== 'string'
+      ? await mkdtemp(join(await realpath(tmpdir()), 'beonforge-config-'))
+      : undefined;
   const env: NodeJS.ProcessEnv = {
     PATH: process.env.PATH,
     SystemRoot: process.env.SystemRoot,
@@ -274,67 +286,77 @@ async function git(
     GIT_NO_LAZY_FETCH: '1',
     GIT_NO_REPLACE_OBJECTS: '1',
     LC_ALL: 'C',
+    ...(parserDirectory
+      ? {
+          GIT_CEILING_DIRECTORIES: parserDirectory,
+          GIT_DISCOVERY_ACROSS_FILESYSTEM: '0',
+        }
+      : {}),
   };
-  return new Promise((resolveResult, reject) => {
-    const child = spawn(
-      'git',
-      [
-        '--no-pager',
-        '--no-optional-locks',
-        '-c',
-        'core.fsmonitor=false',
-        '-c',
-        'core.untrackedCache=false',
-        '-c',
-        `core.excludesFile=${nullFile}`,
-        '-c',
-        `core.attributesFile=${nullFile}`,
-        '-C',
-        root,
-        ...args,
-      ],
-      {
-        env,
-        shell: false,
-        windowsHide: true,
-        stdio: ['ignore', 'pipe', 'pipe'],
-      },
-    );
-    let output = '';
-    let bytes = 0;
-    let exceeded = false;
-    const timer = setTimeout(() => {
-      exceeded = true;
-      child.kill('SIGKILL');
-    }, 5000);
-    child.stdout.on('data', (chunk: Buffer) => {
-      bytes += chunk.length;
-      if (bytes > 1048576) {
+  return new Promise<{ code: number; output: string }>(
+    (resolveResult, reject) => {
+      const child = spawn(
+        'git',
+        [
+          '--no-pager',
+          '--no-optional-locks',
+          '-c',
+          'core.fsmonitor=false',
+          '-c',
+          'core.untrackedCache=false',
+          '-c',
+          `core.excludesFile=${nullFile}`,
+          '-c',
+          `core.attributesFile=${nullFile}`,
+          ...(parserDirectory ? [] : ['-C', root]),
+          ...args,
+        ],
+        {
+          env,
+          ...(parserDirectory ? { cwd: parserDirectory } : {}),
+          shell: false,
+          windowsHide: true,
+          stdio: ['ignore', 'pipe', 'pipe'],
+        },
+      );
+      let output = '';
+      let bytes = 0;
+      let exceeded = false;
+      const timer = setTimeout(() => {
         exceeded = true;
         child.kill('SIGKILL');
-      } else output += chunk.toString('utf8');
-    });
-    child.stderr.on('data', (chunk: Buffer) => {
-      bytes += chunk.length;
-      if (bytes > 1048576) {
-        exceeded = true;
-        child.kill('SIGKILL');
-      }
-    });
-    child.once('error', () => {
-      clearTimeout(timer);
-      reject(new ProjectError('git_failure'));
-    });
-    child.once('close', (code) => {
-      clearTimeout(timer);
-      if (exceeded) reject(new ProjectError('git_limit'));
-      else if (
-        code === 0 ||
-        ((command === 'head' || command === 'branch') && code === 1)
-      )
-        resolveResult({ code: code ?? -1, output });
-      else reject(new ProjectError('git_failure'));
-    });
+      }, 5000);
+      child.stdout.on('data', (chunk: Buffer) => {
+        bytes += chunk.length;
+        if (bytes > 1048576) {
+          exceeded = true;
+          child.kill('SIGKILL');
+        } else output += chunk.toString('utf8');
+      });
+      child.stderr.on('data', (chunk: Buffer) => {
+        bytes += chunk.length;
+        if (bytes > 1048576) {
+          exceeded = true;
+          child.kill('SIGKILL');
+        }
+      });
+      child.once('error', () => {
+        clearTimeout(timer);
+        reject(new ProjectError('git_failure'));
+      });
+      child.once('close', (code) => {
+        clearTimeout(timer);
+        if (exceeded) reject(new ProjectError('git_limit'));
+        else if (
+          code === 0 ||
+          ((command === 'head' || command === 'branch') && code === 1)
+        )
+          resolveResult({ code: code ?? -1, output });
+        else reject(new ProjectError('git_failure'));
+      });
+    },
+  ).finally(async () => {
+    if (parserDirectory) await rmdir(parserDirectory);
   });
 }
 async function inspect(

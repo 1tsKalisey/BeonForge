@@ -31,6 +31,8 @@ Verificación local 2026-10-29: `d73466b`, 17 rojas definitivas (16 marcadores d
 
 Estado: plan, sin implementación. Dependencias: B03-01 aceptado, contratos v1/ArtifactStore/persistencia aceptados, Git local confiable y raíces privadas con permisos explícitos. No añadir dependencias ni modificar contratos/eventos de Fase 01.
 
+Ejecución autorizada 2026-10-29: R-039 primero. Regresión de frontera roja delegando Git real; dos fixtures con includes externos malformados ya se rechazaban con Git 2.52, sin afirmar explotación en este entorno. Parser aislado en mkdtemp privado, sin -C, ceiling=cwd y entorno restringido; limpieza únicamente rmdir del temporal vacío propio. Verde 315/315 y frozen/peers/formato/lint/typecheck/build/diff; sin dependencias. No mutaciones de worktrees antes de este commit. Rollback: revert acotado y suspender uso con repositorios no confiables.
+
 ### Objetivo e interfaces mínimas
 
 Crear un único linked worktree detached desde un commit local completo e inmutable, verificar su identidad/HEAD y recuperar la evidencia tras reiniciar, sin cambiar el checkout original. Reutilizar registro/inspección y CAS. API propuesta: prepareWorktree(projectRef, commitOid, destinationRoot, policy, store) devuelve intentRef; createWorktree(intentRef, policy, store) ejecuta la creación; inspectWorktree(intentRef, policy, store) verifica sin recrear. CLI mínima project worktree create/inspect: create publica primero intentRef y después ejecuta la creación; nombres de DTO internos se concretan al implementar, sin framework genérico.
