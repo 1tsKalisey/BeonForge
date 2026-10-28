@@ -11,7 +11,7 @@ Actualizado: 2026-10-28. Estados: `catalogada`, `diseñada`, `prototipo`, `verif
 | ADR y AGENTS.md | diseñada | verificada | `05b6a51`; instrucciones, plantilla y ADR-0001/0002 revisables. |
 | Threat model inicial | diseñada | diseñada | `05b6a51`; amenazas y controles previstos documentados, enforcement pendiente por fase. |
 | Lifecycle puro de tarea y error de transición | diseñada | verificada | B01-01 `4bf3e58`: API reutilizada del PR #1, 49 pares contrastados con expectativas independientes, estados inciertos/terminales/aprobación, 11/11 tests totales. F-2: tipos publicados en dist; F-3: lint con tipos probado. Sin autorización ni recuperación implementadas. |
-| Contratos versionados, BlockManifest/BlockResult y errores de ejecución | diseñada | catalogada | Sólo versión de formato y lifecycle disponibles. B01-02 pendiente; no acredita B01 completo. |
+| Contratos versionados, BlockManifest/BlockResult y errores de ejecución | diseñada | verificada | B01-02 `cccbb16`: parsers v1, errores tipados, eventos started/finished y referencias SHA-256; 47 tests nuevos, 58/58 totales. Documentación de fronteras y tipos publicados; M01.1 pendiente de revisión. No acredita ejecución ni durabilidad. |
 | DAG, idempotencia, cancelación de ejecución | diseñada | catalogada | Fase 01, tests y demo; el estado cancelled no implementa cancelación de efectos. |
 | EventStore SQLite y proyecciones | diseñada | catalogada | Fase 01, recuperación desde eventos. |
 | ArtifactStore SHA-256 y checkpoints/resume | diseñada | catalogada | Fase 01, fallo y reanudación sin repetir bloque válido. |

@@ -5,15 +5,22 @@ Actualizado: 2026-10-28. Leer este archivo antes de cualquier tarea.
 ## Posición
 
 - Fase preparada: 01 — Kernel durable sin IA; Foundation y M00.3 permanecen cerrados con revisión independiente y CI histórica verde.
-- Última tarea verificada: B01-01 — lifecycle compatible del PR #1 adoptado selectivamente en `4bf3e58`; F-2/F-3 resueltos con evidencia local.
-- Tarea activa: ninguna. Siguiente nodo ejecutable único: B01-02 — contratos mínimos de ejecución según `phases/phase-01.md`. M01.1 sigue abierto; revisión antes de persistencia/runtime.
+- Última tarea verificada localmente: B01-02 — contratos mínimos de ejecución en `cccbb16`. B01-01 aceptado por el usuario; F-2/F-3 conservados.
+- Rama de trabajo: `phase/01-execution-contracts`, creada desde `e14cfdd`. `main` permanece en `e14cfdd`, sin merge ni publicación.
+- Tarea activa: ninguna. M01.1 preparado para revisión independiente: `reviews/current-review-packet.md`. Pausa hasta recibir la revisión del usuario; no declarar el milestone aceptado todavía.
+- Siguiente tarea de implementación: B02a-01 — spike mínimo SQLite, desbloqueable sólo tras revisión/aceptación de M01.1. No iniciada.
 - Dependencias posteriores: contratos mínimos y revisión M01.1 antes del spike SQLite; preferencia por `node:sqlite`, sin driver decidido todavía.
 - Bloqueos de contexto: vault ausente en este checkout; lectura histórica PREP-001 conservada, sin nueva auditoría. El kernel antiguo está incompleto en otro ordenador y no es dependencia.
-- Decisiones pendientes: forma de distribuir o referenciar el vault sin incorporarlo a Git; framework HTTP en fase posterior; estrategia de schema validation del kernel.
+- Decisiones pendientes: revisión de contratos M01.1; distribución/referencia del vault; framework HTTP en fase posterior; driver SQLite tras spike. Validación estructural de contratos v1 implementada sin nueva dependencia.
 - Último commit de cierre antes de registrar la promoción: `629059e` (`docs: close foundation milestone`). `main` y `phase/00-foundation` fueron publicados por fast-forward, sin force ni merge commit.
 - Revisión Claude: formal `APPROVE_WITH_FOLLOWUPS` completada; F-1 confirmado y corregido, F-2/F-3 registrados para Fase 01. M00.3 cerrado. Claude Code no se invoca desde aquí.
 
 ## Gates actuales
+
+- B01-02 / alcance: manifiestos, resultados por intento, errores tipados, eventos de inicio/fin y referencias SHA-256; parsers estrictos desde `unknown`, versión 1 reutilizada y API pública compatible. Sin runtime, storage, DAG, agentes, proveedores, routing ni UI. Fronteras y restricciones en `packages/contracts/README.md`.
+- B01-02 / gates: `pnpm.cmd install --frozen-lockfile`, `pnpm.cmd peers check` y `pnpm.cmd check` pasaron mediante shim temporal Corepack/pnpm 12.15.0 (PATH sólo del proceso, Node 24.13.0). Formato, lint con tipos, typecheck consumidor contra dist, build y 58/58 tests en 3 archivos. No hubo fallos de gates en esta tarea; revisión diff/staged paths y escaneo textual de secretos sin hallazgos. Sin cambios de dependencias/lockfile ni nuevo run remoto.
+- B01-02 / evidencia: `cccbb16`; 47 tests añadidos sobre JSON válido/inválido, versiones externas/anidadas, SHA-256, límites de identificadores/números/mensajes, campos extra, arrays dispersos y combinaciones resultado/error. Permanecen las pruebas de lifecycle y resolución de tipos publicados. Validar registros no acredita permisos, integridad de blobs, idempotencia ni recuperación real.
+- B01-02 / salida: paquete M01.1 preparado, preservando revisión histórica Foundation. Rollback mediante revert acotado de implementación y registro B01-02, sin tocar B00/B01-01 ni `main`. Esperar revisión del usuario antes de B02a-01.
 
 - B01-01 / alcance y procedencia: baseline limpio en `main` sobre `a3e5168`; raíz correcta. Reutilizados selectivamente lifecycle/exports/tests de `edf4379`, `6c9164f`, `efb28b1` y formato de `49e5db9`, sin cherry-pick global ni merge. Conservadas API y transiciones; añadidas expectativas independientes para los 49 pares y aclaraciones sobre tarea/intento, cancelación, aprobación y reconciliación. Objetivo y trazabilidad histórica de B00 preservados.
 - B01-01 / gates: con shim temporal de Corepack en PATH del proceso, `pnpm.cmd install --frozen-lockfile`, `pnpm.cmd peers check` y `pnpm.cmd check` pasaron: formato, lint con tipos, typecheck, build y 11/11 tests en 2 archivos. Diff/staged paths y escaneo textual de secretos sin hallazgos; lockfile y dependencias intactos. Sin publicación ni nuevo run remoto.
@@ -42,7 +49,7 @@ Desde la raíz real del checkout en PowerShell: `git rev-parse --show-toplevel`,
 
 ## Instrucciones exactas para continuar
 
-1. Leer B01-02 en `phases/phase-01.md` y el objetivo en `docs/product/software-factory-objective.md`. B01-01 verificado en `4bf3e58`; no repetir Foundation, B00 ni la adopción de contratos.
-2. Confirmar raíz del checkout y cambios locales. Preservar archivos existentes; no usar la ruta del ordenador anterior.
-3. Completar sólo contratos mínimos de ejecución necesarios para la vertical, reutilizando el lifecycle existente. F-2/F-3 resueltos: mantener resolución a `dist` y lint con tipos; no reinstaurar alias hacia fuentes. El objetivo documental conserva el texto remoto previo; este estado registra su reconciliación.
-4. Kernel limitado a orquestación, persistencia, estados, recuperación, permisos y coordinación. B01-02 debe preparar el paquete de revisión M01.1 y pausar antes de persistencia/runtime; no se ha iniciado SQLite, proveedores ni UI.
+1. Esperar la revisión independiente M01.1 entregada por el usuario. No invocar revisores/agentes ni empezar el spike.
+2. Al recibir hallazgos, reproducir y clasificar antes de corregir; fixes confirmados en commit separado y gates completos. Mantener `main` intacta y trabajar en la rama actual.
+3. Tras aceptación, continuar sólo con B02a-01 según `phases/phase-01.md`: spike SQLite con preferencia por `node:sqlite`. No repetir auditorías ni rediseñar contratos sin hallazgo concreto.
+4. Preservar los gates F-2/F-3 y las fronteras documentadas. La siguiente fase debe probar persistencia/recuperación reales; los contratos actuales no las implementan.

@@ -2,6 +2,8 @@
 
 Actualizado: 2026-10-28. Foundation cerrada. B00-01 prepara esta fase; no implementa kernel. Decisiones: D-017/D-018/D-019 y ADR-0001/0002.
 
+Estado: B01-01 aceptado; B01-02 verificado localmente en `cccbb16`. M01.1 preparado y en pausa para revisión independiente. Siguiente implementación B02a-01 sólo tras aceptación; estado/evidencias vigentes en `../status.md`.
+
 ## Resultado y límites
 
 Una CLI ejecuta un DAG determinista acotado, falla, conserva evidencia y reanuda sin repetir nodos confirmados. Un efecto incierto exige reconciliación antes de cualquier reintento. Kernel limitado a orquestación, persistencia, estados, recuperación, permisos y coordinación. Sin motores de agentes propios, proveedores, modelos, dashboard ni efectos sobre repositorios del usuario.
@@ -14,7 +16,7 @@ Una CLI ejecuta un DAG determinista acotado, falla, conserva evidencia y reanuda
 | M01.2 — Persistencia | M01.1 revisado | Spike, almacenamiento transaccional, replay y backup/restore verificados. |
 | M01.3 — Recuperación | M01.2 | CLI/DAG determinista con fallo real y reanudación tras reinicio; paquete de revisión y pausa. |
 
-## Siguiente tarea única: B01-01 — Adoptar lifecycle existente
+## B01-01 — Adoptar lifecycle existente (completada)
 
 - Objetivo: auditar compatibilidad y reutilizar selectivamente los commits de contratos del PR #1, completando pruebas y API pública sin reimplementación innecesaria.
 - Dependencia: B00-01; comprobar árbol y raíz antes de escribir. Partir de Foundation preservada, sin depender del kernel ausente del otro ordenador.
