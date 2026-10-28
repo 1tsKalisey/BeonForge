@@ -57,6 +57,8 @@ export interface RunReport {
   readonly recoveredFrom: number;
   readonly tailEvents: number;
   readonly checkpointSequence: number;
+  /** Observed stopped-attempt cancellation: true confirmed, false boundary-only, null unknown/not applicable. */
+  readonly cancellationPersisted?: boolean | null;
 }
 const busy = new WeakSet<DurableStore>();
 function hash(value: string): string {
@@ -291,6 +293,7 @@ export async function executeWorkflow(
       status: RunReport['status'],
       stoppedBlock: string | null = null,
       reason: RunReport['reason'] = null,
+      cancellationPersisted: boolean | null = null,
     ): RunReport => ({
       runId,
       status,
@@ -304,6 +307,7 @@ export async function executeWorkflow(
       recoveredFrom,
       tailEvents,
       checkpointSequence,
+      cancellationPersisted,
     });
     if (options.signal?.aborted) return report('cancelled', null, 'cancelled');
     const bytes = Buffer.from(JSON.stringify(workflow));
@@ -406,15 +410,17 @@ export async function executeWorkflow(
       if (previous?.status === 'pending' || previous?.status === 'uncertain')
         return report('blocked', id, previous.status);
       if (previous?.status === 'cancelled')
-        return report('cancelled', id, 'cancelled');
+        return report('cancelled', id, 'cancelled', true);
       if (previous?.status === 'failed' && !retries.has(id))
         return report('failed', id, 'failed');
-      if (options.signal?.aborted) return report('cancelled', id, 'cancelled');
+      if (options.signal?.aborted)
+        return report('cancelled', id, 'cancelled', false);
       const manifest = effectiveManifest(node, states);
       const inputs: Uint8Array[] = [];
       for (const ref of manifest.inputs)
         inputs.push(await store.readArtifact(ref));
-      if (options.signal?.aborted) return report('cancelled', id, 'cancelled');
+      if (options.signal?.aborted)
+        return report('cancelled', id, 'cancelled', false);
       const attemptId = String(previous ? Number(previous.attemptId) + 1 : 1);
       if (!Number.isSafeInteger(Number(attemptId)))
         throw new WorkflowError('invalid_history');
@@ -519,6 +525,7 @@ export async function executeWorkflow(
           result.status === 'uncertain' ? 'blocked' : result.status,
           id,
           result.status,
+          result.status === 'cancelled' ? true : null,
         );
     }
     return report('succeeded');

@@ -141,6 +141,159 @@ describe('compiled workflow boundary', () => {
 });
 
 describe('serial runtime on real SQLite/CAS/checkpoints', () => {
+  it('P3-1 leaves cancellation durability unknown before history is read', async () => {
+    const files = fixture();
+    const store = await files.open();
+    const controller = new AbortController();
+    controller.abort();
+    const result = await executeWorkflow(
+      store,
+      'run',
+      workflow(node('a')),
+      [seed],
+      { signal: controller.signal },
+    );
+    expect(result).toMatchObject({
+      status: 'cancelled',
+      cancellationPersisted: null,
+    });
+    expect(await store.readEvents()).toEqual([]);
+  });
+
+  it('P3-1 distinguishes a non-persisted boundary stop from terminal cancellation', async () => {
+    const files = fixture();
+    let store = await files.open();
+    const controller = new AbortController();
+    const checkpoint = store.createCheckpoint.bind(store);
+    store.createCheckpoint = async (id) => {
+      const confirmed = await checkpoint(id);
+      if (
+        confirmed.attempts.some(
+          (attempt) =>
+            attempt.blockId === 'a' && attempt.status === 'succeeded',
+        )
+      )
+        controller.abort();
+      return confirmed;
+    };
+    const input = workflow(node('a'), node('b', ['a']));
+    const stopped = await executeWorkflow(store, 'run', input, [seed], {
+      signal: controller.signal,
+    });
+    expect(stopped).toMatchObject({
+      status: 'cancelled',
+      stoppedBlock: 'b',
+      cancellationPersisted: false,
+    });
+    expect(
+      (await store.readEvents()).some(
+        (record) =>
+          record.event.type === 'block.finished' &&
+          record.event.result.status === 'cancelled',
+      ),
+    ).toBe(false);
+    await store.close();
+    store = await files.open();
+    expect((await executeWorkflow(store, 'run', input, [seed])).status).toBe(
+      'succeeded',
+    );
+  });
+
+  it('P3-1 confirms terminal cancellation after start, persists it across reopen and never resumes it', async () => {
+    const files = fixture();
+    let store = await files.open();
+    const controller = new AbortController();
+    let calls = 0;
+    const append = store.append.bind(store);
+    store.append = async (event, key) => {
+      const confirmed = await append(event, key);
+      if (event.type === 'block.started' && event.manifest.blockId === 'a')
+        controller.abort();
+      return confirmed;
+    };
+    const handler: BlockHandler = {
+      ...seed,
+      execute(context) {
+        calls++;
+        return seed.execute(context);
+      },
+    };
+    const input = workflow(node('a'));
+    expect(
+      await executeWorkflow(store, 'run', input, [handler], {
+        signal: controller.signal,
+      }),
+    ).toMatchObject({ status: 'cancelled', cancellationPersisted: true });
+    expect(
+      (await store.getAttempt({ runId: 'run', blockId: 'a', attemptId: '1' }))
+        ?.status,
+    ).toBe('cancelled');
+    await store.close();
+    store = await files.open();
+    expect(
+      await executeWorkflow(store, 'run', input, [handler], {
+        retryFailed: ['a'],
+      }),
+    ).toMatchObject({ status: 'cancelled', cancellationPersisted: true });
+    expect(calls).toBe(0);
+  });
+
+  it('P3-1 does not claim cancellation confirmation when its finish fails in SQLite', async () => {
+    const files = fixture();
+    let store = await files.open();
+    const controller = new AbortController();
+    const append = store.append.bind(store);
+    store.append = async (event, key) => {
+      const confirmed = await append(event, key);
+      if (event.type === 'block.started' && event.manifest.blockId === 'a')
+        controller.abort();
+      return confirmed;
+    };
+    sql(
+      files.path,
+      "CREATE TRIGGER fail_cancel BEFORE INSERT ON events WHEN json_extract(NEW.payload,'$.result.status')='cancelled' BEGIN SELECT RAISE(ABORT,'fixture'); END;",
+    );
+    const input = workflow(node('a'));
+    await expect(
+      executeWorkflow(store, 'run', input, [seed], {
+        signal: controller.signal,
+      }),
+    ).rejects.toMatchObject({ code: 'storage_failure' });
+    sql(files.path, 'DROP TRIGGER fail_cancel;');
+    await store.close();
+    store = await files.open();
+    expect(await executeWorkflow(store, 'run', input, [seed])).toMatchObject({
+      status: 'blocked',
+      reason: 'pending',
+      cancellationPersisted: null,
+    });
+  });
+
+  it('P3-1 preserves uncertainty when interruption happens after dispatch', async () => {
+    const files = fixture();
+    const store = await files.open();
+    const controller = new AbortController();
+    const handler: BlockHandler = {
+      ...seed,
+      execute() {
+        controller.abort();
+        return Promise.reject(new Error('Interrupted fixture'));
+      },
+    };
+    const result = await executeWorkflow(
+      store,
+      'run',
+      workflow(node('a')),
+      [handler],
+      { signal: controller.signal },
+    );
+    expect(result).toMatchObject({
+      status: 'blocked',
+      reason: 'uncertain',
+      cancellationPersisted: null,
+    });
+  });
+
   it('executes a DAG in stable dependency order and reuses successful results after reopen', async () => {
     const files = fixture();
     let store = await files.open();
