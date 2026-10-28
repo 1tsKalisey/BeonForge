@@ -38,8 +38,10 @@ function backupManifestAt(path: string): boolean {
   if (
     typeof value === 'object' &&
     value !== null &&
+    'schemaVersion' in value &&
     'database' in value &&
-    'artifacts' in value
+    'artifacts' in value &&
+    'sequence' in value
   )
     return true;
   // Legacy renamed bundles predate the role marker. A sealed branded SQLite snapshot plus

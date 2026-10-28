@@ -169,6 +169,7 @@ describe('content-addressed artifacts, workflow checkpoints and isolated recover
   it.each([
     '{"name":"project","version":1}',
     '{"schemaVersion":1,"name":"project"}',
+    '{"database":"application-config","artifacts":[]}',
     'unrelated text',
     'null',
     '[]',
