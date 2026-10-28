@@ -166,6 +166,107 @@ async function killedAt(
 }
 
 describe('content-addressed artifacts, workflow checkpoints and isolated recovery', () => {
+  it.each([
+    '{"name":"project","version":1}',
+    '{"schemaVersion":1,"name":"project"}',
+    'unrelated text',
+    'null',
+    '[]',
+  ])(
+    'manifest-R2 permits an unrelated manifest %s next to a valid WAL store',
+    async (contents) => {
+      const files = fixture();
+      let store = await files.open();
+      await store.putArtifact(bytes);
+      await store.append(start(), 'start');
+      await files.close(store);
+      const path = join(dirname(files.path), 'manifest.json');
+      writeFileSync(path, contents);
+      store = await files.open();
+      expect(await store.readEvents()).toHaveLength(1);
+      expect(readFileSync(path, 'utf8')).toBe(contents);
+      await store.createBackup(files.copies);
+    },
+  );
+
+  it('manifest-R2 permits foreign manifests at CAS and ancestor locations before initialization', async () => {
+    const files = fixture();
+    writeFileSync(join(files.root, 'manifest.json'), '{"name":"workspace"}');
+    mkdirSync(files.artifacts, { mode: 0o700 });
+    const foreign = join(files.artifacts, 'manifest.json');
+    writeFileSync(foreign, '{"name":"assets"}');
+    const store = await files.open();
+    expect(await store.putArtifact(bytes)).toEqual(reference);
+    expect(readFileSync(foreign, 'utf8')).toBe('{"name":"assets"}');
+  });
+
+  it.each([
+    '{"schemaVersion":1,"database":{},"artifacts":[],"sequence":0}',
+    '{"schemaVersion":99,"database":{},"artifacts":[],"sequence":0}',
+  ])(
+    'manifest-R2 rejects a recognizable but invalid BeonForge manifest',
+    async (contents) => {
+      const files = fixture();
+      writeFileSync(join(dirname(files.path), 'manifest.json'), contents);
+      await expect(files.open().then(() => 'writable')).rejects.toMatchObject({
+        code: 'integrity_failure',
+      });
+      expect(existsSync(files.path)).toBe(false);
+      expect(existsSync(files.artifacts)).toBe(false);
+    },
+  );
+
+  it.each(['{}', 'truncated-json', '{"name":"foreign-looking"}'])(
+    'manifest-R2 protects a renamed legacy standalone backup with damaged manifest %s',
+    async (contents) => {
+      const files = fixture();
+      const store = await files.open();
+      const bundle = await store.createBackup(files.copies);
+      const renamed = join(files.copies, 'legacy-copy');
+      renameSync(bundle.directory, renamed);
+      // Exercise pre-marker bundles as well as newly produced copies.
+      const marker = join(renamed, 'beonforge-backup.json');
+      if (existsSync(marker)) unlinkSync(marker);
+      writeFileSync(join(renamed, 'manifest.json'), contents);
+      await expect(
+        files.open(join(renamed, 'events.sqlite')).then(() => 'writable'),
+      ).rejects.toMatchObject({ code: 'integrity_failure' });
+      await expect(
+        files
+          .open(
+            join(files.root, 'external.sqlite'),
+            join(renamed, 'events.sqlite.artifacts'),
+          )
+          .then(() => 'writable'),
+      ).rejects.toMatchObject({ code: 'integrity_failure' });
+      await expect(
+        restoreSqliteBackup(renamed, files.copies),
+      ).rejects.toMatchObject({ code: 'integrity_failure' });
+    },
+  );
+
+  it('manifest-R2 retains backup identity after rename and manifest removal', async () => {
+    const files = fixture();
+    const store = await files.open();
+    const bundle = await store.createBackup(files.copies);
+    const renamed = join(files.copies, 'copy-without-manifest');
+    renameSync(bundle.directory, renamed);
+    unlinkSync(join(renamed, 'manifest.json'));
+    const before = readdirSync(renamed, { recursive: true }).sort();
+    await expect(
+      files.open(join(renamed, 'events.sqlite')).then(() => 'writable'),
+    ).rejects.toMatchObject({ code: 'integrity_failure' });
+    await expect(
+      files
+        .open(
+          join(files.root, 'external.sqlite'),
+          join(renamed, 'events.sqlite.artifacts'),
+        )
+        .then(() => 'writable'),
+    ).rejects.toMatchObject({ code: 'integrity_failure' });
+    expect(readdirSync(renamed, { recursive: true }).sort()).toEqual(before);
+  });
+
   it.each(['root', 'blobs', 'staging', 'renamed', 'incomplete'] as const)(
     'F6-R2 prevents putArtifact through an external database into backup %s',
     async (kind) => {

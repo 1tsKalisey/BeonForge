@@ -14,6 +14,14 @@ Seis regresiones rojas después de compilar fuentes actuales: una DB externa pod
 
 Ocho regresiones verdes (incluye restore ready/incomplete y reapertura legítima). Sin crear DB/CAS externos ni cambiar inventarios protegidos. Frozen/peers/check verdes: 62 + 102 + 7 = 171 tests. F-5 intacto: sólo cambia checkLocation/guardas de marcadores, sin modificar replay, cachés, validaciones de eventos/checkpoints o presupuestos. La clasificación de manifest ajeno queda para el commit P3 separado siguiente.
 
+## Segunda revisión — P3 manifest ajeno
+
+Seis regresiones rojas sobre build fuente actual: JSON de proyecto, schemaVersion ajeno, texto, null/array y manifests en ancestros/CAS bloqueaban un store legítimo. La identificación ahora usa rol reservado/marcador y firma de campos database+artifacts, no sólo el nombre manifest.json. Los backups nuevos reciben marcador de rol aditivo, sin cambiar manifest v1; los anteriores se reconocen por manifiesto o, si éste está dañado/parece ajeno y la copia se renombró, por conjunto SQLite/CAS sellado (cabecera SQLite, application_id BeonForge y modo standalone). El store normal conserva WAL, por lo que un manifiesto ajeno junto a su DB/CAS no lo convierte en backup.
+
+12 regresiones verdes: seis compatibilidades ajenas, dos manifiestos BeonForge reconocibles inválidos, tres copias legacy renombradas con manifiesto dañado y copia nueva renombrada sin manifest. Rechazos de integridad mantienen diagnóstico fijo; archivos ajenos se conservan, aliases inseguros siguen rechazados por SafeDirectory. Sólo cuando hay manifest y pareja SQLite/CAS legacy ambigua se lee el archivo SQLite para identificar su cabecera; permanece el límite de memoria documentado, sin streaming ni autenticación frente al dueño que borre todos los indicios de rol.
+
+Gates finales: frozen, peers, formato, lint con tipos, typecheck, build y 62 contratos + 114 persistencia + 7 spike = 183 tests verdes, sin skips/fallos. Los tests de F-5 y crash recovery se mantienen; fuente compilada antes de cada regresión y check vuelve a compilar. Sin dependencias nuevas, cambios de schema ni contratos M01.1.
+
 Veredicto recibido: REQUEST_CHANGES. M01.2 permanece abierto; B02b-03 excluido.
 
 Objetivo: reproducir y corregir F-5 (P1, validación/timeout), F-6 (P2, apertura de copias) y F-7 (P2, destinos anidados), un commit por hallazgo. Dependencia: B02b-02. Archivos: adaptador SQLite/worker, tests y registro de ejecución; contratos de dominio, dependencias, GC, streaming y runtime excluidos.

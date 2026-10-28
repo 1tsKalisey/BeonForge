@@ -136,6 +136,10 @@ export async function createBackup(
   const target = location(authorizedParent, 'beonforge-backup-');
   const root = new SafeDirectory(target.directory);
   root.writeExclusive('beonforge-backup-incomplete', new Uint8Array());
+  root.writeExclusive(
+    'beonforge-backup.json',
+    Buffer.from(JSON.stringify({ schemaVersion: 1 })),
+  );
   await database.backupTo(root.file('events.sqlite'));
   const entries = database.artifacts.entries();
   const sourceReferences = entries.map((entry) => entry.reference);
@@ -209,6 +213,7 @@ export async function restoreBackup(
         entryExists(join(current, 'staging'))) ||
       [
         'beonforge-backup-incomplete',
+        'beonforge-backup.json',
         'beonforge-restore-incomplete',
         'beonforge-restore.json',
         'restore-ready.json',

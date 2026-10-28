@@ -25,13 +25,53 @@ type Row = Record<string, SQLOutputValue>;
 type VerifiedBlobs = Map<string, Uint8Array>;
 const applicationId = 0x42464f52;
 
+function backupManifestAt(path: string): boolean {
+  if (!entryExists(join(path, 'manifest.json'))) return false;
+  const root = new SafeDirectory(path);
+  const contents = root.read('manifest.json'); // Unsafe aliases still fail closed, even for foreign files.
+  let value: unknown = null;
+  try {
+    value = JSON.parse(Buffer.from(contents).toString('utf8'));
+  } catch {
+    /* A foreign manifest need not be JSON. Role/layout checks still protect damaged copies. */
+  }
+  if (
+    typeof value === 'object' &&
+    value !== null &&
+    'database' in value &&
+    'artifacts' in value
+  )
+    return true;
+  // Legacy renamed bundles predate the role marker. A sealed branded SQLite snapshot plus
+  // its CAS remains a backup even when its manifest is damaged; normal stores use WAL (2).
+  if (
+    entryExists(root.file('events.sqlite')) &&
+    entryExists(root.file('events.sqlite.artifacts'))
+  ) {
+    const bytes = root.read('events.sqlite');
+    if (
+      bytes.byteLength >= 100 &&
+      Buffer.from(bytes.subarray(0, 16)).toString('latin1') ===
+        'SQLite format 3\0' &&
+      bytes[18] === 1 &&
+      bytes[19] === 1 &&
+      new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength).getUint32(
+        68,
+      ) === applicationId
+    )
+      return true;
+  }
+  return false;
+}
+
 function backupAncestor(path: string): boolean {
   for (let current = path; ; current = dirname(current)) {
     if (
       basename(current).startsWith('beonforge-backup-') ||
-      ['manifest.json', 'beonforge-backup-incomplete'].some((name) =>
+      ['beonforge-backup.json', 'beonforge-backup-incomplete'].some((name) =>
         entryExists(join(current, name)),
-      )
+      ) ||
+      backupManifestAt(current)
     )
       return true;
     if (dirname(current) === current) return false;
