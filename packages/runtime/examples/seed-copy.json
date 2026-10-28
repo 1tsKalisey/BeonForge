@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "nodes": [
+    {
+      "manifest": {
+        "schemaVersion": 1,
+        "blockId": "seed",
+        "handler": "fixture.seed",
+        "handlerVersion": 1,
+        "inputs": [],
+        "effects": "none"
+      },
+      "dependsOn": []
+    },
+    {
+      "manifest": {
+        "schemaVersion": 1,
+        "blockId": "copy",
+        "handler": "fixture.concat",
+        "handlerVersion": 1,
+        "inputs": [],
+        "effects": "none"
+      },
+      "dependsOn": ["seed"]
+    }
+  ]
+}

@@ -196,6 +196,15 @@ importers:
         specifier: workspace:*
         version: link:../contracts
 
+  packages/runtime:
+    dependencies:
+      '@beonforge/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@beonforge/persistence':
+        specifier: workspace:*
+        version: link:../persistence
+
 packages:
 
   '@cacheable/memory@2.2.0':
