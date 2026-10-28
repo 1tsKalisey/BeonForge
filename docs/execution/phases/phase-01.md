@@ -2,7 +2,7 @@
 
 Actualizado: 2026-10-28. Foundation cerrada. B00-01 prepara esta fase; no implementa kernel. Decisiones: D-017/D-018/D-019 y ADR-0001/0002.
 
-Estado: M01.1 cerrado. B02a-01 completado en `d01daf2`, 62 tests de contratos + 7 SQLite verdes en Node 24.13.0 y 24.19.0. D-021 selecciona node:sqlite sobre 24.19.0/SQLite 3.53.3, WAL/FULL y escritor en worker. Siguiente tarea única B02b-01, sin iniciar; verificar runtime parcheado antes de datos reales. M01.2 sigue abierto. Evidencias en `../status.md` y `spikes/sqlite/README.md` desde la raíz.
+Estado: M01.1 cerrado; B02a-01 aceptado y B02b-01 verificado en `39480c0`: eventos/proyección reales en worker, Node 24.19.0/SQLite 3.53.3, WAL/FULL, 90 tests verdes (21 nuevos). Siguiente tarea única B02b-02, sin iniciar. M01.2 sigue abierto hasta artefactos/checkpoints/backup/restore y revisión. Evidencias en `../status.md` y `packages/persistence/README.md` desde la raíz.
 
 ## Resultado y límites
 
