@@ -29,6 +29,8 @@ Activos: código y propiedad intelectual, especificación `knowledge/`, credenci
 
 ## Seguimiento
 
+Segunda revisión M01.2 APPROVE_WITH_FOLLOWUPS aceptada y followups verificados: destinos restore fuera del origen/CAS/directorios activos protegidos antes de crear; SQLite y artifactRoot inspeccionan ancestros de recuperación y no permiten putArtifact externo sobre backups. Rol aditivo de backup y formato versionado distinguen manifest ajeno y copias legacy selladas sin aceptar conjuntos manipulados reconocibles. F-5 intacto, 184 tests verdes; cierre registrado. Siguen raíces/ancestros privados, ámbito intraproceso, memoria y ausencia de autenticación del propietario/power loss documentados en R-023/025/026/027.
+
 Revisión M01.2 REQUEST_CHANGES: F-5 reduce trabajo redundante sin cachés entre operaciones ni retries inciertos; timeout de cola no despacha comandos. F-6 impide apertura normal de backups y requiere ready válido/DB/CAS existentes para restores identificados; los marcadores no son autenticación. F-7 comprueba destinos reales fuera de raíces DB/CAS antes de crear nada, incluyendo junctions y alias Windows. Regresiones reales/volumen y 151 tests verdes; correcciones pendientes de aprobación independiente, sin cierre del milestone. Siguen los límites de raíces privadas, memoria, retención y power loss R-023/025/026/027.
 
 Actualizar este modelo al abrir una frontera nueva. Vincular controles a tests, política, telemetría y riesgos en `docs/execution/risks.md`. La clasificación de datos `public`, `internal`, `confidential`, `secret`, `regulated` debe existir antes de enrutar contexto a modelos externos.

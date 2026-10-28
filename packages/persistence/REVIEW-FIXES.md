@@ -1,5 +1,7 @@
 # M01.2 — Correcciones de revisión
 
+Estado final: M01.2 aceptado y cerrado al verificar los tres followups y registrar formalmente la segunda revisión APPROVE_WITH_FOLLOWUPS comunicada por el usuario. F-5 validado/intacto; 184 tests verdes y gates completos. Esta aceptación procede del veredicto recibido y de su condición de cierre satisfecha; no se atribuye tercera revisión. B02b-03 no iniciado.
+
 Segunda revisión recibida: APPROVE_WITH_FOLLOWUPS. F-5 validado, implementación excluida de cambios. Trabajo actual limitado a destinos de restore F-7/P2, artifactRoot de backups F-6/P3 y clasificación de manifest ajeno/P3. Archivos: guardas de rutas/marcadores existentes, canal privado sólo si necesita transmitir raíces activas, regresiones y evidencias. Sin rediseño, dependencias, schema nuevo ni B02b-03. Cada defecto exige test rojo con build fuente actual, corrección mínima, gates completos y commit separado. Aceptación: rechazo sin residuos/contaminación y backup posterior funcional, backups protegidos ante putArtifact externo y manifests ajenos compatibles sin aceptar copias manipuladas. Rollback: revert puntual conservando datos. Cierre sólo tras verificar correcciones y registrar la aceptación recibida.
 
 ## Segunda revisión — F-7/P2 restore
@@ -22,7 +24,9 @@ Seis regresiones rojas sobre build fuente actual: JSON de proyecto, schemaVersio
 
 Gates finales: frozen, peers, formato, lint con tipos, typecheck, build y 62 contratos + 115 persistencia + 7 spike = 184 tests verdes, sin skips/fallos. Los tests de F-5 y crash recovery se mantienen; fuente compilada antes de cada regresión y check vuelve a compilar. Sin dependencias nuevas, cambios de schema ni contratos M01.1. El formato de cabecera usado para reconocer snapshots legacy se contrastó con la [especificación oficial de SQLite](https://www.sqlite.org/fileformat.html#the_database_header).
 
-Veredicto recibido: REQUEST_CHANGES. M01.2 permanece abierto; B02b-03 excluido.
+## Histórico — Primera revisión
+
+Veredicto entonces recibido: REQUEST_CHANGES. M01.2 permaneció abierto; B02b-03 excluido. Los resultados actuales de segunda revisión y cierre están arriba.
 
 Objetivo: reproducir y corregir F-5 (P1, validación/timeout), F-6 (P2, apertura de copias) y F-7 (P2, destinos anidados), un commit por hallazgo. Dependencia: B02b-02. Archivos: adaptador SQLite/worker, tests y registro de ejecución; contratos de dominio, dependencias, GC, streaming y runtime excluidos.
 

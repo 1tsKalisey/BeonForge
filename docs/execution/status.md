@@ -4,18 +4,26 @@ Actualizado: 2026-10-28. Leer este archivo antes de cualquier tarea.
 
 ## Posición
 
-- Fase actual: 01 — Kernel durable sin IA, M01.2 en curso. Foundation/M00.3 y M01.1 permanecen cerrados.
-- Último trabajo verificado localmente: correcciones M01.2 REQUEST_CHANGES, F-5 `605c43d`, F-6 `773524d`, F-7 `2913393` y diagnóstico P3 `0121302`. Contratos M01.1, schema v2, root manifests y lockfile intactos; sin dependencias nuevas.
+- Fase actual: 01 — Kernel durable sin IA, M01.2 aceptado y cerrado. Foundation/M00.3 y M01.1 permanecen cerrados; M01.3 no iniciado.
+- Último trabajo verificado: followups de segunda revisión M01.2, F-7 restore `15a9cf8`, F-6 artifactRoot `6f28d9e`, P3 manifest `93481c0`/`98e93b6`. F-5 validado por el revisor y conservado intacto. Contratos M01.1, schema v2, root manifests y lockfile sin cambios; ninguna dependencia nueva.
 - Rama de trabajo: `phase/01-artifacts-recovery`, creada desde `0a0c4f9`. `main` permanece en `e14cfdd`, sin merge ni publicación.
-- Tarea activa: ninguna. M01.1 sigue cerrado. M01.2 recibió REQUEST_CHANGES de Claude Code comunicado por el usuario; hallazgos corregidos y nueva revisión preparada en `reviews/current-review-packet.md`. Milestone abierto hasta aprobación independiente; no invocar revisores/agentes ni avanzar al runtime.
-- Siguiente nodo: revisión M01.2. B02b-03 — runtime/CLI determinista y recuperación queda preparado, condicionado a aceptación; no iniciado.
+- Tarea activa: ninguna. Aceptación formal: segunda revisión independiente APPROVE_WITH_FOLLOWUPS comunicada por el usuario, F-5 resuelto y tres followups verificados antes del cierre conforme a su condición. Registro y evidencias en `reviews/current-review-packet.md`; no se atribuye una tercera revisión ni se invocaron agentes.
+- Siguiente nodo ejecutable: B02b-03 — runtime/CLI determinista y recuperación, desbloqueado pero no iniciado. Esta tarea termina al registrar el cierre; no avanzar durante este turno.
 - Decisión del spike: adoptar `node:sqlite` sobre Node 24.19.0/SQLite 3.53.3 medidos, WAL/FULL y único escritor serializado en worker dedicado. La instalación global 24.13.0/3.50.4 no queda aprobada para persistencia durable.
 - Bloqueos de contexto: vault ausente en este checkout; lectura histórica PREP-001 conservada, sin nueva auditoría. El kernel antiguo está incompleto en otro ordenador y no es dependencia.
-- Decisiones pendientes: revisión M01.2, distribución/referencia del vault y framework HTTP posterior. Integridad/recuperación de almacenamiento verificadas localmente; falta runtime/DAG/CLI y recuperación de ejecución B02b-03.
+- Decisiones pendientes: distribución/referencia del vault y framework HTTP posterior. Persistencia M01.2 aceptada; falta runtime/DAG/CLI y recuperación de ejecución B02b-03.
 - Último commit de cierre antes de registrar la promoción: `629059e` (`docs: close foundation milestone`). `main` y `phase/00-foundation` fueron publicados por fast-forward, sin force ni merge commit.
 - Revisión Claude: formal `APPROVE_WITH_FOLLOWUPS` completada; F-1 confirmado y corregido, F-2/F-3 registrados para Fase 01. M00.3 cerrado. Claude Code no se invoca desde aquí.
 
 ## Gates actuales
+
+- Cierre M01.2 / segunda revisión: APPROVE_WITH_FOLLOWUPS recibido, F-5 resuelto sin cambios de implementación. Se verificó igualdad del núcleo database.ts desde normalizeError hasta final frente a `293b8cd`; único cambio de client.ts transmite directorios activos en el comando privado restore, sin tocar colas/presupuestos. Persisten tests de volumen 800 eventos/40 checkpoints.
+- F-7 restore / `15a9cf8`: 8 regresiones rojas antes del cambio, 12 nuevas verdes: origen raíz/descendientes, CAS/blobs/staging y SQL activo con CAS personalizado, stores cerrados identificables y junctions. lstat, rutas canónicas y parentesco antes de crear archivos/directorios; inventario intacto, retries y backups posteriores funcionales. El canal privado reutiliza el registro de escritores intraproceso; no es coordinación multiproceso.
+- F-6 artifactRoot / `6f28d9e`: 6 rojas, 8 nuevas verdes. SQLite externo podía publicar mediante putArtifact dentro de backups completos/renombrados/incompletos. Se inspeccionan ancestros de DB y CAS antes de inicializar ambos; también se rechaza tomar prestado un CAS de otro restore. No deja DB/CAS nuevos ni muta las copias.
+- P3 manifest / `93481c0` y ajuste `98e93b6`: 7 regresiones de compatibilidad rojas (6 originales y una afinando firma demasiado genérica); 13 nuevas verdes. Manifest ajeno no bloquea por su nombre; se identifica familia versionada schemaVersion/database/artifacts/sequence, rol y backups legacy sellados. Marcador aditivo beonforge-backup.json protege nuevas copias aun renombradas/sin manifest. Manifests BeonForge inválidos y copias manipuladas siguen rechazados con errores fijos; archivos ajenos intactos.
+- Gates finales: Node 24.19.0/SQLite 3.53.3, frozen, peers, formato, lint con tipos, typecheck, build y **184/184 tests** (62 contratos + 115 persistencia + 7 spike), sin skips/fallos finales. Antes de cada reproducción se compiló fuente actual; check recompila exports. Diff/secretos/paths revisados, temporales cerrados/eliminados, sin cambios a main, merge/publicación ni nueva CI observada. Límites R-023/025/026/027 permanecen: memoria/GC/ACL/power loss, sin efectos/runtime implementados.
+
+Histórico de primera corrección (la aceptación actual y los gates anteriores lo sustituyen):
 
 - Revisión M01.2 / alcance: corregidos sólo F-5/F-6/F-7 y diagnóstico de inventario; misma rama, sin merge/publicación ni cambios de main. Evidencia reproducible, límites, rollback y seguimientos P3 en `packages/persistence/REVIEW-FIXES.md`. El paquete anterior se conserva como histórico; no se atribuye aprobación a gates locales.
 - F-5 / reproducción y corrección: 800 eventos/40 checkpoints; antes apertura directa 26,223 s y backup 115,215 s, apertura worker falla a 10 s por storage_failure. Validación ahora única con caché SHA por operación y replay incremental ordenado de todos los prefijos. Muestra final `0121302`: apertura directa 0,746 s, 41 verificaciones de referencia vía ArtifactFiles.read y 800 applies frente a 50040/17200; backup directo 1,644 s y 82/800 frente a 197842/66400. Worker abre 0,741 s, backup 1,390 s, restore 1,459 s; reapertura y checkpoint 800 verificados. Contadores excluyen hashing de inventario/staging y no instrumentan worker, como documenta la fixture; tiempos locales, no SLA.
@@ -87,7 +95,7 @@ Desde la raíz real del checkout en PowerShell: `git rev-parse --show-toplevel`,
 
 ## Instrucciones exactas para continuar
 
-1. Esperar revisión independiente M01.2 entregada por el usuario; paquete preparado. No invocar otros agentes, repetir spike ni iniciar B02b-03 antes de aceptación.
-2. Reproducir/clasificar hallazgos recibidos antes de cambios; fixes confirmados en commits separados y gates completos. Mantener main intacta, sin merge ni publicación.
+1. M01.2 cerrado con segunda revisión APPROVE_WITH_FOLLOWUPS y followups verificados. No repetir auditoría/spike/revisión ni invocar agentes; este turno termina aquí.
+2. Próxima implementación B02b-03, aún no iniciada; concretar sólo esa tarea según phase-01.md cuando se continúe. Mantener main intacta, sin merge ni publicación.
 3. Ejecutar herramientas con Node 24.19.0 (portátil verificado en el registro B02a si sigue disponible); el Node global 24.13.0 es rechazado. No cambiar globalmente el runtime ni ampliar su whitelist sin validación explícita. Mantener WAL/FULL y SQL en worker.
-4. Tras aceptación M01.2, ejecutar sólo B02b-03 según su plan: CLI/DAG determinista con recuperación demostrada. Reutilizar almacenamiento real y checkpoints, aplicar tail de eventos confirmado y no reejecutar efectos pending/uncertain sin reconciliación. No incorporar aún agentes/proveedores/UI ni activar/restaurar sobre datos reales sin aprobación.
+4. Para B02b-03 reutilizar almacenamiento real y checkpoints; aplicar tail de eventos confirmado y no reejecutar efectos pending/uncertain sin reconciliación. No incorporar agentes/proveedores/UI ni activar/restaurar sobre datos reales sin aprobación. No modificar F-5 sin una prueba que demuestre regresión.

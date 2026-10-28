@@ -1,4 +1,32 @@
-# M01.2 — Segunda revisión tras REQUEST_CHANGES
+# M01.2 — Aceptación formal y cierre
+
+Registrado: 2026-10-28. **M01.2 aceptado y cerrado.** Segunda revisión independiente de Claude Code: APPROVE_WITH_FOLLOWUPS, comunicada por el usuario. F-5 está resuelto y validado. El usuario condicionó el cierre a corregir y verificar tres hallazgos restantes; condición satisfecha con regresiones/gates siguientes. No se atribuye una tercera revisión de estos commits ni se invocó Claude Code u otro agente. Paquetes anteriores conservados debajo.
+
+## Cambios revisables y regresiones
+
+Base de followups: `293b8cd`. Final de código: `98e93b6`, rama `phase/01-artifacts-recovery`. Diff: `git diff 293b8cd..98e93b6`; milestone completo desde `d960957`. Main permanece `e14cfdd`, sin merge ni publicación. Evidencia detallada en `packages/persistence/REVIEW-FIXES.md`.
+
+| Seguimiento de segunda revisión | Evidencia roja previa al cambio | Corrección / verde |
+|---|---|---|
+| F-7 P2, destinos de restore | 8 destinos inseguros aceptados tras build actual: origen, sus blobs/descendientes y SQL/CAS activo. | `15a9cf8`: valida lstat/rutas reales/parentesco contra origen, escritores registrados y ancestros CAS/artefactos/recuperación antes de crear. 12 regresiones verdes, sin residuos, backups/restores posteriores válidos, stores cerrados identificables y junctions. |
+| F-6 P3, artifactRoot | 6 rojas: SQLite externo podía ejecutar putArtifact dentro de backups completos/renombrados/incompletos o crear DB bajo descendiente del bundle. | `6f28d9e`: guarda ancestros de ambas rutas antes de inicializar; no toma prestado CAS de otro restore. 8 nuevas verdes, inventarios y DB/CAS externos intactos; propio restore sigue operable. |
+| P3, manifest ajeno | 6 rojas originales por nombre de archivo; otra roja mostró firma de dos campos demasiado genérica durante la corrección. | `93481c0`/`98e93b6`: firma completa schemaVersion/database/artifacts/sequence, rol y reconocimiento de snapshots legacy sellados. 13 nuevas verdes: manifests ajenos, inválidos BeonForge, copias renombradas/dañadas y ausencia de manifest bajo marcador de rol. |
+
+## Verificación y aceptación
+
+- Cada regresión roja se ejecutó después de `pnpm.cmd build` contra exports compilados del código fuente actual; no se usó dist obsoleto. Check recompila antes de lint, typecheck y tests. Sólo temporales privados controlados, con limpieza verificada.
+- Frozen install, peers, formato, lint con tipos, typecheck, build y **184/184 tests** (62 contratos + 115 persistencia + 7 spike) verdes. 33 tests nuevos: 12 F-7 + 8 F-6 + 13 manifest. Se conservan volumen 800/40, idempotencia, referencias, corrupción, backup/restore, rollback/reopen y SIGKILL; sin skips/fallos finales.
+- F-5 no modificado: núcleo de database.ts desde normalizeError hasta final idéntico a `293b8cd`; colas/timeouts de client intactos, sólo se añade directorio de escritores al comando privado restore. Nuevos guards de ruta/rol no rediseñan stores ni añaden dependencias, schemas de dominio, GC, scheduler, agentes o runtime.
+- Diff, staged paths y escaneo textual de secretos sin hallazgos; main, contratos M01.1, root manifests/lockfile preservados. Sin nuevo run remoto observado.
+- Aceptación registrada a partir del veredicto independiente recibido y de la verificación de sus followups conforme a la condición del usuario; cierre M01.2. No se interpreta un gate local como un nuevo veredicto independiente.
+
+Límites abiertos: R-023/025/026/027, memoria materializada/retención, raíces/ancestros privados y ACL, crash de proceso distinto de power loss, marcas/hashes sin autenticación privilegiada. El registro de escritores es intraproceso; stores cerrados/CAS externos sólo son reconocibles por su layout/marcadores. En la clasificación legacy ambigua se lee SQLite para identificar su cabecera, con el límite de memoria ya documentado. Estos límites no implementan ni bloquean ficticiamente funcionalidades posteriores.
+
+Rollback: revert acotado conservando datos y schema, sin borrado ni sustitución de activos. Siguiente nodo B02b-03 desbloqueado pero **no iniciado**; esta ejecución se detiene aquí.
+
+---
+
+# Histórico — Segunda revisión tras REQUEST_CHANGES
 
 Preparado: 2026-10-28. **Milestone abierto, aprobación independiente pendiente. No iniciar B02b-03.** Claude Code emitió REQUEST_CHANGES según informe recibido del usuario; no se invoca desde aquí. Los paquetes anteriores se conservan debajo como históricos.
 
