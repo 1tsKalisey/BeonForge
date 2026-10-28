@@ -35,7 +35,9 @@ export class InvalidTaskTransitionError extends Error {
 }
 
 export function isTaskState(value: unknown): value is TaskState {
-  return typeof value === 'string' && (TASK_STATES as readonly string[]).includes(value);
+  return (
+    typeof value === 'string' && (TASK_STATES as readonly string[]).includes(value)
+  );
 }
 
 export function canTransition(from: TaskState, to: TaskState): boolean {
