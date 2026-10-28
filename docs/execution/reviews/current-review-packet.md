@@ -1,4 +1,45 @@
-# M01.2 — Aceptación formal y cierre
+# M01.3 — Runtime determinista y recuperación, revisión pendiente
+
+Preparado: 2026-10-28. **B02b-03 verificado localmente; M01.3 no aceptado/cerrado.** Esperar revisión independiente suministrada por el usuario; no invocar agentes ni iniciar Fase 02. M01.1/M01.2 aceptados siguen intactos; registros históricos debajo.
+
+## Alcance y diff
+
+- Base: `dada616` (M01.2 cerrado); código final `1378d38`, rama `phase/01-workflow-runtime`. Diff reproducible: `git diff dada616..1378d38`. Main sigue `e14cfdd`, sin merge/publicación.
+- Nuevo paquete funcional packages/runtime: Workflow JSON v1 y parser, DAG de 1–64 nodos, runner serial, puertos mínimos de handlers confiables y CLI run/inspect. Usa contratos y DurableStore existentes, sin import SQLite/proveedores en runner ni cambios a persistencia/F-5. Lockfile sólo añade dos enlaces workspace (9 líneas), sin nuevas dependencias externas.
+- Protocolo: kernel.plan reservado enlaza CAS del grafo canónico a runId con eventos v1 existentes antes de handlers. Start confirmado antes de dispatch; inputs efectivos enlazan evidencia de dependencias; outputs CAS antes de finish/checkpoint. La metadata no es un agente ni nuevo EventStore. Alterar un grafo ligado al mismo run o adoptar historia ajena falla cerrado.
+- Recuperación hidrata últimos intentos desde checkpoint y consulta proyecciones de identidades del tail; comprueba semántica de historia/orden/manifest. Continúa leyendo el log completo: no se promete optimización tail-only. Un finish confirmado sin checkpoint se reutiliza y repara su checkpoint, sin repetir handler.
+- Registro handler/versión/efectos debe coincidir, allowlist externa denegada por defecto. Failed exige selección explícita de un nuevo intento por invocación; cancelled terminal, pending/uncertain bloqueados. No se implementa reconciliación manual ni estados de aprobación de task/merge.
+
+## Evidencia verificable
+
+Node 24.19.0/SQLite 3.53.3, WAL/FULL, frozen install, peers, formato, lint con tipos, typecheck de fuentes y consumidor dist, build, **226/226 tests** (62 contratos + 115 persistencia + 42 runtime + 7 spike), sin skips/fallos finales. Diff/paths/secretos revisados; sólo temporales propios cerrados/eliminados. Root package/contratos/persistencia intactos, sin nuevo run remoto observado.
+
+42 tests nuevos: 35 frontera/runtime y 7 CLI/proceso. Cubren DAG/ciclos/versiones/inputs inválidos, permisos/effect mismatch, plan inmutable, orden serial/evidencia, rerun sin duplicados, retry de failed, cancel antes/después de dispatch, timeout/handler tardío bloqueando store, resultados inválidos/excepciones sin filtrar contenido, SQL real fallido antes de finish/checkpoint y recuperación. Primer lint detectó ocho require-await en fixtures instantáneas, corregidos sin excepciones de reglas; gates completos posteriores verdes.
+
+Demo repetible tras build: `pnpm.cmd --filter @beonforge/runtime demo`. Un hijo usa el mismo runtime/SQLite/CAS y archivos receipt exclusivos/fsync. Barreras sólo de test delegan append/checkpoint reales o esperan tras el efecto; no simulan durabilidad ni añaden failpoints productivos. Parent mata con SIGKILL y reabre:
+
+| Corte | Snapshot / tail | Resultado y efectos |
+|---|---|---|
+| Finish confirmado antes de checkpoint | seq 2 / 2 eventos | succeeded; 1 efecto restante, 0 reejecuciones confirmadas, 2 receipts |
+| Después del checkpoint | seq 4 / 0 eventos | succeeded; 1 efecto restante, 0 reejecuciones confirmadas, 2 receipts |
+| Durante segundo efecto ya escrito | seq 4 / 1 start | blocked pending; 0 efectos reejecutados, 2 receipts y ninguna invocación restante |
+
+CLI real además ejecuta ejemplo, inspecciona eventos, reabre sin duplicar, devuelve failure/blocked con códigos coherentes y conserva incertidumbre tras timeout. El CLI sólo registra fixtures puras, sin shell/red/carga dinámica de módulos. El efecto externo de demo se ejecuta por API con handler confiable y permiso explícito, únicamente en temporales.
+
+## Revisión enfocada y límites
+
+1. ¿La vinculación del plan y el orden de deps/manifest/attempt IDs impiden mezclar definiciones o reejecutar trabajo confirmado al recuperar checkpoint y tail?
+2. ¿Se conserva incertidumbre en cada fallo entre start, efecto, CAS, finish y checkpoint, sin retries automáticos ni duplicaciones peligrosas?
+3. ¿Cancelación, timeout y exclusión por handle fallan cerrado ante handlers tardíos, sin confirmar/publicar su resultado después de retornar uncertain?
+4. ¿Las fronteras de permisos/registro y CLI son mínimas y honestas sobre su confianza, sin anticipar motores de agentes o herramientas generales?
+
+R-023/024/025/026/027/031/032: memoria sin cuotas/streaming, propietario/ACL privado, un control plane por DB, no raw concurrent store mutation, cancelación cooperativa sin sandbox/preempción, handler puede seguir efectos hasta asentarse, sin reconciliación pending/uncertain ni exactamente-una-vez/power loss. Los permisos son decisiones explícitas del caller, no aprobaciones humanas persistidas. Validar esto dentro del alcance; proveedores, worktrees, políticas generales y reconciliación futura no son capacidades implementadas por B02b-03.
+
+Rollback: revert acotado de implementación/registro conservando datos v1/schema v2. Siguiente nodo único: recibir revisión independiente M01.3; Fase 01 no se cierra ni Fase 02 se inicia antes de aceptación.
+
+---
+
+# Histórico — M01.2 aceptación formal y cierre
 
 Registrado: 2026-10-28. **M01.2 aceptado y cerrado.** Segunda revisión independiente de Claude Code: APPROVE_WITH_FOLLOWUPS, comunicada por el usuario. F-5 está resuelto y validado. El usuario condicionó el cierre a corregir y verificar tres hallazgos restantes; condición satisfecha con regresiones/gates siguientes. No se atribuye una tercera revisión de estos commits ni se invocó Claude Code u otro agente. Paquetes anteriores conservados debajo.
 

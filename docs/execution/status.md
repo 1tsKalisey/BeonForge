@@ -4,18 +4,27 @@ Actualizado: 2026-10-28. Leer este archivo antes de cualquier tarea.
 
 ## Posición
 
-- Fase actual: 01 — Kernel durable sin IA, M01.2 aceptado y cerrado. Foundation/M00.3 y M01.1 permanecen cerrados; M01.3 no iniciado.
-- Último trabajo verificado: followups de segunda revisión M01.2, F-7 restore `15a9cf8`, F-6 artifactRoot `6f28d9e`, P3 manifest `93481c0`/`98e93b6`. F-5 validado por el revisor y conservado intacto. Contratos M01.1, schema v2, root manifests y lockfile sin cambios; ninguna dependencia nueva.
-- Rama de trabajo: `phase/01-artifacts-recovery`, creada desde `0a0c4f9`. `main` permanece en `e14cfdd`, sin merge ni publicación.
-- Tarea activa: ninguna. Aceptación formal: segunda revisión independiente APPROVE_WITH_FOLLOWUPS comunicada por el usuario, F-5 resuelto y tres followups verificados antes del cierre conforme a su condición. Registro y evidencias en `reviews/current-review-packet.md`; no se atribuye una tercera revisión ni se invocaron agentes.
-- Siguiente nodo ejecutable: B02b-03 — runtime/CLI determinista y recuperación, desbloqueado pero no iniciado. Esta tarea termina al registrar el cierre; no avanzar durante este turno.
+- Fase actual: 01 — Kernel durable sin IA, M01.3 implementado y pendiente de revisión independiente. Foundation/M00.3, M01.1 y M01.2 permanecen cerrados; Fase 01 no se cierra aún.
+- Última tarea verificada localmente: B02b-03 `1378d38`, paquete runtime/CLI, DAG serial, permisos explícitos, cancelación y recuperación. Contratos y persistencia M01.1/M01.2 (incluido F-5) intactos. Lockfile sólo añade vínculos workspace de runtime; ninguna dependencia externa nueva.
+- Rama de trabajo: `phase/01-workflow-runtime`, creada desde `dada616`. `main` permanece en `e14cfdd`, sin merge ni publicación.
+- Tarea activa: ninguna. Paquete M01.3 preparado en `reviews/current-review-packet.md`; esperar revisión del usuario sin invocar otros agentes. No se atribuye aceptación del milestone a gates locales.
+- Siguiente nodo único: revisión independiente M01.3 para cierre de Fase 01. B02b-03 terminado localmente; no iniciar Fase 02 antes de revisión/aceptación.
 - Decisión del spike: adoptar `node:sqlite` sobre Node 24.19.0/SQLite 3.53.3 medidos, WAL/FULL y único escritor serializado en worker dedicado. La instalación global 24.13.0/3.50.4 no queda aprobada para persistencia durable.
 - Bloqueos de contexto: vault ausente en este checkout; lectura histórica PREP-001 conservada, sin nueva auditoría. El kernel antiguo está incompleto en otro ordenador y no es dependencia.
-- Decisiones pendientes: distribución/referencia del vault y framework HTTP posterior. Persistencia M01.2 aceptada; falta runtime/DAG/CLI y recuperación de ejecución B02b-03.
+- Decisiones pendientes: revisión M01.3, distribución/referencia del vault y framework HTTP posterior. Runtime mínimo verificado; reconciliación manual, herramientas aisladas, permisos generales y proveedores no se adelantan.
 - Último commit de cierre antes de registrar la promoción: `629059e` (`docs: close foundation milestone`). `main` y `phase/00-foundation` fueron publicados por fast-forward, sin force ni merge commit.
 - Revisión Claude: formal `APPROVE_WITH_FOLLOWUPS` completada; F-1 confirmado y corregido, F-2/F-3 registrados para Fase 01. M00.3 cerrado. Claude Code no se invoca desde aquí.
 
 ## Gates actuales
+
+- B02b-03 / alcance: `1378d38`, DAG JSON v1 de 1–64 nodos, parser estricto, ciclos/dependencias/IDs rechazados, orden estable y handlers registrados por versión/efectos. `kernel.plan` es metadata con CAS y eventos existentes, no agente ni nuevo EventStore. Inicio confirmado antes del handler; inputs efectivos incluyen evidencia de dependencias, outputs CAS antes de finish/checkpoint. Misma persistencia y schemas aceptados, sin SQLite ni proveedor en runner.
+- B02b-03 / seguridad: allowlist de bloques externos denegada por defecto, retry explícito sólo para fallo conocido, cancelled terminal, pending/uncertain bloqueados. Timeout/cancel tras dispatch/throw/resultados inválidos se registran uncertain; antes del dispatch no se invoca handler. No se persiste error bruto. Handler tardío no publica outputs ni desbloquea el mismo store hasta asentarse. Handlers son código confiable, no sandbox ni exactly-once; uso concurrente crudo del store/múltiples procesos sigue fuera de contrato.
+- B02b-03 / recuperación real: demo limpia con SIGKILL sobre hijo y archivos externos exclusivos/fsync. Corte after-finish: snapshot seq 2 + 2 eventos de tail, succeeded y sólo 1 efecto restante. After-checkpoint: snapshot seq 4 + tail 0, succeeded y sólo 1 efecto restante. Inside-effect: snapshot seq 4 + tail 1, bloqueado pending, 0 efectos reejecutados; exactamente dos receipts y ningún efecto confirmado duplicado. Barreras sólo de test, delegando llamadas reales; sin mocks de durabilidad ni failpoints de producto. No acredita power loss.
+- B02b-03 / CLI: run/inspect reales sobre DB/CAS, ejemplo seed-copy, códigos de salida y diagnósticos fijos, sin mostrar blobs. Sólo fixtures puras registradas; no carga módulos/comandos desde JSON. API de runtime probada con efecto de fixture real. Reproducir desde build actual: `pnpm.cmd --filter @beonforge/runtime demo`; comandos manuales y límites en packages/runtime/README.md.
+- B02b-03 / gates: Node 24.19.0/SQLite 3.53.3; frozen, peers, formato, lint con tipos, typecheck consumidor dist, build y **226/226 tests** (62 contratos + 115 persistencia + 42 runtime + 7 spike), sin skips/fallos pendientes. 35 pruebas de frontera/runtime y 7 CLI/proceso. Primer lint: 8 require-await en fixtures instantáneas, corregidos sin excepciones. Diff/secretos/paths y limpieza de temporales verificados, sin nueva CI remota observada. Sólo 9 líneas nuevas en lockfile para dependencias workspace; root package y paquetes aceptados sin modificar.
+- B02b-03 / salida: milestone M01.3 listo para revisión, no cerrado. Riesgos R-023/024/025/026/027/031/032 y límites de confianza/cancelación/reconciliación registrados; no hay agentes, routing, scheduler paralelo, worktrees, modelos ni dashboard. Rollback: revertir commits de esta tarea conservando datos v1/schema v2; sin borrar ni sustituir activos. Siguiente nodo: recibir revisión M01.3 y detenerse hasta entonces.
+
+Evidencia histórica M01.2 aceptada (sin repetirla ni modificar F-5):
 
 - Cierre M01.2 / segunda revisión: APPROVE_WITH_FOLLOWUPS recibido, F-5 resuelto sin cambios de implementación. Se verificó igualdad del núcleo database.ts desde normalizeError hasta final frente a `293b8cd`; único cambio de client.ts transmite directorios activos en el comando privado restore, sin tocar colas/presupuestos. Persisten tests de volumen 800 eventos/40 checkpoints.
 - F-7 restore / `15a9cf8`: 8 regresiones rojas antes del cambio, 12 nuevas verdes: origen raíz/descendientes, CAS/blobs/staging y SQL activo con CAS personalizado, stores cerrados identificables y junctions. lstat, rutas canónicas y parentesco antes de crear archivos/directorios; inventario intacto, retries y backups posteriores funcionales. El canal privado reutiliza el registro de escritores intraproceso; no es coordinación multiproceso.
@@ -95,7 +104,7 @@ Desde la raíz real del checkout en PowerShell: `git rev-parse --show-toplevel`,
 
 ## Instrucciones exactas para continuar
 
-1. M01.2 cerrado con segunda revisión APPROVE_WITH_FOLLOWUPS y followups verificados. No repetir auditoría/spike/revisión ni invocar agentes; este turno termina aquí.
-2. Próxima implementación B02b-03, aún no iniciada; concretar sólo esa tarea según phase-01.md cuando se continúe. Mantener main intacta, sin merge ni publicación.
+1. Esperar revisión independiente M01.3 suministrada por el usuario; paquete preparado, sin invocar agentes. No repetir B02b-03/spike ni iniciar Fase 02 antes de aceptación.
+2. Reproducir/clasificar hallazgos recibidos antes de cambiarlos; fixes confirmados en commits separados y gates completos. Mantener main intacta, sin merge ni publicación.
 3. Ejecutar herramientas con Node 24.19.0 (portátil verificado en el registro B02a si sigue disponible); el Node global 24.13.0 es rechazado. No cambiar globalmente el runtime ni ampliar su whitelist sin validación explícita. Mantener WAL/FULL y SQL en worker.
-4. Para B02b-03 reutilizar almacenamiento real y checkpoints; aplicar tail de eventos confirmado y no reejecutar efectos pending/uncertain sin reconciliación. No incorporar agentes/proveedores/UI ni activar/restaurar sobre datos reales sin aprobación. No modificar F-5 sin una prueba que demuestre regresión.
+4. Preservar la semántica pending/uncertain sin reejecución automática, la vinculación inmutable del plan y los contratos aceptados. No incorporar agentes/proveedores/UI ni activar/restaurar sobre datos reales sin aprobación. No modificar F-5 sin una prueba que demuestre regresión.

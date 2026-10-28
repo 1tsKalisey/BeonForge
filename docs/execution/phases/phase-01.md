@@ -2,7 +2,7 @@
 
 Actualizado: 2026-10-28. Foundation cerrada. B00-01 prepara esta fase; no implementa kernel. Decisiones: D-017/D-018/D-019 y ADR-0001/0002.
 
-Estado: M01.1 y M01.2 cerrados. Segunda revisión M01.2 APPROVE_WITH_FOLLOWUPS recibida; F-5 validado/intacto y followups restore/artifactRoot/manifest corregidos (`15a9cf8`, `6f28d9e`, `93481c0`, `98e93b6`), 184 tests verdes y aceptación registrada. B02b-03 desbloqueado, no iniciado. Evidencias en `../status.md`, `packages/persistence/REVIEW-FIXES.md` y paquete de revisión actual desde la raíz.
+Estado: M01.1/M01.2 cerrados. B02b-03 implementado y verificado localmente en `1378d38`, 226 tests verdes y demo real de SIGKILL/reanudación segura. M01.3 preparado para revisión independiente, aún no aceptado ni cerrado; Fase 02 no iniciada. Contexto de persistencia/F-5 intacto. Evidencias en `../status.md`, `packages/runtime/README.md` y paquete de revisión actual desde la raíz.
 
 ## Resultado y límites
 

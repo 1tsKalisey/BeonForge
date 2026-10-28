@@ -1,6 +1,6 @@
 # Threat model inicial — Fase 00
 
-Actualizado: 2026-10-28. Alcance: repositorio/toolchain y fronteras de persistencia, CAS y recuperación B02b-01/02; los demás controles futuros siguen pendientes.
+Actualizado: 2026-10-28. Alcance: repositorio/toolchain, persistencia/CAS y runtime serial con fixtures B02b-03; los controles generales de herramientas/proveedores siguen pendientes.
 
 ## Activos y fronteras
 
@@ -13,10 +13,10 @@ Activos: código y propiedad intelectual, especificación `knowledge/`, credenci
 | Git superior o ruta ambigua causa commit fuera de BeonForge | Alto | Git propio, comprobación de raíz, staged paths explícitos | WorkspaceProvider acotado y diff-scope gate en Fase 02 |
 | Instrucción maliciosa en `knowledge/`, README, web o tool output | Alto | Vault tratado como datos de especificación; revisión humana actual | Separar instrucciones autorizadas y datos, procedencia, validación y pruebas adversariales |
 | Path traversal, symlink o escritura fuera del worktree | Alto | Sandbox de desarrollo y único escritor | Raíces canónicas, política por efecto, tests de frontera y aislamiento en Fases 01–02 |
-| Comando destructivo o efecto repetido tras crash | Alto | Aprobación humana y ausencia de runtime de efectos | Idempotency keys, checkpoints, estado incierto explícito, no reintento de efectos irreversibles |
+| Comando destructivo o efecto repetido tras crash | Alto | Runtime de fixtures: start durable antes de dispatch, plan inmutable, allowlist explícita, checkpoint/tail y bloqueo pending/uncertain; pruebas de efecto real/SIGKILL | Handlers confiables sólo; sin sandbox ni exactly-once. Aprobación humana, herramientas aisladas y reconciliación antes de efectos generales |
 | Exfiltración de secretos por logs, prompts, proveedor o plugin | Alto | No se usan secretos; escaneo textual de cambios | SecretStore por referencia, redacción previa, clasificación de datos y egress mínimo antes de proveedores |
 | Dependencia o acción CI comprometida | Medio/alto | Lockfile, versiones exactas, peer check, acciones CI por SHA y permisos `contents: read` | Revisión de advisories, licencias, SBOM y canary por actualización |
-| Corrupción de eventos, blobs o migración | Alto | SQLite v2 WAL/FULL en worker, evento/proyección atómicos, CAS verificado, checkpoints contrastados con replay y backup online/restore aislado validados; tests de rollback/kill/reapertura | Revisión M01.2, protección del archivo local y demo de recuperación de ejecución B02b-03; sin afirmar exactly-once de efectos o autenticación del dueño |
+| Corrupción de eventos, blobs o migración | Alto | M01.2 aceptado; SQLite/CAS/checkpoints y backup/restore reales. B02b-03 verifica plan y DAG/historia, errores SQL y recuperación confirmada sin repetir nodos | Revisión M01.3, protección local y conciliación humana de incertidumbre antes de efectos generales; sin autenticación privilegiada del log |
 | Plugin o MCP con permisos excesivos | Alto | Ninguno activado | Instalación deshabilitada, allowlist, aislamiento, permisos por bloque y contract tests |
 | Resumen engañoso induce aprobación de riesgo | Alto | Usuario revisa cambios concretos en esta fase | Approval packet con diff, efectos, evidencia, impacto y rollback; reviewer separado |
 
@@ -28,6 +28,8 @@ Activos: código y propiedad intelectual, especificación `knowledge/`, credenci
 - Fallar cerrado ante un permiso o estado de efecto desconocido será requisito del kernel.
 
 ## Seguimiento
+
+B02b-03 `1378d38`: workflow JSON sólo selecciona handlers previamente registrados, nunca módulos/SDKs/comandos. El runtime no recibe permisos por declaración del manifest; contrasta descriptor y allowlist del caller antes de ejecutar. No pasa store/credenciales al handler. Inicios se confirman antes del efecto; outputs CAS antes de resultados/checkpoints; la recuperación no confunde pending con trabajo no ejecutado. Abort/timeout/throw/resultados inválidos tras dispatch conservan incertidumbre, sin publicar resultados tardíos y con exclusión del mismo handle hasta asentarse. CLI sólo tiene fixtures puras; efectos externos de demo están en archivos temporales exclusivos/fsync de test, con permiso explícito. No se acredita sandbox/preempción de JS confiable, liderazgo multiproceso, redacción de contenido de resultados declarados seguros ni aprobaciones de herramientas/merge. 42 tests nuevos y demo SIGKILL verdes, M01.3 pendiente de revisión; R-023/024/031/032.
 
 Segunda revisión M01.2 APPROVE_WITH_FOLLOWUPS aceptada y followups verificados: destinos restore fuera del origen/CAS/directorios activos protegidos antes de crear; SQLite y artifactRoot inspeccionan ancestros de recuperación y no permiten putArtifact externo sobre backups. Rol aditivo de backup y formato versionado distinguen manifest ajeno y copias legacy selladas sin aceptar conjuntos manipulados reconocibles. F-5 intacto, 184 tests verdes; cierre registrado. Siguen raíces/ancestros privados, ámbito intraproceso, memoria y ausencia de autenticación del propietario/power loss documentados en R-023/025/026/027.
 
