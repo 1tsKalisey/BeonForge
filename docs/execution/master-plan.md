@@ -1,6 +1,6 @@
 # Plan maestro de ejecución
 
-Actualizado: 2026-10-25. Fuente principal: `knowledge/AI/18 BeonForge Agentic OS/BeonForge Agentic OS MOC.md` y sus 22 documentos, leídos íntegramente antes de la implementación. El vault es de solo lectura y no se incorpora a Git por defecto; una copia del proyecto requiere acceso separado a esa especificación. La auditoría del vault es documental y no acredita código.
+Actualizado: 2026-10-28. Fuentes operativas: `AGENTS.md`, esta memoria de ejecución y `docs/product/software-factory-objective.md`. La especificación complementaria es `knowledge/AI/18 BeonForge Agentic OS/BeonForge Agentic OS MOC.md` y sus 22 documentos, cuya lectura histórica consta en PREP-001. El vault no está disponible en este checkout; no se ha vuelto a auditar. Es de solo lectura y no se incorpora a Git por defecto.
 
 Inspección inicial y herramientas: `docs/execution/preparation-report.md`.
 
@@ -14,6 +14,7 @@ BeonForge será un plano de control local-first, vendor-neutral, con contratos d
 - Node.js LTS, TypeScript estricto, pnpm workspaces, Vitest, ESLint, formato uniforme. SQLite WAL para eventos y metadatos; filesystem dirigido por SHA-256 para blobs; Git para versionado. OpenTelemetry al empezar ejecución observable.
 - Contratos versionados en toda frontera; eventos append-only, proyecciones reconstruibles, checkpoints, idempotencia y cancelación. Evidencia y políticas preceden a inferencia.
 - CLI y API antes de Angular. Modelos, subagentes, routing y entrenamiento sólo después de los prerrequisitos de sus fases.
+- Kernel ligero: orquestación, persistencia, estados, recuperación, permisos y coordinación; las capacidades de agente de programación se delegan a interfaces soportadas de OpenCode y Codex. Claude Code permanece como herramienta independiente de revisión, aportada por el usuario.
 
 ## Secuencia ejecutable
 
@@ -24,7 +25,7 @@ BeonForge será un plano de control local-first, vendor-neutral, con contratos d
 | 02 Workspace y contexto | Worktree acotado y ContextPackage reproducible con instrucciones, mapa y redacción | 01 |
 | 03 Primer proveedor local | Registry, probes y Ollama candidato evaluado con salida estructurada y cancelación | 02, clasificación de datos, política, evals |
 | 04 Vertical bugfix | Workflow sobre fixture: reproducir, test rojo, cambio, gates, revisión y rollback | 01–03 |
-| 05 Harness externos | Adaptadores oficiales de Codex y Claude Code, perfiles y contract tests | 04 |
+| 05 Harness externos | Adaptadores soportados de OpenCode y Codex CLI, perfiles y contract tests; Claude Code independiente | 04 |
 | 06 Routing y OmniRoute | Reglas auditables, presupuestos, fallback y shadow; OmniRoute restringido a datos no sensibles | 03, 05, política y evals |
 | 07 Subagentes | Delegación contractual, worktrees aislados, integrador único y comparación con agente único | 02, 05–06 |
 | 08 Contexto y memoria avanzada | Índice incremental, recuperación evaluada y promoción controlada de memoria | 04, evals |
@@ -33,6 +34,10 @@ BeonForge será un plano de control local-first, vendor-neutral, con contratos d
 | 11 Plugins | Manifiesto, permisos, instalación deshabilitada, contract tests y retirada | kernel y política estables |
 
 ## Dependencias y límites transversales
+
+Los bloques del objetivo son hitos de producto, no sustituyen las dependencias de fase: B00 corresponde a esta reconciliación; B01/B02 al kernel de Fase 01; B03 a Fase 02; B04 a Fase 05; B05 a Fase 03; B06 a la API y Fase 09; B07 a Fase 06; B08 a la coordinación de Fases 01/07; B09 es transversal; B10 agrupa evolución posterior. No se adelantan proveedores ni UI por el orden numérico de los bloques. Entrenamiento, OmniRoute y plugins permanecen diferidos fuera del MVP.
+
+Próximo nodo único: B01-01 en `phases/phase-01.md`. Se reutilizarán selectivamente los commits de `origin/initiative/software-factory-mvp` (PR #1), comprobando compatibilidad antes de incorporarlos. B00 sólo adopta su documento de producto; no integra código ni hace merge.
 
 Cada fase conserva seguridad, threat model, paridad, migración, backup/restore, observabilidad, documentación y cobertura. No se incorporan Nx, Turborepo, NgRx, LangGraph, Temporal, Graphiti, vector DB, Kubernetes o microservicios por anticipación. Repositorios y frameworks citados en el vault son candidatos. Fases 00–01 usan un solo escritor, sin IA de producto, modelos locales, OmniRoute, routing automático ni dashboard.
 

@@ -1,6 +1,6 @@
 # Registro de decisiones
 
-Actualizado: 2026-10-25. Las decisiones de la especificación se citan, no se atribuyen a una implementación inexistente.
+Actualizado: 2026-10-28. Las decisiones de la especificación se citan, no se atribuyen a una implementación inexistente.
 
 | ID | Estado | Decisión y fundamento | Revisión |
 |---|---|---|---|
@@ -22,5 +22,9 @@ Actualizado: 2026-10-25. Las decisiones de la especificación se citan, no se at
 | D-016 | Fijada | Archivos de texto normalizados a LF mediante `.gitattributes`; formatos binarios comunes se marcan `binary`. El checkout de `main` en Windows había materializado CRLF y hacía fallar Prettier pese a que CI Linux pasaba. | Mantener el gate local en Windows y ampliar patrones binarios cuando se incorporen nuevos formatos. |
 
 ## Reglas
+
+- D-017 — Aprobada por el usuario: adoptar selectivamente la implementación B01 del PR #1 como base, auditar compatibilidad antes de incorporar commits y completar sólo lo necesario. El kernel antiguo de otro ordenador no está disponible ni es prerrequisito. B00-01 es exclusivamente documental.
+- D-018 — Aprobada por el usuario: spike mínimo de SQLite antes de elegir driver, con preferencia por `node:sqlite`; verificar WAL, transacciones, reapertura e idempotencia. No seleccionar dependencia definitiva en B00/B01.
+- D-019 — Aprobada por el usuario: BeonForge es un orquestador ligero; el kernel se limita a orquestación, persistencia, estados, recuperación, permisos y coordinación. OpenCode/Codex son motores externos; Claude Code es revisión independiente. Se conserva la pausa de revisión al cerrar contratos antes de persistencia/runtime.
 
 Una incompatibilidad deliberada, retirada funcional, cambio mayor de arquitectura o uso de secretos requiere decisión humana. Toda ADR futura tendrá contexto, opciones, decisión, consecuencias, fecha y rollback.
