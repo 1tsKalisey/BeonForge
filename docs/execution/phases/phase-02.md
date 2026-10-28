@@ -1,6 +1,10 @@
 # Fase 02 — Workspace y contexto
 
-Estado actual 2026-10-29: **B03-01 aceptado y cerrado**, segunda auditoría APPROVE_WITH_FOLLOWUPS; P1 validado independientemente. P3 R-037–040 abiertos y aceptados, sin cambios funcionales en el cierre. El histórico inferior conserva la secuencia de revisiones. B03-02 sólo propuesto.
+Estado actual 2026-10-29: **B03-01 aceptado y cerrado**, segunda auditoría APPROVE_WITH_FOLLOWUPS; P1 validado independientemente. B03-02 implementado para revisión; R-039 corregido localmente, otros tres P3 pendientes. El histórico inferior conserva la secuencia de revisiones.
+
+Actualización de ejecución: B03-02 autorizado posteriormente por el usuario e implementado en 17243e8, R-039 en 79ba91e previo a mutaciones; pendiente de auditoría. La propuesta inferior se conserva como alcance aprobado, no como estado actual. Demostración automática: CLI create publica intención y confirma; inspect en otro proceso recupera recibo. Cortes reales SIGKILL dejan prepared/uncertain/confirmed según frontera, sin repetición. Materialización raw de blobs + read-tree en índice propio, no checkout/conversiones. Límites de compatibilidad, seguridad y rollback explícitos en README. Sin dependencias ni modificaciones Fase 01. Siguiente único nodo: revisión B03-02, sin B03-03.
+
+Verificación final integrada: 335/335 tests sin skips (312 previos + 4 R-039 + 19 B03-02), frozen/peers/formato/lint/typecheck/build/diff/secretos verdes. No nueva CI remota ni aceptación independiente atribuida. Fallos de tipado y timeouts de integración corregidos sin relajar Git; detalle en status y paquete.
 
 Fase 01/M01.3 aceptados y cerrados. Este documento conserva el primer nodo y prepara únicamente el siguiente, sin replanificar la fase. Fuentes: AGENTS, status, master-plan y decisiones/riesgos vigentes. Vault ausente, no reconstruido.
 
@@ -27,9 +31,9 @@ REQUEST_CHANGES recibido: reemplazar exclusivamente la detección de encabezados
 
 Verificación local 2026-10-29: `d73466b`, 17 rojas definitivas (16 marcadores de filtros + límite), 34 nuevas verdes y suite completa 312/312 sin skips; frozen/peers/formato/lint/typecheck/build/tests/diff/secretos verificados. Código sólo workspace/src/index.ts y tests; mismos contratos/pins, sin dependencias. Reproducción con fuentes compiladas, temporales e inventarios protegidos. P3 R-037/038 sólo documentados; R-036 requiere verificación externa. Nuevo paquete listo; B03-01 no cerrado. Ante rollback de la corrección, suspender registro/inspección hasta restablecer protección; no volver a usar la versión vulnerable.
 
-## B03-02 — Creación y verificación de worktrees aislados (propuesta ejecutable)
+## B03-02 — Creación y verificación de worktrees aislados
 
-Estado: plan, sin implementación. Dependencias: B03-01 aceptado, contratos v1/ArtifactStore/persistencia aceptados, Git local confiable y raíces privadas con permisos explícitos. No añadir dependencias ni modificar contratos/eventos de Fase 01.
+Estado: implementado en 17243e8, pendiente de auditoría. El alcance aprobado original inferior se conserva como trazabilidad. Dependencias: B03-01 aceptado, contratos v1/ArtifactStore/persistencia aceptados, Git local confiable y raíces privadas con permisos explícitos. Sin dependencias ni modificaciones de contratos/eventos de Fase 01.
 
 Ejecución autorizada 2026-10-29: R-039 primero. Regresión de frontera roja delegando Git real; dos fixtures con includes externos malformados ya se rechazaban con Git 2.52, sin afirmar explotación en este entorno. Parser aislado en mkdtemp privado, sin -C, ceiling=cwd y entorno restringido; limpieza únicamente rmdir del temporal vacío propio. Verde 315/315 y frozen/peers/formato/lint/typecheck/build/diff; sin dependencias. No mutaciones de worktrees antes de este commit. Rollback: revert acotado y suspender uso con repositorios no confiables.
 

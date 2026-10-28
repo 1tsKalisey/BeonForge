@@ -4,11 +4,11 @@ Actualizado: 2026-10-29. Leer este archivo antes de cualquier tarea.
 
 ## Posición
 
-- Fase actual: 02 — Workspace y contexto. B03-01 aceptado y cerrado formalmente: segunda auditoría APPROVE_WITH_FOLLOWUPS comunicada/aceptada por el usuario el 2026-10-29. P1 resuelto y validado independientemente; cuatro P3 aceptados y pendientes, no corregidos. Fase 01 sigue cerrada.
-- Último trabajo funcional verificado: P1 B03-01 `d73466b`, validado por segunda auditoría: parser oficial con --no-includes; lectura residual durante descubrimiento registrada en R-039 pendiente. 312 tests verdes. Base `a837e9c` preservada; contratos, persistencia/F-5, runtime, dependencias y schemas intactos.
+- Fase actual: 02 — Workspace y contexto. B03-01 aceptado/cerrado; P1 validado independientemente. De sus cuatro P3, R-039 corregido localmente como precondición B03-02, otros tres pendientes. B03-02 implementado para revisión. Fase 01 sigue cerrada.
+- Último trabajo funcional: B03-02 `17243e8`, intención CAS, creación detached sin checkout, blobs/índice propios, inspección y recibos recuperables. Precondición R-039 `79ba91e` verificada/committeada antes de mutaciones: 315 tests. Fase 01/contratos/persistencia/F-5/runtime/dependencias/schema/lockfile intactos. B03-01 sigue cerrado; B03-02 requiere auditoría independiente.
 - Rama de trabajo: `phase/02-project-inspection`, desde `485283c`. `main` permanece en `e14cfdd`, sin merge ni publicación.
-- Tarea activa: ninguna implementación. Cierre documental B03-01 y propuesta B03-02 en phase-02.md; no se invocaron agentes. R-037/038/039/040 son P3 pendientes, con limitaciones aceptadas, no resueltos.
-- Siguiente nodo único: B03-02 — Creación y verificación de worktrees aislados, propuesto y sin implementar. Primer paso obligatorio de seguridad: aislar el parser del descubrimiento Git (R-039) antes de aceptar repositorios no confiables. Contexto/indexación permanecen excluidos; este turno termina con el plan.
+- Tarea activa: B03-02 implementado para auditoría, sin aceptación atribuida a gates locales. No se invocaron agentes. R-039 corregido localmente, pendiente de revisión; R-037/038/040 sin corregir.
+- Siguiente nodo único: revisión independiente B03-02 aportada por el usuario. No iniciar B03-03, contexto/indexación, agentes ni otra fase.
 - Decisión del spike: adoptar `node:sqlite` sobre Node 24.19.0/SQLite 3.53.3 medidos, WAL/FULL y único escritor serializado en worker dedicado. La instalación global 24.13.0/3.50.4 no queda aprobada para persistencia durable.
 - Bloqueos de contexto: vault ausente en este checkout; lectura histórica PREP-001 conservada, sin nueva auditoría. El kernel antiguo está incompleto en otro ordenador y no es dependencia.
 - Decisiones pendientes: distribución/referencia del vault y framework HTTP posterior. Primera tarea Fase 02 acotada en phase-02.md; D-025 registra descriptor/identidades/almacenamiento y límites. Reconciliación manual, herramientas aisladas, permisos generales y proveedores no se adelantan.
@@ -16,6 +16,11 @@ Actualizado: 2026-10-29. Leer este archivo antes de cualquier tarea.
 - Revisión Claude: formal `APPROVE_WITH_FOLLOWUPS` completada; F-1 confirmado y corregido, F-2/F-3 registrados para Fase 01. M00.3 cerrado. Claude Code no se invoca desde aquí.
 
 ## Gates actuales
+
+- B03-02: **335/335 tests** finales integrados, cero skips/fallos: contratos 62 + persistencia 115 + runtime 71 + workspace 80 + spike 7 (312 previos + 4 R-039 + 19 worktrees). Recompilación actual, frozen/peers/formato/lint/typecheck/build verdes; diff/secretos/paths revisados. SIGKILL antes de create, después de add/materialización antes de read-tree y después de confirmación; recuperación desde otro proceso con prepared/uncertain/confirmed, sin repetir add. CLI real, binarios, índice propio, permisos comunes, paths/identidad/ocupación/config/hooks/enlaces/gitlinks/atributos rechazados, inventarios originales intactos salvo delta administrativo worktrees. No power loss simulado ni nueva CI remota.
+- Fallos intermedios corregidos: unión interna de argumentos Git necesitó estrechar posiciones de tupla para compilar; dos integraciones excedieron 5 s de Vitest, margen sólo de tests 15/20 s (Git conserva 5 s/1 MiB). Sin exclusiones de lint ni tests eliminados. Limitaciones y rollback en README; riesgo R-041. Paquete de revisión actualizado, no cerrar sin auditoría.
+
+Histórico del cierre B03-01 (preservado):
 
 - Cierre documental: frozen, peers, formato, lint, typecheck, build y 312/312 tests reejecutados verdes, sin skips/fallos. Diff/paths/secretos revisados; sólo Markdown, ningún archivo funcional/contrato/lockfile modificado. No nueva CI remota. Propuesta B03-02 documentada, no implementada.
 - Cierre 2026-10-29: aceptación independiente APPROVE_WITH_FOLLOWUPS recibida del usuario, P1 validado, B03-01 cerrado con cuatro P3 abiertos. Se conserva evidencia funcional 312/312 del commit d73466b; este cierre no cambia código ni atribuye una nueva auditoría propia. El descubrimiento inicial puede leer includes externos pese a --no-includes: R-039 corrige la afirmación anterior de aislamiento completo, sin reabrir el P1 de ejecución arbitraria validado por Claude. R-040 documenta falsos rechazos de barras escapadas. Ver paquete de aceptación actual.

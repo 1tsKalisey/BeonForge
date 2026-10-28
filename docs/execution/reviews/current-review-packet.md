@@ -1,4 +1,40 @@
-# B03-01 — Aceptación independiente y cierre formal
+# B03-02 — Worktrees aislados, paquete para auditoría independiente
+
+Preparado 2026-10-29. Implementado, pendiente de revisión; no se atribuye aceptación independiente. Base 84d60ae, rama phase/02-project-inspection, R-039 79ba91e (antes de mutaciones), B03-02 17243e8. Main e14cfdd intacta. Diff de código: git diff 84d60ae..17243e8; documentación posterior de evidencias en este cierre de tarea. B03-01 sigue aceptado/cerrado. Sin agentes invocados ni B03-03 iniciado.
+
+## Alcance revisable
+
+- workspace/src/index.ts: parser privado/ceiling y runner Git común con argv fijos, salida binaria acotada, hooks privados vacíos. APIs prepare/create/inspect, WorktreePolicy con ejecución y escritura de metadatos separadas, schemas CAS v1 para intención/recibo. Source/identidades revalidadas. Sin contratos de Fase 01, SQLite, proveedores, dependencias o lockfile nuevos.
+- worktree-cli.ts y cli.ts: project worktree create/inspect reales. --ref/--bytes representan projectRef en create e intentRef en inspect; mismo --storage/projects.sqlite y CAS. CLI emite intención antes de add, resultado incierto sale 2; inspección no crea base inexistente. Ejemplos completos en README.
+- Add detached/no-checkout/locked a OID local exacto; sin force/fetch/shell/checkout, blobs regulares como bytes por wx/fsync y read-tree al índice propio. Rechaza árboles no soportados antes del efecto. Límites: nombres ASCII conservadores sin .git*, enlaces/gitlinks, Windows reservados/case collisions; 512 archivos, 16 componentes, 32 MiB total/1 MiB por comando. Git conserva 5 s y entorno aislado.
+- Intención CAS antes de Git; dispatch.json exclusivo/fsync con SHA, lock administrativo con la misma identidad. No transacción CAS/filesystem/Git. Prepared/pending/uncertain/confirmed diferenciados; despacho existente prohíbe repetir create. Inspect verifica HEAD/índice/bytes/inventario/lock y publica recibo CAS recuperable, sin reejecutar Git mutante. Parciales/huérfanos conservados sin limpieza destructiva.
+
+## Evidencia y límites de las pruebas
+
+R-039: regresión de frontera roja antes del cambio y verde después, delegando spawn real para comprobar cwd/ceiling/ausencia de -C. Dos fixtures de includes externos malformados ya se rechazaban con Git 2.52; no se afirma explotación reproducida en ese entorno ni trazado OS universal. Un test adicional coloca el temporal bajo ancestro Git con configuración/include hostil y confirma funcionamiento sin consultar esos includes. Primer commit pasa 315 tests y gates antes de implementar mutaciones.
+
+B03-02: 19 pruebas nuevas reales: OID/HEAD detached/contenido, origen dirty y linked source, permisos comunes separados, destino ocupado/sentinel e identidad reemplazada, junction/root inválido, hooks/filtros/includes/enlaces/gitlinks/atributos rechazados, concurrencia de despacho y CLI en procesos separados. Bytes binarios y archivos extra posteriores verificados. Inventarios SHA/modo/mtime del original conservados, salvo directorios administrativos cuyo timestamp cambia y nuevas entradas bajo .git/worktrees; no cambios al índice/config/HEAD/archivos originales.
+
+SIGKILL sobre proceso hijo real: antes de create -> prepared, después de add y materialización antes de read-tree -> uncertain, después de confirmar -> confirmed. Barreras sólo en script de test delegando Git/store reales, sin failpoints de producto ni mocks de durabilidad. Recovery corre en otro proceso; número de worktrees se mantiene 1/2/2, sin repetición. No se prueba power loss ni muerte a mitad de una escritura interna específica de Git.
+
+Suite integrada final: **335/335 verdes**, sin skips/fallos: contratos 62 + persistencia 115 + runtime 71 + workspace 80 + spike 7. Incluye los 312 previos y 23 nuevos (4 R-039 + 19 worktrees). Fuentes compiladas antes de tests; typecheck consumidor dist, frozen/peers/formato/lint/build, diff y secretos comprobados. Fallos intermedios: estrechamiento TS de tupla; dos escenarios de integración excedían 5 s de Vitest (margen 15/20 s sólo en tests, no límites Git), corregidos sin skips/exclusiones. Aviso LF/CRLF de Git sólo en fixture de atributos rechazada, no cambio de configuración del usuario.
+
+## Reproducción y preguntas de auditoría
+
+```powershell
+pnpm.cmd install --frozen-lockfile
+pnpm.cmd peers check
+pnpm.cmd check
+git diff 84d60ae..HEAD --check
+```
+
+Revisar especialmente: ausencia de descubrimiento antes de validación; autorización de metadatos comunes; no-checkout y materialización sin ejecución implícita; posesión física/lock/despacho de intención y denegación de repetición; partials y evidencia después del crash. Distinguir límites conservadores documentados de fallos de seguridad o recuperación.
+
+R-037/038/040 siguen pendientes (inode -> registrar de nuevo, volumen ls-files, continuaciones conservadoras). R-039 corregido localmente, requiere auditoría de este paquete. R-041: ACL/raíces/Git/PATH confiables, storeRoot debe corresponder al store, exclusión intraproceso y uso exclusivo del operador; sin sandbox/lease multiproceso/autenticación contra dueño privilegiado. Confirmed es estado observado, no garantía contra procesos ajenos posteriores. Worktrees permanecen locked; sin remove/unlock/prune, streaming/GC, agentes o contexto. Rollback por revert preservando datos/worktrees; reparar/eliminar requiere autorización. Detenerse hasta revisión independiente B03-02.
+
+---
+
+# Histórico — B03-01: aceptación independiente y cierre formal
 
 Registrado: 2026-10-29. Segunda auditoría **APPROVE_WITH_FOLLOWUPS** comunicada y aceptada por el usuario: Claude confirma P1 d73466b resuelto, sin bloqueo para cerrar. **B03-01 aceptado y cerrado.** Código final d73466b, evidencias 0cb8e61, rama phase/02-project-inspection. Este turno es exclusivamente documental, sin invocar agentes ni atribuir otra auditoría propia.
 

@@ -1,4 +1,25 @@
-# Proyectos Git locales — B03-01
+# Proyectos Git locales y worktrees — B03-01/B03-02
+
+## Worktrees — B03-02
+
+API: prepareWorktree(projectRef, commitOid, executionRoot, policy, store) publica intención v1 en CAS y reserva un padre exclusivo; createWorktree(intentRef, policy, store) realiza una única tentativa; inspectWorktree(intentRef, policy, store) verifica o recupera evidencia sin repetir efectos. WorktreePolicy añade executionRoots, metadataWriteRoots y storageRoot privado real del store. Store y policy son configuración confiable del operador, no datos concedidos por un descriptor.
+
+CLI (build actual, mismo --storage de project register):
+
+```powershell
+pnpm.cmd --filter @beonforge/workspace cli project worktree create --storage C:/BeonForge-private --allow-root C:/proyectos/app --write-root C:/proyectos/app/.git --execution-root C:/ejecuciones --ref <project-sha256> --bytes <project-byteLength> --commit <OID-completo>
+pnpm.cmd --filter @beonforge/workspace cli project worktree inspect --storage C:/BeonForge-private --allow-root C:/proyectos/app --write-root C:/proyectos/app/.git --execution-root C:/ejecuciones --ref <intent-sha256> --bytes <intent-byteLength>
+```
+
+Create emite primero una línea prepared con intentRef y después el reporte final. Conservar la referencia; no hay catálogo. Para origen linked worktree añadir --git-root y --common-root de B03-01. Escritura de gitdir/common-dir y ejecución se autorizan separadamente; las autorizaciones de lectura no bastan. Destino siempre checkout bajo un padre mkdtemp nuevo; no permite elegir/reutilizar un checkout existente.
+
+Protocolo: intención CAS antes del efecto Git, dispatch.json exclusivo/fsync con SHA de intención antes de add. Marcador no es evento SQL ni transacción distribuida. Prepared significa no despachado; pending, operación activa en este proceso; uncertain, despacho sin resultado completo comprobable; confirmed, HEAD detached/OID/lock de propiedad/índice/bytes/inventario verificados y recibo CAS v1 enlazando intención y descriptor del nuevo proyecto. Un dispatch ya existente impide toda repetición, incluso tras reinicio; inspección puede confirmar una creación acabada sin recibo. Cortes antes de publicación de intención pueden dejar sólo reserva huérfana, sin efecto Git; no se limpia automáticamente. No hay exactly-once, GC ni recuperación automática de parciales.
+
+Materialización: git worktree add --detach --no-checkout --lock al OID local exacto con hooksPath vacío privado. Luego blobs como bytes mediante escrituras wx/fsync, y read-tree sólo para índice propio; no checkout, filtros, conversiones de atributos ni submódulos. Git y PATH confiables, entorno aislado, sin shell/red/force/fetch; límites Git 5 s/1 MiB. Revalidación de fuente, permisos, reserva y metadata de destino antes de mutaciones. Sólo entradas regulares 100644/100755, nombres ASCII seguros portables (sin .git*, enlaces, gitlinks, nombres Windows reservados ni colisiones de mayúsculas); 512 archivos, 16 componentes y 32 MiB totales, cada blob dentro del límite Git. Estas restricciones incluyen .gitattributes/.gitmodules: fallar cerrado hasta ampliar con evidencia. El checkout original puede estar dirty; no se copia su estado. Cambian únicamente los metadatos comunes necesarios para worktrees (y timestamps de directorios administrativos), no su HEAD/rama/índice/config/archivos.
+
+Raíces privadas: POSIX exige propietario/modo privado para executionRoot; Windows requiere ACL privada del operador como el store. Se rechazan solapamientos, junctions/symlinks, CAS/backups identificables; la API debe recibir storageRoot auténtico del ArtifactStore. No es sandbox de procesos, autenticación contra el dueño ni liderazgo multiproceso; exclusión de common-dir intraproceso y wx por intención, uso exclusivo del repositorio por el operador. Los worktrees quedan locked intencionadamente, sin API de unlock/remove/prune. Revert de código conserva datos/worktrees; reparar/borrar parciales requiere revisión y autorización explícita. Tests SIGKILL prueban crash de proceso, no pérdida eléctrica ni fsync de directorios portable en Windows.
+
+R-039 corregido localmente en 79ba91e: parser desde temporal privado sin -C, ceiling=cwd; tests delegan Git real, incluyen archivos externos malformados y ancestro Git hostil. Con Git 2.52 los includes malformados ya se rechazaban antes; el rojo reproducido es la falta de frontera, no se afirma explotación OS en esa versión. Esperar auditoría B03-02. R-037, R-038 y R-040 siguen pendientes.
 
 Registro e inspección de un checkout existente; no crea worktrees ni selecciona contexto. API asíncrona `registerProject(root, policy, artifactStore)` devuelve `ArtifactReference` v1 existente (sha256 + byteLength). `inspectProject(reference, policy, artifactStore)` recupera y contrasta el descriptor con rutas y pins físicos actuales antes de inspeccionar. Tests consumen exports y CLI de `dist` tras build.
 
@@ -27,9 +48,9 @@ Para un worktree añadir en ambas operaciones `--git-root <gitdir-exacto>` y `--
 
 ## Seguimientos P3 de revisión (sin cambio funcional)
 
-B03-01 aceptado y cerrado tras segunda auditoría APPROVE_WITH_FOLLOWUPS (2026-10-29); los cuatro P3 permanecen abiertos, no corregidos.
+B03-01 aceptado y cerrado tras segunda auditoría APPROVE_WITH_FOLLOWUPS (2026-10-29). B03-02 corrige localmente R-039; pendiente de su auditoría. Los otros tres P3 permanecen abiertos, no corregidos.
 
-- **Descubrimiento/includes (R-039):** priorizar antes de repositorios no confiables. Candidato pendiente: ejecutar validación desde directorio privado sin descubrimiento de repositorio, conservando el runner aislado y demostrando ausencia de lecturas externas; no basta con --no-includes bajo -C root. Prerrequisito del plan B03-02.
+- **Descubrimiento/includes (R-039):** 79ba91e implementa parser privado con ceiling=cwd y sin -C, antes de mutaciones B03-02. Pruebas de frontera real y ancestro hostil; auditoría pendiente. No basta con --no-includes desde el checkout.
 - **Barras escapadas (R-040):** la comprobación de continuaciones puede rechazar valores legítimos con barras invertidas escapadas. Se conserva el rechazo conservador hasta una corrección con tests; no cambiar configuración legítima automáticamente para eludirlo.
 
 - **Config con inode nuevo:** una edición normal con `git config` o un editor que publica por reemplazo puede cambiar el inode de `.git/config` (también aplica a config.worktree). Inspect conserva el pin y devuelve identity_changed aunque la edición sea legítima. Recuperación: revisar y confirmar manualmente los cambios/rutas/permisos, ejecutar de nuevo `project register` con el mismo --root, --storage y autorizaciones de metadatos, conservar la nueva referencia sha256+byteLength y usarla en inspect. No editar el descriptor viejo ni eludir los pins; el artefacto anterior permanece como evidencia. No hay registro automático ante cambios.
