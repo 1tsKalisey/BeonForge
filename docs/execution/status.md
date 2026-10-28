@@ -5,17 +5,25 @@ Actualizado: 2026-10-28. Leer este archivo antes de cualquier tarea.
 ## Posición
 
 - Fase preparada: 01 — Kernel durable sin IA; Foundation y M00.3 permanecen cerrados con revisión independiente y CI histórica verde.
-- Última tarea verificada: corrección F-4 — constantes del lifecycle congeladas en runtime, sin cambios de API/tipos/transiciones. B01-02 permanece en `cccbb16`; F-2/F-3 conservados.
-- Rama de trabajo: `phase/01-execution-contracts`, creada desde `e14cfdd`. `main` permanece en `e14cfdd`, sin merge ni publicación.
+- Última tarea verificada: B02a-01 — spike SQLite en `d01daf2`, sin EventStore de producto. M01.1/F-4 permanecen cerrados; contratos intactos.
+- Rama de trabajo: `phase/01-sqlite-spike`, creada desde `d960957`. `main` permanece en `e14cfdd`, sin merge ni publicación.
 - Tarea activa: ninguna. M01.1 aceptado y cerrado tras revisión `APPROVE_WITH_FOLLOWUPS`, F-4 resuelto y gates verdes. No quedan hallazgos bloqueantes; evidencia en `reviews/current-review-packet.md`.
-- Siguiente nodo ejecutable único: B02a-01 — Spike SQLite. Desbloqueado, no iniciado.
-- Dependencias posteriores: spike mínimo con preferencia por `node:sqlite`, antes de elegir driver o implementar persistencia.
+- Siguiente nodo ejecutable único: B02b-01 — eventos y proyección durable. Desbloqueado, no iniciado; verificar/fijar Node 24.19.0 y SQLite parcheada antes de abrir datos reales.
+- Decisión del spike: adoptar `node:sqlite` sobre Node 24.19.0/SQLite 3.53.3 medidos, WAL/FULL y único escritor serializado en worker dedicado. La instalación global 24.13.0/3.50.4 no queda aprobada para persistencia durable.
 - Bloqueos de contexto: vault ausente en este checkout; lectura histórica PREP-001 conservada, sin nueva auditoría. El kernel antiguo está incompleto en otro ordenador y no es dependencia.
-- Decisiones pendientes: distribución/referencia del vault; framework HTTP en fase posterior; driver SQLite tras spike. Contratos M01.1 revisados; validación estructural v1 sin nueva dependencia.
+- Decisiones pendientes: distribución/referencia del vault y framework HTTP en fase posterior. Driver seleccionado por D-021; enforcement del runtime y almacenamiento de producto pendientes de B02b. M01.2 sigue abierto.
 - Último commit de cierre antes de registrar la promoción: `629059e` (`docs: close foundation milestone`). `main` y `phase/00-foundation` fueron publicados por fast-forward, sin force ni merge commit.
 - Revisión Claude: formal `APPROVE_WITH_FOLLOWUPS` completada; F-1 confirmado y corregido, F-2/F-3 registrados para Fase 01. M00.3 cerrado. Claude Code no se invoca desde aquí.
 
 ## Gates actuales
+
+- B02a-01 / alcance y evidencia: `d01daf2`; spike nativo aislado en `spikes/sqlite/`, integrado mediante `test:sqlite-spike` en el gate raíz. Sólo temporales propios validados; sin modificar contratos, lockfile, datos reales o runtime global. Informe/mediciones/reproducción/fuentes en `spikes/sqlite/README.md`.
+- B02a-01 / resultados: WAL y synchronous consultados por conexión; migración user_version 1→2 con DDL/versión atómicos y rollback; UNIQUE/idempotencia, lectores con snapshots y exclusión de escritores con SQLITE_BUSY (errcode primario 5). Kill abrupto con IPC bajo FULL/NORMAL: sobrevive una operación/proyección confirmada; desaparecen las 16 filas pendientes y su proyección; retry de clave confirmada no duplica. integrity_check=ok en todos los casos. No simula pérdida de alimentación/SO ni prueba recuperación del futuro kernel.
+- B02a-01 / rendimiento: workload 3 rondas de 100 commits/modo, dos inserts y payload 128 B; auto-checkpoint desactivado, TRUNCATE medido aparte. En muestra portátil 24.19, FULL mediana 1.8860–1.8954 ms/tx; NORMAL 0.0302–0.0312 ms/tx. BUSY timeout configurado 75 ms esperó ~133–142 ms en muestras independientes y bloqueó timer principal; worker permitió liberar lock desde un timer. Son diagnósticos locales, no umbrales/SLA.
+- B02a-01 / versiones: instalado Node 24.13.0/SQLite 3.50.4 (experimental y afectada por WAL-reset según fuente SQLite). Se descargó a temporal el Node oficial 24.19.0, ya fijado en CI, verificando SHA-256; incorpora SQLite 3.53.3 y pasa el spike. No se acepta el binario antiguo para durabilidad. FULL elegido para commits durables; NORMAL no garantiza conservarlos tras caída de alimentación/SO.
+- B02a-01 / gates: instalación frozen y peers verdes; `pnpm.cmd check` completo verde tanto con Node 24.13.0 como con portátil 24.19.0: formato, lint, typecheck, build, 62/62 tests de contratos + 7/7 tests SQLite (69 totales por runtime). Sintaxis .mjs y diff revisados, escaneo textual de secretos sin hallazgos. Primer lint del spike detectó dos no-undef de URL, corregidos con import nativo antes de los gates completos. Sin nuevas dependencias ni run remoto observado.
+- B02a-01 / temporales: fixtures SQLite cerradas y eliminadas por los tests. La política del entorno rechazó la limpieza recursiva del runtime portátil descargado; permanece sólo en el temporal aislado `beonforge-node24-spike-b806bc479c1f45a68213e0c9f47ab213`, sin instalación global ni archivos DB del spike pendientes.
+- B02a-01 / salida: decisión D-021 y riesgos R-020/R-021/R-022 registrados. Revertir commits del spike/registro si se descarta, preservando M01.1 y sus contratos. B02b-01 preparado, no ejecutado; no cerrar M01.2 todavía.
 
 - F-4 / reproducción y corrección: hallazgo P3 confirmado mediante tres tests de mutación de exports compilados importados desde `@beonforge/contracts`; antes del cambio fallaron los 3 (59 tests restantes pasaron). `Object.freeze` aplicado a TASK_STATES, cada array de TASK_TRANSITIONS y la tabla; Reflect.set/delete rechazados sin alterar validadores. Cuarto test nuevo confirma tipos readonly/tuplas exactos contra dist. Sin cambios a otros contratos ni dependencias.
 - F-4 / gates: instalación frozen, peers y `pnpm.cmd check` verdes (formato, lint con tipos, typecheck, build, 62/62 tests en 3 archivos). Diff, staged paths y escaneo textual de secretos revisados. Mismo entorno Corepack/pnpm 12.15.0 y Node 24.13.0, PATH temporal; sin nuevo run remoto. Rollback: revertir sólo el commit F-4 y reabrir el seguimiento si fuese necesario.
@@ -53,7 +61,7 @@ Desde la raíz real del checkout en PowerShell: `git rev-parse --show-toplevel`,
 
 ## Instrucciones exactas para continuar
 
-1. Continuar únicamente con B02a-01 según `phases/phase-01.md`: spike SQLite con preferencia por `node:sqlite`. M01.1 cerrado; no repetir revisión ni planificación de contratos.
+1. Continuar únicamente con B02b-01 según `phases/phase-01.md`. M01.1 cerrado y spike B02a-01 completado; no repetir pruebas exploratorias ni alterar contratos sin necesidad concreta.
 2. Confirmar raíz Git, rama y cambios locales; mantener `main` intacta. No hacer merge ni publicar.
-3. Evaluar WAL, transacciones, reapertura e idempotencia con evidencia antes de decidir driver; no ampliar a persistencia de producto todavía.
+3. Antes de abrir datos reales, fijar/verificar runtime Node 24.19.0/SQLite 3.53.3 o actualización explícitamente validada que incluya el fix WAL-reset. Aplicar WAL/FULL por conexión, único escritor en worker y manejo acotado de BUSY; implementar sólo eventos/proyección/transacción/replay de B02b-01. No trasladar helpers del spike como API productiva.
 4. Preservar los gates F-2/F-3 y las fronteras documentadas. La siguiente fase debe probar persistencia/recuperación reales; los contratos actuales no las implementan.

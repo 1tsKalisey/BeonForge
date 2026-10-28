@@ -14,6 +14,7 @@ Actualizado: 2026-10-28. Estados: `catalogada`, `diseñada`, `prototipo`, `verif
 | Contratos versionados, BlockManifest/BlockResult y errores de ejecución | diseñada | verificada | B01-02 `cccbb16`: parsers v1, errores tipados, eventos started/finished y referencias SHA-256; 47 tests nuevos. M01.1 cerrado tras APPROVE_WITH_FOLLOWUPS y F-4 resuelto; 62/62 tests actuales. No acredita ejecución ni durabilidad. |
 | DAG, idempotencia, cancelación de ejecución | diseñada | catalogada | Fase 01, tests y demo; el estado cancelled no implementa cancelación de efectos. |
 | EventStore SQLite y proyecciones | diseñada | catalogada | Fase 01, recuperación desde eventos. |
+| Evaluación técnica node:sqlite | diseñada | verificada | B02a-01 `d01daf2`: 7 tests de WAL/transacciones/migración/UNIQUE/concurrencia/BUSY/kill/integridad/performance/worker; verdes con Node 24.13.0/SQLite 3.50.4 y 24.19.0/3.53.3. Se selecciona sólo el segundo runtime para B02b por fix WAL-reset. No implementa EventStore ni durabilidad del kernel. |
 | ArtifactStore SHA-256 y checkpoints/resume | diseñada | catalogada | Fase 01, fallo y reanudación sin repetir bloque válido. |
 | CLI mínima | diseñada | catalogada | Fase 01, demo E2E. |
 | Git/workspace y contexto | diseñada | catalogada | Fase 02. |

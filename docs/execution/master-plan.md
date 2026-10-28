@@ -37,7 +37,7 @@ BeonForge será un plano de control local-first, vendor-neutral, con contratos d
 
 Los bloques del objetivo son hitos de producto, no sustituyen las dependencias de fase: B00 corresponde a esta reconciliación; B01/B02 al kernel de Fase 01; B03 a Fase 02; B04 a Fase 05; B05 a Fase 03; B06 a la API y Fase 09; B07 a Fase 06; B08 a la coordinación de Fases 01/07; B09 es transversal; B10 agrupa evolución posterior. No se adelantan proveedores ni UI por el orden numérico de los bloques. Entrenamiento, OmniRoute y plugins permanecen diferidos fuera del MVP.
 
-M01.1 cerrado tras revisión APPROVE_WITH_FOLLOWUPS, corrección F-4 y gates verdes. B01 reutilizó selectivamente los contratos compatibles del PR #1. Siguiente nodo único: B02a-01 — Spike SQLite, según `status.md` y `phases/phase-01.md`. Sin merge ni publicación.
+M01.1 cerrado; B02a-01 completado con evidencia en `spikes/sqlite/README.md` y D-021 (node:sqlite, runtime parcheado 24.19.0/SQLite 3.53.3, WAL/FULL, escritor en worker). Siguiente nodo único B02b-01 — eventos y proyección durable, sin iniciar. Verificar runtime antes de abrir datos reales; M01.2 no está cerrado. Sin merge ni publicación.
 
 Cada fase conserva seguridad, threat model, paridad, migración, backup/restore, observabilidad, documentación y cobertura. No se incorporan Nx, Turborepo, NgRx, LangGraph, Temporal, Graphiti, vector DB, Kubernetes o microservicios por anticipación. Repositorios y frameworks citados en el vault son candidatos. Fases 00–01 usan un solo escritor, sin IA de producto, modelos locales, OmniRoute, routing automático ni dashboard.
 

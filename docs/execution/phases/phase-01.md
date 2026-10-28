@@ -2,7 +2,7 @@
 
 Actualizado: 2026-10-28. Foundation cerrada. B00-01 prepara esta fase; no implementa kernel. Decisiones: D-017/D-018/D-019 y ADR-0001/0002.
 
-Estado: M01.1 aceptado y cerrado tras APPROVE_WITH_FOLLOWUPS, F-4 resuelto y gates verdes (62/62 tests). B01-01/B01-02 completados; siguiente tarea única B02a-01 — Spike SQLite, desbloqueada y no iniciada. Evidencias vigentes en `../status.md`.
+Estado: M01.1 cerrado. B02a-01 completado en `d01daf2`, 62 tests de contratos + 7 SQLite verdes en Node 24.13.0 y 24.19.0. D-021 selecciona node:sqlite sobre 24.19.0/SQLite 3.53.3, WAL/FULL y escritor en worker. Siguiente tarea única B02b-01, sin iniciar; verificar runtime parcheado antes de datos reales. M01.2 sigue abierto. Evidencias en `../status.md` y `spikes/sqlite/README.md` desde la raíz.
 
 ## Resultado y límites
 
