@@ -10,8 +10,9 @@ Actualizado: 2026-10-28. Estados: `catalogada`, `diseñada`, `prototipo`, `verif
 | CI inicial | diseñada | verificada | `c0dc05f`, pin corregido en `dfcbb1d`; run remoto `40202416013` verde sobre `84d7328`, con checkout, setup, peers y gates completados. |
 | ADR y AGENTS.md | diseñada | verificada | `05b6a51`; instrucciones, plantilla y ADR-0001/0002 revisables. |
 | Threat model inicial | diseñada | diseñada | `05b6a51`; amenazas y controles previstos documentados, enforcement pendiente por fase. |
-| Contratos versionados, BlockManifest/BlockResult y errores | diseñada | catalogada | Local: sólo versión de formato. PR #1 contiene lifecycle y tests en `49e5db9`, no incorporados ni ejecutados localmente; B01-01 audita y reutiliza selectivamente. No acredita aún B01 completo. |
-| DAG, estados, idempotencia, cancelación | diseñada | catalogada | Fase 01, tests y demo. |
+| Lifecycle puro de tarea y error de transición | diseñada | verificada | B01-01 `4bf3e58`: API reutilizada del PR #1, 49 pares contrastados con expectativas independientes, estados inciertos/terminales/aprobación, 11/11 tests totales. F-2: tipos publicados en dist; F-3: lint con tipos probado. Sin autorización ni recuperación implementadas. |
+| Contratos versionados, BlockManifest/BlockResult y errores de ejecución | diseñada | catalogada | Sólo versión de formato y lifecycle disponibles. B01-02 pendiente; no acredita B01 completo. |
+| DAG, idempotencia, cancelación de ejecución | diseñada | catalogada | Fase 01, tests y demo; el estado cancelled no implementa cancelación de efectos. |
 | EventStore SQLite y proyecciones | diseñada | catalogada | Fase 01, recuperación desde eventos. |
 | ArtifactStore SHA-256 y checkpoints/resume | diseñada | catalogada | Fase 01, fallo y reanudación sin repetir bloque válido. |
 | CLI mínima | diseñada | catalogada | Fase 01, demo E2E. |

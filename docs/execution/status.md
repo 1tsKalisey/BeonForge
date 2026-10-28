@@ -5,8 +5,8 @@ Actualizado: 2026-10-28. Leer este archivo antes de cualquier tarea.
 ## Posición
 
 - Fase preparada: 01 — Kernel durable sin IA; Foundation y M00.3 permanecen cerrados con revisión independiente y CI histórica verde.
-- Última tarea: B00-01 — reconciliación documental autorizada; resultados de validación abajo. No incorpora código de producto.
-- Tarea activa: ninguna. Siguiente nodo ejecutable único: B01-01 — auditar y adoptar selectivamente el lifecycle del PR #1 según `phases/phase-01.md`, resolviendo F-2/F-3.
+- Última tarea verificada: B01-01 — lifecycle compatible del PR #1 adoptado selectivamente en `4bf3e58`; F-2/F-3 resueltos con evidencia local.
+- Tarea activa: ninguna. Siguiente nodo ejecutable único: B01-02 — contratos mínimos de ejecución según `phases/phase-01.md`. M01.1 sigue abierto; revisión antes de persistencia/runtime.
 - Dependencias posteriores: contratos mínimos y revisión M01.1 antes del spike SQLite; preferencia por `node:sqlite`, sin driver decidido todavía.
 - Bloqueos de contexto: vault ausente en este checkout; lectura histórica PREP-001 conservada, sin nueva auditoría. El kernel antiguo está incompleto en otro ordenador y no es dependencia.
 - Decisiones pendientes: forma de distribuir o referenciar el vault sin incorporarlo a Git; framework HTTP en fase posterior; estrategia de schema validation del kernel.
@@ -14,6 +14,12 @@ Actualizado: 2026-10-28. Leer este archivo antes de cualquier tarea.
 - Revisión Claude: formal `APPROVE_WITH_FOLLOWUPS` completada; F-1 confirmado y corregido, F-2/F-3 registrados para Fase 01. M00.3 cerrado. Claude Code no se invoca desde aquí.
 
 ## Gates actuales
+
+- B01-01 / alcance y procedencia: baseline limpio en `main` sobre `a3e5168`; raíz correcta. Reutilizados selectivamente lifecycle/exports/tests de `edf4379`, `6c9164f`, `efb28b1` y formato de `49e5db9`, sin cherry-pick global ni merge. Conservadas API y transiciones; añadidas expectativas independientes para los 49 pares y aclaraciones sobre tarea/intento, cancelación, aprobación y reconciliación. Objetivo y trazabilidad histórica de B00 preservados.
+- B01-01 / gates: con shim temporal de Corepack en PATH del proceso, `pnpm.cmd install --frozen-lockfile`, `pnpm.cmd peers check` y `pnpm.cmd check` pasaron: formato, lint con tipos, typecheck, build y 11/11 tests en 2 archivos. Diff/staged paths y escaneo textual de secretos sin hallazgos; lockfile y dependencias intactos. Sin publicación ni nuevo run remoto.
+- B01-01 / F-2: retirado alias `paths` hacia `src`; build previo a lint/typecheck consumidor. Test de resolución y `tsc --noEmit --traceResolution -p packages/contracts/tsconfig.test.json` confirman `packages/contracts/dist/index.d.ts`; assertions de tipos compilan contra exports publicados.
+- B01-01 / F-3: `recommendedTypeChecked` con proyectos explícitos de fuente/tests. Sondas mediante API ESLint: `Promise.resolve(1);` rechazado por `no-floating-promises`, `void Promise.resolve(1);` aceptado. La sonda inicial por stdin no produjo diagnóstico y no se usó como evidencia positiva.
+- B01-01 / fallo corregido: primera ejecución de check detectó 9 errores de lint con tipos por referencias Node/URL no resolubles en el nuevo test consumidor; corregido usando `ts.sys` sin añadir dependencias. Check completo posterior verde. Las precondiciones de aprobación/reconciliación siguen siendo responsabilidad de la aplicación futura; el lifecycle sólo comprueba adyacencia y no acredita durabilidad. Rollback: revertir el commit de tarea y su registro, preservando B00.
 
 - B00-01: raíz comprobada `C:/Users/RaulMéndez/Desktop/personal/BeonForge`; baseline limpio en `main` (`99abf50`). No existe rama local `phase/01-kernel` ni otro worktree. La iniciativa remota observada en `49e5db9` añade objetivo y lifecycle; sólo se adopta el documento de producto desde esa revisión, sin merge ni publicación. Código/tests remotos aún no integrados ni ejecutados aquí.
 - B00-01 / entorno y gates: Node `24.13.0` (CI histórica: `24.19.0`), pnpm `12.15.0`. `corepack.cmd pnpm install --frozen-lockfile` y `corepack.cmd pnpm peers check` pasaron sin cambios al lockfile. El primer `corepack.cmd pnpm check` falló porque sus scripts internos no encontraban `pnpm` en PATH. Se habilitó un shim de Corepack en directorio temporal y se añadió sólo al PATH del proceso: `pnpm.cmd check` pasó (formato, lint, typecheck, build, 1/1 test). Sin cambios globales de configuración ni de código; sin nuevo run de CI remota. Prettier excluye `docs/` según configuración existente.
@@ -36,7 +42,7 @@ Desde la raíz real del checkout en PowerShell: `git rev-parse --show-toplevel`,
 
 ## Instrucciones exactas para continuar
 
-1. Leer B01-01 en `phases/phase-01.md` y el objetivo en `docs/product/software-factory-objective.md`. No repetir la auditoría de Foundation ni reabrir B00.
+1. Leer B01-02 en `phases/phase-01.md` y el objetivo en `docs/product/software-factory-objective.md`. B01-01 verificado en `4bf3e58`; no repetir Foundation, B00 ni la adopción de contratos.
 2. Confirmar raíz del checkout y cambios locales. Preservar archivos existentes; no usar la ruta del ordenador anterior.
-3. Auditar compatibilidad antes de reutilizar selectivamente los commits del PR #1. No reimplementar lo existente ni incorporar código por merge. El objetivo documental ya está adoptado desde `49e5db9`; sus advertencias sobre reconciliación describen el estado previo, actualizado aquí.
-4. Resolver F-2 (tipos publicados) y F-3 (lint con tipos), gates y cobertura en B01. Kernel limitado a orquestación, persistencia, estados, recuperación, permisos y coordinación. Pausar tras paquete de revisión M01.1 antes de persistencia/runtime.
+3. Completar sólo contratos mínimos de ejecución necesarios para la vertical, reutilizando el lifecycle existente. F-2/F-3 resueltos: mantener resolución a `dist` y lint con tipos; no reinstaurar alias hacia fuentes. El objetivo documental conserva el texto remoto previo; este estado registra su reconciliación.
+4. Kernel limitado a orquestación, persistencia, estados, recuperación, permisos y coordinación. B01-02 debe preparar el paquete de revisión M01.1 y pausar antes de persistencia/runtime; no se ha iniciado SQLite, proveedores ni UI.
