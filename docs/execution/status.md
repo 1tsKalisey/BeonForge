@@ -1,14 +1,14 @@
 # Estado persistente
 
-Actualizado: 2026-10-28. Leer este archivo antes de cualquier tarea.
+Actualizado: 2026-10-29. Leer este archivo antes de cualquier tarea.
 
 ## Posición
 
-- Fase actual: 02 — Workspace y contexto. Fase 01/M01.3 aceptados y cerrados; B03-01 implementado/verificado localmente, pendiente de revisión independiente.
-- Último trabajo verificado: B03-01 `a837e9c`, registro CAS v1 e inspección segura de repositorios/worktrees existentes. Contratos, persistencia/F-5 y runtime aceptados intactos. Sin dependencias externas nuevas ni cambios de schema; lockfile sólo añade vínculos workspace.
+- Fase actual: 02 — Workspace y contexto. Fase 01/M01.3 aceptados y cerrados; B03-01 sigue abierto tras REQUEST_CHANGES. P1 corregido/verificado localmente, pendiente de verificación independiente.
+- Último trabajo verificado: P1 B03-01 `d73466b`: parser oficial Git valida config/config.worktree sin includes antes de comandos susceptibles de ejecutar filtros. 312 tests verdes. Base `a837e9c` preservada; contratos, persistencia/F-5, runtime, dependencias y schemas intactos.
 - Rama de trabajo: `phase/02-project-inspection`, desde `485283c`. `main` permanece en `e14cfdd`, sin merge ni publicación.
-- Tarea activa: B03-01 terminado para revisión; paquete en `reviews/current-review-packet.md`. Plan acotado incorporado primero en `c201c0d`. No se invocaron Claude Code ni otros agentes, ni se atribuye aceptación a los gates locales.
-- Siguiente nodo único: revisión independiente B03-01 aportada por el usuario. B03-02 no iniciado ni autorizado en este turno; creación de worktrees y selección de contexto permanecen diferidas.
+- Tarea activa: corrección del único P1 confirmado de B03-01 terminada para nueva revisión; paquete en `reviews/current-review-packet.md`. P3 config-inode y volumen ls-files registrados como seguimientos, sin cambios funcionales. No se invocaron Claude Code ni otros agentes; los gates locales no sustituyen la aceptación independiente.
+- Siguiente nodo único: recibir verificación independiente de P1 y aceptación B03-01 aportadas por el usuario. No cerrar ni iniciar B03-02; creación de worktrees y selección de contexto permanecen diferidas.
 - Decisión del spike: adoptar `node:sqlite` sobre Node 24.19.0/SQLite 3.53.3 medidos, WAL/FULL y único escritor serializado en worker dedicado. La instalación global 24.13.0/3.50.4 no queda aprobada para persistencia durable.
 - Bloqueos de contexto: vault ausente en este checkout; lectura histórica PREP-001 conservada, sin nueva auditoría. El kernel antiguo está incompleto en otro ordenador y no es dependencia.
 - Decisiones pendientes: distribución/referencia del vault y framework HTTP posterior. Primera tarea Fase 02 acotada en phase-02.md; D-025 registra descriptor/identidades/almacenamiento y límites. Reconciliación manual, herramientas aisladas, permisos generales y proveedores no se adelantan.
@@ -16,6 +16,11 @@ Actualizado: 2026-10-28. Leer este archivo antes de cualquier tarea.
 - Revisión Claude: formal `APPROVE_WITH_FOLLOWUPS` completada; F-1 confirmado y corregido, F-2/F-3 registrados para Fase 01. M00.3 cerrado. Claude Code no se invoca desde aquí.
 
 ## Gates actuales
+
+- P1 B03-01 / `d73466b`: reproducción definitiva sobre build anterior, 17 rojas de 34 nuevas: 16 ejecutaron el marcador inocuo (registro/inspect, config/config.worktree, encabezados contiguos y mayúsculas/includeIf) y una aceptó salida de claves superior al límite. Tras corrección: 34 verdes enfocadas y **312/312** suite completa sin skips/fallos (62 contratos + 115 persistencia + 71 runtime + 57 workspace + 7 spike). Los 278 tests anteriores permanecen intactos. Config malformada, válida, continuaciones y límites cubiertos; el control positivo ejecuta el filtro sólo como fixture, nunca desde las operaciones protegidas.
+- P1 / gates: Node 24.19.0/SQLite 3.53.3, frozen/peers/formato/lint con tipos/typecheck consumidor dist/build/tests verdes. Fuentes compiladas antes del rojo y del verde; Git runner existente conserva entorno aislado, argv/shell:false, no-pager/no-optional-locks, timeout y límite. Inventarios de índice/config/trabajo intactos. Diff/paths/secretos revisados; main intacta, sin publicación/merge ni CI remota nueva. R-036 mitigado localmente, requiere revisión; P3 R-037/038 documentados en README sin cambiar pins ni implementar streaming.
+
+Histórico B03-01 previo a REQUEST_CHANGES (no representa aceptación):
 
 - B03-01: Node 24.19.0/SQLite 3.53.3, frozen, peers, formato, lint con tipos, typecheck consumidor dist, build y **278/278 tests**: 255 previos intactos + 23 de workspace. CLI compilado en dos procesos recupera la misma referencia desde almacenamiento privado explícito; registro repetido deduplica. Repositorios reales temporales cubren worktree/permisos separados, detached/unborn, identidad sustituida, rutas/junctions, variables Git/fsmonitor, gitlinks y descriptor incompatible. Inventarios SHA-256/modo/mtime y directorios confirman ausencia de cambios en índice, config y archivos de trabajo/privados. Primer lint detectó un import sin uso, corregido sin excepciones. Diff/secretos/paths revisados; no nueva CI remota observada.
 - B03-01 / límites: raíces/ancestros privados, ACL Windows a cargo del operador; no sandbox ante propietario concurrente ni snapshot Git atómico. Includes/filtros/alternates y git-dir separado no-worktree rechazados; 10 000 entradas metadata, 256 KiB por config/puntero, 5 s/1 MiB por comando. Descriptor contiene rutas privadas; R-034/035. No catálogo, contexto, proveedores ni creación de worktrees. Operación/demo y rollback en packages/workspace/README.md y phase-02.md. Esperar revisión antes de avanzar.

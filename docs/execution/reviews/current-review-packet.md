@@ -1,4 +1,44 @@
-# B03-01 — Registro e inspección segura de proyectos Git locales
+# B03-01 — Nueva revisión de la corrección P1 de configuración Git
+
+Preparado: 2026-10-29. Veredicto independiente recibido: **REQUEST_CHANGES**, un único P1 bloqueante confirmado. Corrección `d73466b` verificada localmente; **B03-01 sigue abierto hasta verificación independiente y aceptación**. No se invocaron Claude Code ni otros agentes. No iniciar B03-02.
+
+## Alcance y commits
+
+Base correctiva `d34d82f`, código/tests `d73466b` en phase/02-project-inspection: `git diff d34d82f..d73466b` (sólo workspace/src/index.ts y workspace/test/project.test.ts). Memoria, README y paquete actual en commit documental posterior. Implementación completa desde `485283c`; plan inicial `c201c0d`. Contratos/persistencia/F-5/runtime/dependencias/schema/lockfile intactos frente a la base correctiva; main permanece e14cfdd, sin merge/publicación.
+
+Cambio mínimo: el bucle existente de config/config.worktree conserva lectura limitada, pins y rechazo de continuaciones; usa parser oficial `git config --file <ruta> --no-includes --list --name-only -z`. Comparación de sección de clave normalizada rechaza include.*, includeif.* y filter.* independientemente de encabezados contiguos, mayúsculas y subsecciones. Registro e inspección validan antes de rev-parse/status/ls-files. Errores de Git/parsing/salida inesperada fallan cerrado; se comprueba terminación NUL y registros con sección/clave. No se interpreta configuración externa ni se siguen includes durante validación.
+
+Se reutiliza el mismo runner privado con variante fija config+archivo: argv separados, shell:false, entorno aislado, --no-pager/--no-optional-locks, fsmonitor desactivado, 5 s/1 MiB. No hay runner genérico ni cambio de contratos públicos/identidades/permisos.
+
+## Reproducción rojo → verde
+
+- Build de fuente anterior antes del rojo. Reproducción definitiva de 34 pruebas nuevas: **17 rojas / 17 verdes**; 16 casos de encabezados contiguos ejecutaron el marcador inocuo (4 variantes × register/inspect × config/config.worktree) y una operación aceptó el listado expandido superior al límite. Antes de esa reproducción se corrigió la fixture: un cambio de tamaño permitía a Git detectar dirty sin convertir; mantener tamaño obliga a comprobar el filtro. El control positivo ya pasaba antes de modificar producto.
+- Después de `d73466b` y nuevo build: **34/34 verdes** enfocadas. Matriz: filter convencional, [core][filter "x"], [core][include], includeIf, mayúsculas/encabezados contiguos; archivos config y config.worktree sobre linked worktree real, operaciones register/inspect. Inspect parte de un registro limpio y modifica configuración conservando inode, evitando falsos verdes por rechazo de identidad.
+- También: dos casos válidos con secciones contiguas, cuatro casos malformados, dos de continuaciones y un listado de claves >1 MiB a partir de archivo <256 KiB. Error unsafe_path para claves prohibidas, git_failure para parsing, git_limit para salida excedida; sin resultados parciales ni retry.
+- El control positivo adicional invoca Git status sin la protección del producto, ejecuta sólo Node con script fijo y marcador bajo el temporal de la fixture. Demuestra que el filtro es operativo. **Ningún filtro se ejecuta desde registerProject/inspectProject tras la corrección.** Inventarios SHA-256/modo/mtime de repositorio/worktree/metadata y archivo include intactos; comandos/scripts sólo pueden escribir el marcador dentro de temporales controlados, eliminados al cerrar stores.
+
+## Gates y reproducción independiente
+
+Node 24.19.0/SQLite 3.53.3. Frozen install, peers, formato, lint con tipos, typecheck consumidor dist, build y **312/312 tests**, sin skips/fallos finales: contratos 62 + persistencia 115 + runtime 71 + workspace 57 + spike 7. Son los 278 previos intactos + 34 nuevos. Diff/staged paths y escaneo de patrones de secretos sin hallazgos; no se acredita CI remota nueva. Los únicos rojos definitivos son los intencionales anteriores a corregir; ajuste de fixture descrito arriba, sin exclusiones de gates.
+
+```powershell
+pnpm.cmd install --frozen-lockfile
+pnpm.cmd peers check
+pnpm.cmd check
+git diff d34d82f..d73466b --check
+```
+
+Para aislar seguridad después de build actual: `pnpm.cmd --filter @beonforge/workspace exec vitest run -t P1` (34 seleccionadas; las 23 previas se omiten sólo en esta selección, no en el gate completo). Revisar especialmente que config --no-includes valida antes de comandos susceptibles de filtros y mantiene todas las protecciones previas. No atribuir aprobación a estos resultados locales.
+
+## Seguimientos y salida
+
+P3-1/R-037: un reemplazo legítimo del inode de config exige nuevo registro tras revisión manual, con las mismas raíces/storage/permisos; conservar nueva referencia y no alterar la antigua. Procedimiento explícito en packages/workspace/README.md. P3-2/R-038: muchos tracked pueden exceder salida de ls-files; git_limit sin parcial/retry, procesamiento incremental diferido a nodo posterior. **Ambos sólo documentados, sin cambios funcionales.** R-034/035 (raíces/ACL privadas, PATH/Git confiables, snapshot no atómico y límites) permanecen; R-036 mitigado localmente, pendiente de verificación independiente.
+
+Rollback: revert correctivo acotado sin borrar datos/repositorios y suspender registro/inspección hasta restablecer protección, pues la versión anterior es vulnerable. Siguiente nodo único: recibir verificación independiente P1 y aceptación B03-01. Detenerse sin B03-02 ni cierre automático.
+
+---
+
+# Histórico — B03-01: paquete inicial anterior a REQUEST_CHANGES
 
 Preparado: 2026-10-28. **Implementado/verificado localmente, pendiente de revisión independiente aportada por el usuario.** No se invocó Claude Code ni otros agentes. Fase 01/M01.3 siguen aceptados/cerrados; este paquete no atribuye aprobación a B03-01. B03-02 no iniciado.
 
