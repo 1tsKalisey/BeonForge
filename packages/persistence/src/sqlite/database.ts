@@ -6,6 +6,7 @@ import {
   parseBlockExecutionEvent,
   parseBlockManifest,
   parseBlockResult,
+  parseArtifactReference,
   type BlockExecutionEvent,
   type ArtifactReference,
 } from '@beonforge/contracts';
@@ -20,6 +21,7 @@ import {
 import { requireRuntime } from './runtime.js';
 
 type Row = Record<string, SQLOutputValue>;
+type VerifiedBlobs = Map<string, Uint8Array>;
 const applicationId = 0x42464f52;
 
 export function normalizeError(error: unknown): PersistenceError {
@@ -181,7 +183,6 @@ export class SqliteDatabase {
       if (version === 0) this.transaction(() => this.db.exec(migration));
       if (version < 2)
         this.transaction(() => this.db.exec(checkpointMigration));
-      this.rebuild();
       this.validate();
     } catch (error) {
       this.db.close();
@@ -287,26 +288,54 @@ export class SqliteDatabase {
     });
   }
 
-  events(): readonly StoredEvent[] {
+  events(verified: VerifiedBlobs = new Map()): readonly StoredEvent[] {
     const records = this.db
       .prepare('SELECT * FROM events ORDER BY sequence')
       .all()
       .map(decode);
     if (records.some((record, index) => record.sequence !== index + 1))
       throw new PersistenceError('incompatible_database');
-    for (const record of records) this.verifyReferences(record.event);
+    for (const record of records) this.verifyReferences(record.event, verified);
     return records;
   }
 
-  private verifyReferences(event: BlockExecutionEvent): void {
+  sequence(): number {
+    return number(
+      this.db.prepare('SELECT count(*) AS n FROM events').get() ?? {},
+      'n',
+    );
+  }
+
+  private readVerified(
+    reference: ArtifactReference,
+    verified: VerifiedBlobs,
+  ): Uint8Array {
+    const ref = parseArtifactReference(reference);
+    let bytes = verified.get(ref.sha256);
+    if (!bytes) {
+      bytes = this.artifacts.read(ref);
+      verified.set(ref.sha256, bytes);
+    }
+    if (bytes.byteLength !== ref.byteLength)
+      throw new PersistenceError('integrity_failure');
+    return bytes;
+  }
+
+  private verifyReferences(
+    event: BlockExecutionEvent,
+    verified: VerifiedBlobs = new Map(),
+  ): void {
     const references =
       event.type === 'block.started'
         ? event.manifest.inputs
         : event.result.evidence;
-    for (const reference of references) this.artifacts.read(reference);
+    for (const reference of references) this.readVerified(reference, verified);
   }
 
-  attempt(identity: AttemptIdentity): AttemptProjection | null {
+  attempt(
+    identity: AttemptIdentity,
+    verified: VerifiedBlobs = new Map(),
+  ): AttemptProjection | null {
     if (typeof identity !== 'object' || identity === null)
       throw new PersistenceError('invalid_input');
     const runId = identifier(identity.runId);
@@ -324,9 +353,10 @@ export class SqliteDatabase {
       const rawResult: unknown =
         row.result === null ? null : JSON.parse(text(row, 'result'));
       const result = rawResult === null ? null : parseBlockResult(rawResult);
-      for (const reference of manifest.inputs) this.artifacts.read(reference);
+      for (const reference of manifest.inputs)
+        this.readVerified(reference, verified);
       for (const reference of result?.evidence ?? [])
-        this.artifacts.read(reference);
+        this.readVerified(reference, verified);
       const status = result?.status ?? 'pending';
       if (
         status !== row.status ||
@@ -366,29 +396,44 @@ export class SqliteDatabase {
     });
   }
 
-  private snapshot(checkpointId: string, sequence: number): WorkflowCheckpoint {
-    const records = this.events();
+  private currentSnapshot(
+    checkpointId: string,
+    sequence: number,
+    verified: VerifiedBlobs,
+  ): WorkflowCheckpoint {
+    const identities = this.db
+      .prepare(
+        'SELECT run_id, block_id, attempt_id FROM attempts ORDER BY run_id, block_id, attempt_id',
+      )
+      .all();
+    const attempts = identities.map((row) => {
+      const attempt = this.attempt(
+        {
+          runId: text(row, 'run_id'),
+          blockId: text(row, 'block_id'),
+          attemptId: text(row, 'attempt_id'),
+        },
+        verified,
+      );
+      if (!attempt) throw new PersistenceError('integrity_failure');
+      return attempt;
+    });
+    return { schemaVersion: 1, checkpointId, sequence, attempts };
+  }
+
+  private snapshot(
+    checkpointId: string,
+    sequence: number,
+    verified: VerifiedBlobs,
+    records = this.events(verified),
+  ): WorkflowCheckpoint {
     if (sequence > records.length)
       throw new PersistenceError('integrity_failure');
     this.db.exec('SAVEPOINT workflow_snapshot;');
     try {
       this.db.exec('DELETE FROM attempts;');
       for (const record of records.slice(0, sequence)) this.apply(record);
-      const identities = this.db
-        .prepare(
-          'SELECT run_id, block_id, attempt_id FROM attempts ORDER BY run_id, block_id, attempt_id',
-        )
-        .all();
-      const attempts = identities.map((row) => {
-        const attempt = this.attempt({
-          runId: text(row, 'run_id'),
-          blockId: text(row, 'block_id'),
-          attemptId: text(row, 'attempt_id'),
-        });
-        if (!attempt) throw new PersistenceError('integrity_failure');
-        return attempt;
-      });
-      return { schemaVersion: 1, checkpointId, sequence, attempts };
+      return this.currentSnapshot(checkpointId, sequence, verified);
     } finally {
       try {
         this.db.exec(
@@ -402,7 +447,9 @@ export class SqliteDatabase {
 
   createCheckpoint(id: string): WorkflowCheckpoint {
     const checkpointId = identifier(id);
-    const sequence = this.events().length;
+    const verified: VerifiedBlobs = new Map();
+    const records = this.events(verified);
+    const sequence = records.length;
     const existing = this.db
       .prepare(
         'SELECT sequence FROM workflow_checkpoints WHERE checkpoint_id=?',
@@ -415,7 +462,7 @@ export class SqliteDatabase {
       if (!checkpoint) throw new PersistenceError('integrity_failure');
       return checkpoint;
     }
-    const checkpoint = this.snapshot(checkpointId, sequence);
+    const checkpoint = this.snapshot(checkpointId, sequence, verified, records);
     const reference = this.artifacts.put(
       Buffer.from(JSON.stringify(checkpoint)),
     );
@@ -438,8 +485,13 @@ export class SqliteDatabase {
       sha256: text(row, 'state_sha256'),
       byteLength: number(row, 'state_bytes'),
     };
-    const actual = this.artifacts.read(reference);
-    const expected = this.snapshot(checkpointId, number(row, 'sequence'));
+    const verified: VerifiedBlobs = new Map();
+    const actual = this.readVerified(reference, verified);
+    const expected = this.snapshot(
+      checkpointId,
+      number(row, 'sequence'),
+      verified,
+    );
     if (!Buffer.from(actual).equals(Buffer.from(JSON.stringify(expected))))
       throw new PersistenceError('integrity_failure');
     return expected;
@@ -453,15 +505,43 @@ export class SqliteDatabase {
       this.db.prepare('PRAGMA foreign_key_check').all().length !== 0
     )
       throw new PersistenceError('integrity_failure');
-    this.events();
-    for (const row of this.db
-      .prepare('SELECT checkpoint_id FROM workflow_checkpoints')
-      .all())
-      this.loadCheckpoint(text(row, 'checkpoint_id'));
+    // One ordered replay validates every prefix and atomically rebuilds the derived projection.
+    // The cache belongs to this operation only: future reads always detect changed/deleted blobs.
+    this.transaction(() => {
+      const verified: VerifiedBlobs = new Map();
+      const records = this.events(verified);
+      const checkpoints = this.db
+        .prepare(
+          'SELECT * FROM workflow_checkpoints ORDER BY sequence, checkpoint_id',
+        )
+        .all();
+      this.db.exec('DELETE FROM attempts;');
+      let applied = 0;
+      for (const row of checkpoints) {
+        const sequence = number(row, 'sequence');
+        if (sequence > records.length)
+          throw new PersistenceError('integrity_failure');
+        while (applied < sequence) this.apply(records[applied++]!);
+        const expected = this.currentSnapshot(
+          identifier(text(row, 'checkpoint_id')),
+          sequence,
+          verified,
+        );
+        const actual = this.readVerified(
+          {
+            sha256: text(row, 'state_sha256'),
+            byteLength: number(row, 'state_bytes'),
+          },
+          verified,
+        );
+        if (!Buffer.from(actual).equals(Buffer.from(JSON.stringify(expected))))
+          throw new PersistenceError('integrity_failure');
+      }
+      while (applied < records.length) this.apply(records[applied++]!);
+    });
   }
 
   async backupTo(path: string): Promise<void> {
-    this.validate();
     if (entryExists(path)) throw new PersistenceError('unsafe_path');
     await backup(this.db, path);
   }

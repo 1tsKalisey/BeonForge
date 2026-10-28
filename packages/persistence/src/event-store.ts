@@ -43,6 +43,7 @@ export type PersistenceErrorCode =
   | 'idempotency_conflict'
   | 'invalid_sequence'
   | 'busy'
+  | 'queue_timeout'
   | 'storage_failure'
   | 'outcome_unknown'
   | 'closed'

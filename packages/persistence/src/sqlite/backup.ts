@@ -111,15 +111,15 @@ export async function createBackup(
   database: SqliteDatabase,
   parent: string,
 ): Promise<RecoveryLocation> {
-  database.validate();
   const target = location(parent, 'beonforge-backup-');
   const root = new SafeDirectory(target.directory);
   root.writeExclusive('beonforge-backup-incomplete', new Uint8Array());
   await database.backupTo(root.file('events.sqlite'));
-  const sourceReferences = database.artifacts.list();
+  const entries = database.artifacts.entries();
+  const sourceReferences = entries.map((entry) => entry.reference);
   const copied = new ArtifactFiles(target.artifactRoot);
-  for (const reference of sourceReferences) {
-    const actual = copied.put(database.artifacts.read(reference));
+  for (const { reference, bytes } of entries) {
+    const actual = copied.put(bytes);
     if (actual.sha256 !== reference.sha256)
       throw new PersistenceError('integrity_failure');
   }
@@ -127,11 +127,7 @@ export async function createBackup(
     target.databasePath,
     target.artifactRoot,
   );
-  try {
-    validatedSnapshot.validate();
-  } finally {
-    validatedSnapshot.close();
-  }
+  validatedSnapshot.close(); // Construction performs the complete integrity/reference/prefix validation once.
   // Seal the standalone snapshot before hashing; never copy the live .db or ignore active WAL.
   const snapshot = new DatabaseSync(root.file('events.sqlite'), {
     allowExtension: false,
@@ -181,9 +177,9 @@ export async function restoreBackup(
     join(sourceRoot.path, 'events.sqlite.artifacts'),
     false,
   );
-  for (const reference of contents.artifacts) sourceArtifacts.read(reference);
+  const entries = sourceArtifacts.entries();
   if (
-    JSON.stringify(sourceArtifacts.list()) !==
+    JSON.stringify(entries.map((entry) => entry.reference)) !==
     JSON.stringify(
       [...contents.artifacts].sort((a, b) => a.sha256.localeCompare(b.sha256)),
     )
@@ -213,11 +209,9 @@ export async function restoreBackup(
     root.writeExclusive('beonforge-restore-incomplete', new Uint8Array());
     await backup(sourceDb, root.file('events.sqlite'));
     const restoredArtifacts = new ArtifactFiles(target.artifactRoot);
-    for (const reference of contents.artifacts)
-      restoredArtifacts.put(sourceArtifacts.read(reference));
-    // Validate the exact copied bytes again, then replay and check every SQL reference/checkpoint.
-    for (const reference of contents.artifacts)
-      restoredArtifacts.read(reference);
+    for (const { bytes } of entries) restoredArtifacts.put(bytes);
+    // Source identity/hash is rechecked across the asynchronous SQLite copy. Target construction
+    // validates copied bytes/references and every checkpoint once, independently of the source.
     sourceRoot.check();
     verify(sourceRoot.read('events.sqlite'), contents.database);
     const restored = new SqliteDatabase(
@@ -226,8 +220,7 @@ export async function restoreBackup(
       true,
     );
     try {
-      restored.validate();
-      if (restored.events().length !== contents.sequence)
+      if (restored.sequence() !== contents.sequence)
         throw new PersistenceError('integrity_failure');
     } finally {
       restored.close();

@@ -390,6 +390,65 @@ describe('content-addressed artifacts, workflow checkpoints and isolated recover
     });
   });
 
+  it('validates equal-sequence and older checkpoints during ordered replay', async () => {
+    const files = fixture();
+    let store = await files.open();
+    await store.createCheckpoint('z-empty');
+    await store.createCheckpoint('a-empty');
+    await store.putArtifact(bytes);
+    await store.append(start(), 'start');
+    await store.createCheckpoint('pending');
+    await store.append(finish(), 'finish');
+    await store.createCheckpoint('uncertain');
+    await files.close(store);
+    store = await files.open();
+    expect((await store.loadCheckpoint('a-empty'))?.attempts).toEqual([]);
+    expect((await store.loadCheckpoint('pending'))?.attempts[0]?.status).toBe(
+      'pending',
+    );
+    expect((await store.getAttempt(identity))?.status).toBe('uncertain');
+    const falseSnapshot = await store.putArtifact(Buffer.from('{}'));
+    await files.close(store);
+    sql(files.path, (db) =>
+      db
+        .prepare(
+          'UPDATE workflow_checkpoints SET state_sha256=?,state_bytes=? WHERE checkpoint_id=?',
+        )
+        .run(falseSnapshot.sha256, falseSnapshot.byteLength, 'pending'),
+    );
+    await expect(files.open()).rejects.toMatchObject({
+      code: 'integrity_failure',
+    });
+  });
+
+  it('rejects inconsistent lengths even when the SHA was already verified in the operation', async () => {
+    const files = fixture();
+    const store = await files.open();
+    await store.putArtifact(bytes);
+    await store.append(start(), 'start');
+    await store.append(finish(), 'finish');
+    await files.close(store);
+    const invalidFinish = finish();
+    if (invalidFinish.type !== 'block.finished')
+      throw new Error('Fixture finish');
+    sql(files.path, (db) => {
+      db.exec('DROP TRIGGER events_no_update');
+      db.prepare('UPDATE events SET payload=? WHERE event_id=?').run(
+        JSON.stringify({
+          ...invalidFinish,
+          result: {
+            ...invalidFinish.result,
+            evidence: [{ ...reference, byteLength: 4 }],
+          },
+        }),
+        'finish',
+      );
+    });
+    await expect(files.open()).rejects.toMatchObject({
+      code: 'integrity_failure',
+    });
+  });
+
   it('migrates schema v1 additively and supports an empty workflow checkpoint', async () => {
     const files = fixture();
     let store = await files.open();

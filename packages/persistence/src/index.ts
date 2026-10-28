@@ -11,6 +11,7 @@ export {
   openSqlitePersistence,
   restoreSqliteBackup,
 } from './sqlite/client.js';
+export type { SqliteTimeoutPolicy } from './sqlite/client.js';
 export type {
   ArtifactStore,
   DurableStore,

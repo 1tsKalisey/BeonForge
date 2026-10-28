@@ -23,16 +23,47 @@ import { requireRuntime } from './runtime.js';
 import type { Command, Reply, Response } from './protocol.js';
 
 const activePaths = new Set<string>();
+/** Finite wall-clock budgets. Queue expiry never dispatches the command or kills active work. */
+export interface SqliteTimeoutPolicy {
+  readonly openingMs?: number;
+  readonly queueMs?: number;
+  readonly executionMs?: number;
+  readonly backupMs?: number;
+  readonly restoreMs?: number;
+}
+const defaultTimeouts: Required<SqliteTimeoutPolicy> = {
+  openingMs: 120000,
+  queueMs: 120000,
+  executionMs: 30000,
+  backupMs: 300000,
+  restoreMs: 300000,
+};
+function timeouts(
+  value: SqliteTimeoutPolicy = {},
+): Required<SqliteTimeoutPolicy> {
+  if (
+    typeof value !== 'object' ||
+    value === null ||
+    Object.keys(value).some((key) => !(key in defaultTimeouts))
+  )
+    throw new PersistenceError('invalid_input');
+  const policy = { ...defaultTimeouts, ...value };
+  for (const ms of Object.values(policy))
+    if (!Number.isSafeInteger(ms) || ms < 1 || ms > 2147483647)
+      throw new PersistenceError('invalid_input');
+  return policy;
+}
 interface Pending {
-  readonly command: Command['kind'];
+  readonly command: Command;
   readonly resolve: (reply: Reply) => void;
   readonly reject: (error: PersistenceError) => void;
-  readonly timer: ReturnType<typeof setTimeout>;
+  timer: ReturnType<typeof setTimeout>;
 }
 
 class WorkerEventStore implements DurableStore {
   private readonly pending = new Map<number, Pending>();
   private nextId = 0;
+  private activeId: number | undefined;
   private closing: Promise<void> | undefined;
   private state: 'opening' | 'open' | 'closing' | 'closed' | 'failed' =
     'opening';
@@ -42,6 +73,7 @@ class WorkerEventStore implements DurableStore {
   constructor(
     private readonly worker: Worker,
     release: () => void,
+    private readonly policy: Required<SqliteTimeoutPolicy>,
   ) {
     let readyResolve: () => void;
     let readyReject: (error: PersistenceError) => void;
@@ -52,7 +84,7 @@ class WorkerEventStore implements DurableStore {
     const startupTimer = setTimeout(() => {
       readyReject(new PersistenceError('storage_failure'));
       this.fail();
-    }, 10000);
+    }, policy.openingMs);
     this.exited = new Promise<void>((resolve) => {
       worker.once('exit', () => {
         clearTimeout(startupTimer);
@@ -83,6 +115,7 @@ class WorkerEventStore implements DurableStore {
       const pending = this.pending.get(response.id);
       if (!pending) return;
       this.pending.delete(response.id);
+      this.activeId = undefined;
       clearTimeout(pending.timer);
       if (response.kind === 'error') {
         pending.reject(new PersistenceError(response.code));
@@ -95,13 +128,14 @@ class WorkerEventStore implements DurableStore {
         if (response.reply.kind === 'closed') this.state = 'closed';
         pending.resolve(response.reply);
       }
+      this.dispatch();
     });
   }
 
   private fail(): void {
     if (this.state === 'failed') return;
     this.state = 'failed';
-    for (const pending of this.pending.values()) {
+    for (const [id, pending] of this.pending) {
       clearTimeout(pending.timer);
       pending.reject(
         new PersistenceError(
@@ -111,13 +145,14 @@ class WorkerEventStore implements DurableStore {
             'create-checkpoint',
             'backup',
             'restore',
-          ].includes(pending.command)
+          ].includes(pending.command.kind) && id === this.activeId
             ? 'outcome_unknown'
             : 'storage_failure',
         ),
       );
     }
     this.pending.clear();
+    this.activeId = undefined;
     void this.worker.terminate();
   }
 
@@ -126,14 +161,38 @@ class WorkerEventStore implements DurableStore {
       return Promise.reject(new PersistenceError('closed'));
     return new Promise<Reply>((resolve, reject) => {
       const id = ++this.nextId;
-      const timer = setTimeout(() => this.fail(), 10000);
-      this.pending.set(id, { command: command.kind, resolve, reject, timer });
-      try {
-        this.worker.postMessage({ id, command });
-      } catch {
-        this.fail();
-      }
+      const timer = setTimeout(() => {
+        this.pending.delete(id);
+        reject(new PersistenceError('queue_timeout'));
+      }, this.policy.queueMs);
+      this.pending.set(id, { command, resolve, reject, timer });
+      this.dispatch();
     });
+  }
+
+  private dispatch(): void {
+    if (
+      this.activeId !== undefined ||
+      !['open', 'closing'].includes(this.state)
+    )
+      return;
+    const next = this.pending.entries().next().value;
+    if (!next) return;
+    const [id, pending] = next;
+    this.activeId = id;
+    clearTimeout(pending.timer);
+    const ms =
+      pending.command.kind === 'backup'
+        ? this.policy.backupMs
+        : pending.command.kind === 'restore'
+          ? this.policy.restoreMs
+          : this.policy.executionMs;
+    pending.timer = setTimeout(() => this.fail(), ms);
+    try {
+      this.worker.postMessage({ id, command: pending.command });
+    } catch {
+      this.fail();
+    }
   }
 
   async append(
@@ -237,8 +296,10 @@ class WorkerEventStore implements DurableStore {
 export async function openSqlitePersistence(
   path: string,
   artifactRoot?: string,
+  timeoutPolicy?: SqliteTimeoutPolicy,
 ): Promise<DurableStore> {
   requireRuntime(process.versions.node);
+  const policy = timeouts(timeoutPolicy);
   if (artifactRoot !== undefined && typeof artifactRoot !== 'string')
     throw new PersistenceError('invalid_input');
   if (typeof path !== 'string' || !isAbsolute(path))
@@ -273,6 +334,7 @@ export async function openSqlitePersistence(
         workerData: { path: canonical, artifactRoot },
       }),
       () => activePaths.delete(key),
+      policy,
     );
   } catch {
     activePaths.delete(key);
@@ -287,20 +349,26 @@ export async function openSqlitePersistence(
   }
 }
 
-export async function openSqliteEventStore(path: string): Promise<EventStore> {
-  return openSqlitePersistence(path);
+export async function openSqliteEventStore(
+  path: string,
+  timeoutPolicy?: SqliteTimeoutPolicy,
+): Promise<EventStore> {
+  return openSqlitePersistence(path, undefined, timeoutPolicy);
 }
 
 export async function restoreSqliteBackup(
   backupDirectory: string,
   destinationParent: string,
+  timeoutPolicy?: SqliteTimeoutPolicy,
 ): Promise<RecoveryLocation> {
   requireRuntime(process.versions.node);
+  const policy = timeouts(timeoutPolicy);
   const store = new WorkerEventStore(
     new Worker(new URL('./worker.js', import.meta.url), {
       workerData: { restoreOnly: true },
     }),
     () => {},
+    policy,
   );
   try {
     await store.ready;

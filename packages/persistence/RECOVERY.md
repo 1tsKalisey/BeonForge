@@ -4,6 +4,8 @@ Objective: SHA-256 CAS, consistent confirmed checkpoints and verifiable recovery
 
 ## API and layout
 
+M01.2 REQUEST_CHANGES fixes and reproducible volume measurements: [REVIEW-FIXES.md](REVIEW-FIXES.md). Timeout policy is optional and operation-specific (opening, queue, execution, backup, restore); queue expiry never dispatches the request. All deadlines remain finite; dispatched mutations with lost confirmation remain uncertain and are never retried automatically. Startup validates all checkpoint prefixes with a single ordered replay and operation-local blob verification cache; subsequent operations verify again.
+
 `openSqliteEventStore(path): Promise<EventStore>` remains available. `openSqlitePersistence(path, artifactRoot?): Promise<DurableStore>` exposes the same worker plus `putArtifact`, `readArtifact`, `createCheckpoint`, `loadCheckpoint` and `createBackup(destinationParent)`. By default the CAS is `${databasePath}.artifacts`, with flat `blobs/<lowercase-sha256>` and private `staging/<uuid>.tmp` directories. APIs accept bytes and validated ArtifactReference values, never caller-selected blob filenames.
 
 `restoreSqliteBackup(backupDirectory, destinationParent)` uses the same worker implementation in restore-only mode. Both backup and restore allocate a new private subdirectory and return `{ directory, databasePath, artifactRoot }` only on success. The parent must already exist and be authorized/private. Passing an active directory as parent does not replace it: only a fresh child is created. No API activates a restored copy or overwrites active data; any later substitution requires explicit human approval outside this task.

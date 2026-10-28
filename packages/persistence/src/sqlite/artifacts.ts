@@ -233,6 +233,10 @@ export class ArtifactFiles {
     return bytes;
   }
   list(): readonly ArtifactReference[] {
+    return this.entries().map((entry) => entry.reference);
+  }
+  /** Operation-scoped verified inventory; callers copy these bytes without rereading the source. */
+  entries(): readonly { reference: ArtifactReference; bytes: Uint8Array }[] {
     this.root.check();
     this.blobs.check();
     return readdirSync(this.blobs.path)
@@ -244,7 +248,7 @@ export class ArtifactFiles {
         const reference = digest(bytes);
         if (reference.sha256 !== name)
           throw new PersistenceError('integrity_failure');
-        return reference;
+        return { reference, bytes };
       });
   }
   private verify(bytes: Uint8Array, reference: ArtifactReference): void {
