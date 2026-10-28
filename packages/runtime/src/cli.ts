@@ -91,6 +91,14 @@ async function main(): Promise<void> {
   const path = options.get('--db');
   const runId = identifier(options.get('--run'));
   if (!path || !isAbsolute(path)) throw new WorkflowError('invalid_options');
+  const timeoutText = options.get('--timeout-ms') ?? '30000';
+  const timeoutMs = Number(timeoutText);
+  if (
+    !/^[1-9][0-9]*$/.test(timeoutText) ||
+    !Number.isSafeInteger(timeoutMs) ||
+    timeoutMs > 2147483647
+  )
+    throw new WorkflowError('invalid_options');
   let workflow: unknown;
   if (command === 'run') {
     const file = options.get('--workflow');
@@ -137,13 +145,12 @@ async function main(): Promise<void> {
       const report = await executeWorkflow(store, runId, workflow, handlers, {
         external: options.get('--external')?.split(',') ?? [],
         retryFailed: options.get('--retry-failed')?.split(',') ?? [],
-        timeoutMs: Number(options.get('--timeout-ms') ?? 30000),
+        timeoutMs,
         signal: controller.signal,
       });
       process.stdout.write(JSON.stringify(report) + '\n');
-      process.exitCode = controller.signal.aborted
-        ? 130
-        : report.status === 'succeeded'
+      process.exitCode =
+        report.status === 'succeeded'
           ? 0
           : report.status === 'blocked'
             ? 2

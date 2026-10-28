@@ -55,11 +55,26 @@ function workflow(handler: string, effects: 'none' | 'external' = 'none') {
     })),
   };
 }
-async function runCli(args: string[]) {
+async function runCli(
+  args: string[],
+  interrupt?: 'after-report' | 'before-runtime',
+) {
   const child = spawn(
     process.execPath,
-    [fileURLToPath(new URL('../dist/cli.js', import.meta.url)), ...args],
-    { stdio: ['ignore', 'pipe', 'pipe'] },
+    [
+      ...(interrupt
+        ? [
+            '--import',
+            new URL('./fixtures/interrupt-cli.mjs', import.meta.url).href,
+          ]
+        : []),
+      fileURLToPath(new URL('../dist/cli.js', import.meta.url)),
+      ...args,
+    ],
+    {
+      stdio: ['ignore', 'pipe', 'pipe'],
+      env: { ...process.env, BEONFORGE_INTERRUPT_STAGE: interrupt ?? '' },
+    },
   );
   children.add(child);
   let stdout = '';
@@ -79,6 +94,112 @@ async function runCli(args: string[]) {
     stderr,
   };
 }
+
+it.each([
+  ['fixture.seed', 'succeeded', 0],
+  ['fixture.fail', 'failed', 1],
+  ['fixture.wait', 'blocked', 2],
+] as const)(
+  'P3-2 uses the actual %s report before a late abort signal',
+  async (handler, status, code) => {
+    const root = fixture();
+    const path = join(root, 'events.sqlite');
+    const file = join(root, 'workflow.json');
+    writeFileSync(file, JSON.stringify(workflow(handler)));
+    const result = await runCli(
+      [
+        'run',
+        '--db',
+        path,
+        '--run',
+        'signal',
+        '--workflow',
+        file,
+        '--timeout-ms',
+        '20',
+      ],
+      'after-report',
+    );
+    expect(JSON.parse(result.stdout) as unknown).toMatchObject({ status });
+    expect(result.code, result.stderr).toBe(code);
+  },
+);
+
+it('P3-2 keeps exit 130 for an applicable cancellation before execution', async () => {
+  const root = fixture();
+  const path = join(root, 'events.sqlite');
+  const file = join(root, 'workflow.json');
+  writeFileSync(file, JSON.stringify(workflow('fixture.seed')));
+  const result = await runCli(
+    ['run', '--db', path, '--run', 'signal', '--workflow', file],
+    'before-runtime',
+  );
+  expect(result.code, result.stderr).toBe(130);
+  expect(JSON.parse(result.stdout) as unknown).toMatchObject({
+    status: 'cancelled',
+    cancellationPersisted: null,
+  });
+});
+
+it.each([
+  '1e3',
+  '0x3e8',
+  '1.0',
+  '+1000',
+  ' 1000',
+  '1000 ',
+  '01000',
+  '0',
+  '-1',
+  '2147483648',
+  'Infinity',
+  'NaN',
+])(
+  'P3-2 rejects noncanonical/out-of-range timeout %s before creating storage',
+  async (timeout) => {
+    const root = fixture();
+    const path = join(root, 'events.sqlite');
+    const file = join(root, 'workflow.json');
+    writeFileSync(file, JSON.stringify(workflow('fixture.seed')));
+    const result = await runCli([
+      'run',
+      '--db',
+      path,
+      '--run',
+      'invalid-timeout',
+      '--workflow',
+      file,
+      '--timeout-ms',
+      timeout,
+    ]);
+    expect(result.code).toBe(1);
+    expect(result.stderr).toContain('invalid_options');
+    expect(existsSync(path)).toBe(false);
+    expect(existsSync(`${path}.artifacts`)).toBe(false);
+  },
+);
+
+it.each(['1', '2147483647'])(
+  'P3-2 accepts the canonical timeout boundary %s',
+  async (timeout) => {
+    const root = fixture();
+    const path = join(root, 'events.sqlite');
+    const file = join(root, 'workflow.json');
+    writeFileSync(file, JSON.stringify(workflow('fixture.seed')));
+    const result = await runCli([
+      'run',
+      '--db',
+      path,
+      '--run',
+      'bounds',
+      '--workflow',
+      file,
+      '--timeout-ms',
+      timeout,
+    ]);
+    expect(result.code, result.stderr).toBe(0);
+  },
+);
 
 it.each(['after-finish', 'after-checkpoint', 'inside-effect'] as const)(
   'demonstrates real SIGKILL and safe resume at %s',
