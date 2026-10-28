@@ -11,7 +11,8 @@
     "format:check": "prettier --check .",
     "lint": "pnpm build && eslint . --max-warnings 0",
     "typecheck": "pnpm build && pnpm -r typecheck",
-    "test": "pnpm build && pnpm -r test",
+    "test": "pnpm build && pnpm -r test && pnpm test:sqlite-spike",
+    "test:sqlite-spike": "node --test spikes/sqlite/sqlite.test.mjs",
     "build": "pnpm -r build",
     "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test"
   },
