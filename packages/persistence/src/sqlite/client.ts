@@ -1,0 +1,223 @@
+import { realpath, lstat } from 'node:fs/promises';
+import { basename, dirname, isAbsolute, join } from 'node:path';
+import process from 'node:process';
+import { setTimeout, clearTimeout } from 'node:timers';
+import { Worker } from 'node:worker_threads';
+import type { BlockExecutionEvent } from '@beonforge/contracts';
+import {
+  PersistenceError,
+  type EventStore,
+  type StoredEvent,
+  type AttemptIdentity,
+  type AttemptProjection,
+} from '../event-store.js';
+import { requireRuntime } from './runtime.js';
+import type { Command, Reply, Response } from './protocol.js';
+
+const activePaths = new Set<string>();
+interface Pending {
+  readonly command: Command['kind'];
+  readonly resolve: (reply: Reply) => void;
+  readonly reject: (error: PersistenceError) => void;
+  readonly timer: ReturnType<typeof setTimeout>;
+}
+
+class WorkerEventStore implements EventStore {
+  private readonly pending = new Map<number, Pending>();
+  private nextId = 0;
+  private closing: Promise<void> | undefined;
+  private state: 'opening' | 'open' | 'closing' | 'closed' | 'failed' =
+    'opening';
+  private readonly exited: Promise<void>;
+  readonly ready: Promise<void>;
+
+  constructor(
+    private readonly worker: Worker,
+    release: () => void,
+  ) {
+    let readyResolve: () => void;
+    let readyReject: (error: PersistenceError) => void;
+    this.ready = new Promise<void>((resolve, reject) => {
+      readyResolve = resolve;
+      readyReject = reject;
+    });
+    const startupTimer = setTimeout(() => {
+      readyReject(new PersistenceError('storage_failure'));
+      this.fail();
+    }, 10000);
+    this.exited = new Promise<void>((resolve) => {
+      worker.once('exit', () => {
+        clearTimeout(startupTimer);
+        release();
+        if (this.state !== 'closed') this.fail();
+        readyReject(new PersistenceError('storage_failure'));
+        resolve();
+      });
+    });
+    worker.on('error', () => {
+      readyReject(new PersistenceError('storage_failure'));
+      this.fail();
+    });
+    worker.on('message', (response: Response) => {
+      if (response.kind === 'ready') {
+        if (this.state !== 'opening') return;
+        clearTimeout(startupTimer);
+        this.state = 'open';
+        readyResolve();
+        return;
+      }
+      if (response.kind === 'init-error') {
+        clearTimeout(startupTimer);
+        readyReject(new PersistenceError(response.code));
+        this.fail();
+        return;
+      }
+      const pending = this.pending.get(response.id);
+      if (!pending) return;
+      this.pending.delete(response.id);
+      clearTimeout(pending.timer);
+      if (response.kind === 'error') {
+        pending.reject(new PersistenceError(response.code));
+        if (
+          response.code === 'outcome_unknown' ||
+          response.code === 'incompatible_database'
+        )
+          this.fail();
+      } else {
+        if (response.reply.kind === 'closed') this.state = 'closed';
+        pending.resolve(response.reply);
+      }
+    });
+  }
+
+  private fail(): void {
+    if (this.state === 'failed') return;
+    this.state = 'failed';
+    for (const pending of this.pending.values()) {
+      clearTimeout(pending.timer);
+      pending.reject(
+        new PersistenceError(
+          pending.command === 'append' ? 'outcome_unknown' : 'storage_failure',
+        ),
+      );
+    }
+    this.pending.clear();
+    void this.worker.terminate();
+  }
+
+  private call(command: Command): Promise<Reply> {
+    if (this.state !== 'open')
+      return Promise.reject(new PersistenceError('closed'));
+    return new Promise<Reply>((resolve, reject) => {
+      const id = ++this.nextId;
+      const timer = setTimeout(() => this.fail(), 10000);
+      this.pending.set(id, { command: command.kind, resolve, reject, timer });
+      try {
+        this.worker.postMessage({ id, command });
+      } catch {
+        this.fail();
+      }
+    });
+  }
+
+  async append(
+    event: BlockExecutionEvent,
+    idempotencyKey: string,
+  ): Promise<StoredEvent> {
+    const reply = await this.call({ kind: 'append', event, idempotencyKey });
+    if (reply.kind !== 'appended')
+      throw new PersistenceError('storage_failure');
+    return reply.record;
+  }
+  async readEvents(): Promise<readonly StoredEvent[]> {
+    const reply = await this.call({ kind: 'events' });
+    if (reply.kind !== 'events') throw new PersistenceError('storage_failure');
+    return reply.records;
+  }
+  async getAttempt(
+    identity: AttemptIdentity,
+  ): Promise<AttemptProjection | null> {
+    const reply = await this.call({ kind: 'attempt', identity });
+    if (reply.kind !== 'attempt') throw new PersistenceError('storage_failure');
+    return reply.projection;
+  }
+  async rebuildProjection(): Promise<void> {
+    const reply = await this.call({ kind: 'rebuild' });
+    if (reply.kind !== 'rebuilt') throw new PersistenceError('storage_failure');
+  }
+  close(): Promise<void> {
+    this.closing ??= this.closeOwned();
+    return this.closing;
+  }
+
+  private async closeOwned(): Promise<void> {
+    if (this.state === 'closed') {
+      await this.exited;
+      return;
+    }
+    if (this.state === 'failed') {
+      await this.exited;
+      return;
+    }
+    const closing = this.call({ kind: 'close' });
+    this.state = 'closing';
+    let acknowledged = false;
+    try {
+      const reply = await closing;
+      if (reply.kind !== 'closed')
+        throw new PersistenceError('storage_failure');
+      acknowledged = true;
+    } finally {
+      if (!acknowledged) this.fail();
+      await this.exited;
+    }
+  }
+}
+
+export async function openSqliteEventStore(path: string): Promise<EventStore> {
+  requireRuntime(process.versions.node);
+  if (typeof path !== 'string' || !isAbsolute(path))
+    throw new PersistenceError('invalid_input');
+  let canonical: string;
+  try {
+    canonical = join(await realpath(dirname(path)), basename(path));
+    try {
+      if ((await lstat(canonical)).isSymbolicLink())
+        throw new PersistenceError('invalid_input');
+    } catch (error) {
+      if (!(
+        typeof error === 'object' &&
+        error !== null &&
+        'code' in error &&
+        error.code === 'ENOENT'
+      ))
+        throw error;
+    }
+  } catch (error) {
+    if (error instanceof PersistenceError) throw error;
+    throw new PersistenceError('invalid_input');
+  }
+  const key =
+    process.platform === 'win32' ? canonical.toLowerCase() : canonical;
+  if (activePaths.has(key)) throw new PersistenceError('busy');
+  activePaths.add(key);
+  let store: WorkerEventStore;
+  try {
+    store = new WorkerEventStore(
+      new Worker(new URL('./worker.js', import.meta.url), {
+        workerData: { path: canonical },
+      }),
+      () => activePaths.delete(key),
+    );
+  } catch {
+    activePaths.delete(key);
+    throw new PersistenceError('storage_failure');
+  }
+  try {
+    await store.ready;
+    return store;
+  } catch (error) {
+    await store.close();
+    throw error;
+  }
+}
