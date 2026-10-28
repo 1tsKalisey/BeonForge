@@ -37,7 +37,7 @@ BeonForge será un plano de control local-first, vendor-neutral, con contratos d
 
 Los bloques del objetivo son hitos de producto, no sustituyen las dependencias de fase: B00 corresponde a esta reconciliación; B01/B02 al kernel de Fase 01; B03 a Fase 02; B04 a Fase 05; B05 a Fase 03; B06 a la API y Fase 09; B07 a Fase 06; B08 a la coordinación de Fases 01/07; B09 es transversal; B10 agrupa evolución posterior. No se adelantan proveedores ni UI por el orden numérico de los bloques. Entrenamiento, OmniRoute y plugins permanecen diferidos fuera del MVP.
 
-M01.1 cerrado; B02a-01 aceptado. B02b-01 implementa eventos/proyección durable con transacciones, idempotencia y replay en worker (D-022, `packages/persistence/README.md`). Siguiente nodo único B02b-02 — artefactos/checkpoints/backup/restore, sin iniciar; M01.2 no está cerrado. Sin merge ni publicación.
+M01.1 cerrado. B02a/B02b-01/B02b-02 implementan y verifican localmente persistencia, CAS, checkpoints y backup/restore en worker (D-021/022/023). Nodo actual: revisión independiente M01.2; paquete preparado, milestone aún no cerrado. Siguiente implementación B02b-03 sólo tras aceptación. Sin merge ni publicación.
 
 Cada fase conserva seguridad, threat model, paridad, migración, backup/restore, observabilidad, documentación y cobertura. No se incorporan Nx, Turborepo, NgRx, LangGraph, Temporal, Graphiti, vector DB, Kubernetes o microservicios por anticipación. Repositorios y frameworks citados en el vault son candidatos. Fases 00–01 usan un solo escritor, sin IA de producto, modelos locales, OmniRoute, routing automático ni dashboard.
 

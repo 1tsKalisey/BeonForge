@@ -15,7 +15,9 @@ Actualizado: 2026-10-28. Estados: `catalogada`, `diseñada`, `prototipo`, `verif
 | DAG, idempotencia, cancelación de ejecución | diseñada | catalogada | Fase 01, tests y demo; el estado cancelled no implementa cancelación de efectos. |
 | EventStore SQLite y proyecciones | diseñada | verificada | B02b-01 `39480c0`: WAL/FULL en worker, migración v1, append-only, secuencia/idempotencia y proyección atómica, replay equivalente tras reapertura. 21 integraciones reales (fallos SQL, worker/hijo, versiones/BUSY), gate total 90 tests. No acredita blobs/checkpoints ni recuperación de ejecución; M01.2 sigue abierto. |
 | Evaluación técnica node:sqlite | diseñada | verificada | B02a-01 `d01daf2`: 7 tests de WAL/transacciones/migración/UNIQUE/concurrencia/BUSY/kill/integridad/performance/worker; verdes con Node 24.13.0/SQLite 3.50.4 y 24.19.0/3.53.3. Se selecciona sólo el segundo runtime para B02b por fix WAL-reset. No implementa EventStore ni durabilidad del kernel. |
-| ArtifactStore SHA-256 y checkpoints/resume | diseñada | catalogada | Fase 01, fallo y reanudación sin repetir bloque válido. |
+| ArtifactStore SHA-256 e integridad | diseñada | verificada | B02b-02 `2e5f9e3`: staging fsync/link sin overwrite, dedupe, hashes/longitudes, rutas confinadas/junctions, temporales/huérfanos seguros. 25 tests nuevos de recuperación; roots privados y límites Windows documentados. |
+| Checkpoints de workflow y backup/restore | diseñada | verificada | B02b-02 `2e5f9e3`: schema 1→2, snapshot v1 del prefijo confirmado, referencias CAS/SQL verificadas, backup online con WAL y restores aislados validados. 115 tests totales; M01.2 pendiente de revisión, sin reemplazo de activos ni garantía de power loss. |
+| Resume de ejecución | diseñada | catalogada | B02b-03: CLI/DAG y recuperación sin repetir nodos válidos; almacenamiento de checkpoint no implementa ejecución. |
 | CLI mínima | diseñada | catalogada | Fase 01, demo E2E. |
 | Git/workspace y contexto | diseñada | catalogada | Fase 02. |
 | Model registry, provider adapters y probes | diseñada | catalogada | Fases 03, 05; evaluación previa a uso real. |
