@@ -6,8 +6,9 @@ import {
   closeSync,
   constants,
   unlinkSync,
+  realpathSync,
 } from 'node:fs';
-import { join } from 'node:path';
+import { join, dirname, relative, isAbsolute, sep } from 'node:path';
 import {
   parseArtifactReference,
   type ArtifactReference,
@@ -20,6 +21,7 @@ import {
   digest,
   syncDirectory,
   entryExists,
+  directory,
 } from './artifacts.js';
 import { SqliteDatabase } from './database.js';
 import { requireRuntime } from './runtime.js';
@@ -111,7 +113,26 @@ export async function createBackup(
   database: SqliteDatabase,
   parent: string,
 ): Promise<RecoveryLocation> {
-  const target = location(parent, 'beonforge-backup-');
+  // Validate the entire parent before mkdtemp or any write. Native realpaths also normalize
+  // Windows 8.3 aliases; directory() rejects symlinks/junctions and traversal first.
+  const authorizedParent = directory(parent);
+  const destination = realpathSync.native(authorizedParent);
+  database.artifacts.root.check();
+  for (const protectedRoot of [
+    dirname(database.path),
+    database.artifacts.root.path,
+  ]) {
+    const child = relative(
+      realpathSync.native(directory(protectedRoot)),
+      destination,
+    );
+    if (
+      child === '' ||
+      (!isAbsolute(child) && child !== '..' && !child.startsWith(`..${sep}`))
+    )
+      throw new PersistenceError('unsafe_path');
+  }
+  const target = location(authorizedParent, 'beonforge-backup-');
   const root = new SafeDirectory(target.directory);
   root.writeExclusive('beonforge-backup-incomplete', new Uint8Array());
   await database.backupTo(root.file('events.sqlite'));

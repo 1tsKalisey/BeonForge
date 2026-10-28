@@ -185,7 +185,7 @@ export class SqliteDatabase {
   readonly artifacts: ArtifactFiles;
 
   constructor(
-    path: string,
+    readonly path: string,
     artifactRoot = `${path}.artifacts`,
     validation?: 'backup' | 'restore',
   ) {

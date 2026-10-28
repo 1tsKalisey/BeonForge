@@ -78,7 +78,9 @@ function finish(): BlockExecutionEvent {
 }
 function fixture() {
   const root = mkdtempSync(join(temporary, 'beonforge-recovery-'));
-  const path = join(root, 'events.sqlite');
+  const live = join(root, 'live');
+  mkdirSync(live, { mode: 0o700 });
+  const path = join(live, 'events.sqlite');
   const artifacts = `${path}.artifacts`;
   const copies = join(root, 'copies');
   mkdirSync(copies, { mode: 0o700 });
@@ -138,7 +140,7 @@ async function killedAt(
       mode === 'checkpoint-incomplete'
         ? (async () => {
             for (let i = 0; i < 800; i++) {
-              if (existsSync(join(files.root, 'checkpoint-paused')))
+              if (existsSync(join(dirname(files.path), 'checkpoint-paused')))
                 return [{ phase: mode }];
               await delay(5);
             }
@@ -164,6 +166,112 @@ async function killedAt(
 }
 
 describe('content-addressed artifacts, workflow checkpoints and isolated recovery', () => {
+  it.each([
+    'sqlite-root',
+    'sqlite-child',
+    'cas-root',
+    'cas-blobs',
+    'cas-staging',
+    'cas-child',
+  ] as const)(
+    'F-7 rejects backup destination %s before creating residues',
+    async (kind) => {
+      const files = fixture();
+      const store = await files.open();
+      await store.putArtifact(bytes);
+      const nestedDb = join(dirname(files.path), 'nested');
+      const nestedCas = join(files.artifacts, 'nested');
+      mkdirSync(nestedDb, { mode: 0o700 });
+      mkdirSync(nestedCas, { mode: 0o700 });
+      const destinations = {
+        'sqlite-root': dirname(files.path),
+        'sqlite-child': nestedDb,
+        'cas-root': files.artifacts,
+        'cas-blobs': join(files.artifacts, 'blobs'),
+        'cas-staging': join(files.artifacts, 'staging'),
+        'cas-child': nestedCas,
+      };
+      const destination = destinations[kind];
+      const before = readdirSync(destination);
+      await expect(store.createBackup(destination)).rejects.toMatchObject({
+        code: 'unsafe_path',
+      });
+      expect(readdirSync(destination)).toEqual(before);
+      expect(Buffer.from(await store.readArtifact(reference))).toEqual(bytes);
+      const valid = await store.createBackup(files.copies);
+      const restored = await restoreSqliteBackup(valid.directory, files.copies);
+      const copy = await files.open(restored.databasePath);
+      expect(Buffer.from(await copy.readArtifact(reference))).toEqual(bytes);
+    },
+  );
+
+  it.each(['sqlite', 'cas', 'valid-parent'] as const)(
+    'F-7 rejects a junction to %s before allocation and permits retry',
+    async (kind) => {
+      const files = fixture();
+      const store = await files.open();
+      const targets = {
+        sqlite: dirname(files.path),
+        cas: files.artifacts,
+        'valid-parent': files.copies,
+      };
+      const target = targets[kind];
+      const names = readdirSync(target);
+      const alias = join(files.root, 'alias-destination');
+      symlinkSync(
+        target,
+        alias,
+        process.platform === 'win32' ? 'junction' : 'dir',
+      );
+      await expect(store.createBackup(alias)).rejects.toMatchObject({
+        code: 'unsafe_path',
+      });
+      expect(readdirSync(target)).toEqual(names);
+      expect((await store.createBackup(files.copies)).databasePath).not.toBe(
+        files.path,
+      );
+    },
+  );
+
+  it.each(['missing', 'file', 'traversal'] as const)(
+    'F-7 rejects an invalid %s destination without residues',
+    async (kind) => {
+      const files = fixture();
+      const store = await files.open();
+      const file = join(files.root, 'parent-file');
+      writeFileSync(file, 'sentinel');
+      const names = readdirSync(files.root);
+      const destinations = {
+        missing: join(files.root, 'missing'),
+        file,
+        traversal: `${files.copies}/../copies`,
+      };
+      await expect(
+        store.createBackup(destinations[kind]),
+      ).rejects.toMatchObject({ code: 'unsafe_path' });
+      expect(readdirSync(files.root)).toEqual(names);
+      expect(readFileSync(file, 'utf8')).toBe('sentinel');
+      await store.createBackup(files.copies);
+    },
+  );
+
+  it('F-7 protects a custom CAS outside the SQLite directory and permits sibling prefix names', async () => {
+    const files = fixture();
+    const customCas = join(files.root, 'custom-cas');
+    const store = await files.open(files.path, customCas);
+    await store.putArtifact(bytes);
+    const before = readdirSync(customCas);
+    await expect(store.createBackup(customCas)).rejects.toMatchObject({
+      code: 'unsafe_path',
+    });
+    expect(readdirSync(customCas)).toEqual(before);
+    const sibling = `${dirname(files.path)}-copies`;
+    mkdirSync(sibling, { mode: 0o700 });
+    const backup = await store.createBackup(realpathSync.native(sibling));
+    expect(backup.databasePath).not.toBe(files.path);
+    expect(Buffer.from(await store.readArtifact(reference))).toEqual(bytes);
+  });
+
   it.each(['complete', 'incomplete'] as const)(
     'F-6 rejects opening %s backup without modifying it',
     async (kind) => {

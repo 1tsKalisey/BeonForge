@@ -10,9 +10,11 @@ it('opens and backs up 800 events/40 checkpoints with bounded verification and r
   const root = mkdtempSync(join(temporary, 'beonforge-volume-'));
   const copies = join(root, 'copies');
   mkdirSync(copies, { mode: 0o700 });
+  const live = join(root, 'live');
+  mkdirSync(live, { mode: 0o700 });
   const child = fork(
     new URL('./fixtures/recovery-volume.mjs', import.meta.url),
-    [join(root, 'events.sqlite'), copies],
+    [join(live, 'events.sqlite'), copies],
     { stdio: ['ignore', 'ignore', 'pipe', 'ipc'] },
   );
   const metrics: {

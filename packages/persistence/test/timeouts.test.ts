@@ -1,4 +1,4 @@
-import { mkdtempSync, realpathSync, rmSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, realpathSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
@@ -25,7 +25,9 @@ function fixture() {
     raw: [] as DatabaseSync[],
   };
   allocated.push(files);
-  return { ...files, path: join(root, 'events.sqlite') };
+  const live = join(root, 'live');
+  mkdirSync(live, { mode: 0o700 });
+  return { ...files, path: join(live, 'events.sqlite') };
 }
 afterEach(async () => {
   for (const files of allocated.splice(0)) {

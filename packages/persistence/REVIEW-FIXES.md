@@ -41,3 +41,11 @@ Restores requieren ready JSON estricto v1, DB/CAS existentes, nombres de DB/CAS 
 11 regresiones nuevas verdes: incluyen renombrado sin ready, intento de DB/CAS alternativos sin residuos y reapertura de restore válido después de appends. Los kills previos de backup/restore y la copia de volumen se mantienen. F-7 sigue pendiente de su corrección separada.
 
 Gates F-6: frozen/peers/check verdes, 62 + 68 + 7 = 137 tests. El primer check detectó dos fallos de reapertura con CAS explícito por alias Windows 8.3 frente a nombre largo; comparación corregida con realpath nativo y pruebas completas posteriores verdes. Sin cambios a contratos/dependencias ni datos reales.
+
+## F-7 — Destinos fuera del almacenamiento activo
+
+Reproducción: 6/6 regresiones rojas, destinos SQLite raíz/hijo y CAS raíz/blobs/staging/hijo. El intento en blobs dejaba una entrada ajena al inventario, bloqueando futuras copias. Ahora se rechaza antes de mkdtemp/escritura mediante recorrido lstat, realpath nativo y relación padre/hijo con separadores; también cubre CAS personalizado fuera del directorio SQLite y aliases cortos/largos Windows. Se permiten hermanos con prefijo parecido, no comparación ingenua por startsWith.
+
+13 regresiones verdes: los seis destinos anidados, tres junctions, entradas missing/file/traversal y CAS externo/hermano. Rechazos no cambian directorios/sentinels; retry válido y restore posterior funcionan. Fixtures reorganizadas en un árbol temporal privado con live/ y copies/ hermanos, sin modificar datos reales ni relajar la comprobación para los tests. No se añade limpieza automática ni GC: la prevención no crea residuos; fallos posteriores a una copia real siguen conservando su conjunto incompleto aislado para diagnóstico.
+
+Gates F-7: frozen/peers/check completos verdes, 62 contratos + 81 persistencia + 7 spike = 150 tests. Diff/alcance y secretos revisados; los tests de interrupción y volumen siguen incluidos, sin skips en suite completa.
