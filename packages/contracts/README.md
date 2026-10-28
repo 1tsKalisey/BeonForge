@@ -1,0 +1,16 @@
+# Execution contracts v1
+
+Import from `@beonforge/contracts`; consumers resolve declarations through `dist/index.d.ts`. The existing task lifecycle and schema version remain compatible. These contracts validate data; they do not execute blocks.
+
+- `BlockManifest`: logical `blockId`, handler identifier and positive `handlerVersion`, content-addressed inputs, and explicit `effects: none | external`. No shell commands, provider configuration, permissions or approval flags.
+- `BlockResult`: one `(runId, blockId, attemptId)` report. `succeeded` and `cancelled` carry evidence; `failed` and `uncertain` also require a typed error. Evidence references may identify outputs, logs or test reports; empty lists are valid. Attempt success does not imply task approval or merge authorization. Use `uncertain` whenever effects cannot be established, including after cancellation/timeout.
+- `BlockExecutionEvent`: `block.started` embeds run/attempt identity and manifest; `block.finished` embeds the result. `eventId` and `occurredAt` (Unix milliseconds) identify the fact. No automatic replay/retry follows from these fields.
+- `ArtifactReference`: lowercase SHA-256 and nonnegative safe-integer byte length, embedded under a versioned envelope. It contains no path or URI. Validation of a reference does not prove that its blob exists or matches its hash.
+
+The `parse*` functions accept decoded JSON-like values and return detached, readonly-typed records. All declared fields are required; unknown fields, unsupported envelope versions and malformed nested values are rejected with `ContractValidationError`. Identifiers are ASCII, start with an alphanumeric character, allow `._:-`, and have at most 128 characters; they are opaque identifiers, never filesystem paths. Versions are positive safe integers, sizes/timestamps nonnegative safe integers. Error summaries contain 1–1024 characters and must not be whitespace-only. No normalization or migration is implicit.
+
+The wire error codes (`invalid_input`, `permission_denied`, `execution_failed`, `timeout`, `interrupted`) classify a report; they do not determine retry safety. Parser diagnostics contain only fixed field names, not raw input. Producers must redact execution summaries and referenced content before storage/logging: the parser cannot detect secrets in valid strings.
+
+Execution selects a known handler/version and reports an attempt. The application must bind the same immutable manifest to a logical block within a run and correlate start/result identities. Persistence owns ordering, unique event/attempt identities, transactional append, idempotency, checkpoints and replay. Policy owns permission checks, approvals and reconciliation before resolving uncertainty. External adapters own effects and must not treat `effects: external` as authorization. A started event without a finish must be reconciled; even `effects: none` is a declaration to verify, not proof.
+
+No storage, handler registry, scheduler, DAG, executor interface or policy engine is implemented here. M01.1 requires independent review before the SQLite spike. Rollback is a focused revert of the B01-02 implementation and evidence commits; no persisted state migration is needed yet.
