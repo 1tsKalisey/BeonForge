@@ -10,7 +10,9 @@ import {
 
 describe('task lifecycle contract', () => {
   it('publishes a complete state-transition table', () => {
-    expect(Object.keys(TASK_TRANSITIONS).sort()).toEqual([...TASK_STATES].sort());
+    expect(Object.keys(TASK_TRANSITIONS).sort()).toEqual(
+      [...TASK_STATES].sort(),
+    );
   });
 
   it('accepts only declared transitions', () => {
