@@ -166,6 +166,88 @@ async function killedAt(
 }
 
 describe('content-addressed artifacts, workflow checkpoints and isolated recovery', () => {
+  it.each(['root', 'blobs', 'staging', 'renamed', 'incomplete'] as const)(
+    'F6-R2 prevents putArtifact through an external database into backup %s',
+    async (kind) => {
+      const files = fixture();
+      const store = await files.open();
+      await store.putArtifact(bytes);
+      const bundle = await store.createBackup(files.copies);
+      let source = bundle.directory;
+      if (kind === 'renamed') {
+        source = join(files.copies, 'renamed-bundle');
+        renameSync(bundle.directory, source);
+      }
+      if (kind === 'incomplete')
+        writeFileSync(join(source, 'beonforge-backup-incomplete'), '');
+      const cas = join(source, 'events.sqlite.artifacts');
+      const artifactRoot =
+        kind === 'blobs' || kind === 'staging' ? join(cas, kind) : cas;
+      const before = readdirSync(source, { recursive: true }).sort();
+      const external = join(files.root, 'external.sqlite');
+      const outcome: unknown = await files.open(external, artifactRoot).then(
+        async (writer) => {
+          await writer.putArtifact(Buffer.from('external-write'));
+          return 'writable';
+        },
+        (error: unknown) => error,
+      );
+      expect(outcome).toMatchObject({ code: 'integrity_failure' });
+      expect(existsSync(external)).toBe(false);
+      expect(readdirSync(source, { recursive: true }).sort()).toEqual(before);
+      await store.createBackup(files.copies);
+      if (kind !== 'incomplete')
+        await restoreSqliteBackup(source, files.copies);
+    },
+  );
+
+  it('F6-R2 rejects an SQLite descendant of a backup before creating an external CAS', async () => {
+    const files = fixture();
+    const store = await files.open();
+    const bundle = await store.createBackup(files.copies);
+    const child = join(bundle.directory, 'child');
+    mkdirSync(child, { mode: 0o700 });
+    const externalCas = join(files.root, 'external-cas');
+    await expect(
+      files.open(join(child, 'db.sqlite'), externalCas).then(() => 'writable'),
+    ).rejects.toMatchObject({ code: 'integrity_failure' });
+    expect(readdirSync(child)).toEqual([]);
+    expect(existsSync(externalCas)).toBe(false);
+  });
+
+  it.each(['ready', 'incomplete'] as const)(
+    'F6-R2 prevents borrowing an %s restore CAS for another database',
+    async (state) => {
+      const files = fixture();
+      const store = await files.open();
+      const bundle = await store.createBackup(files.copies);
+      const restored = await restoreSqliteBackup(
+        bundle.directory,
+        files.copies,
+      );
+      if (state === 'incomplete')
+        writeFileSync(
+          join(restored.directory, 'beonforge-restore-incomplete'),
+          '',
+        );
+      const before = readdirSync(restored.directory, {
+        recursive: true,
+      }).sort();
+      await expect(
+        files
+          .open(join(files.root, 'other.sqlite'), restored.artifactRoot)
+          .then(() => 'writable'),
+      ).rejects.toMatchObject({ code: 'integrity_failure' });
+      expect(
+        readdirSync(restored.directory, { recursive: true }).sort(),
+      ).toEqual(before);
+      if (state === 'ready') {
+        const copy = await files.open(restored.databasePath);
+        expect(await copy.readEvents()).toEqual([]);
+      }
+    },
+  );
+
   it.each([
     'source-root',
     'source-blobs',

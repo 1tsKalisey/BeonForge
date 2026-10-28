@@ -25,6 +25,19 @@ type Row = Record<string, SQLOutputValue>;
 type VerifiedBlobs = Map<string, Uint8Array>;
 const applicationId = 0x42464f52;
 
+function backupAncestor(path: string): boolean {
+  for (let current = path; ; current = dirname(current)) {
+    if (
+      basename(current).startsWith('beonforge-backup-') ||
+      ['manifest.json', 'beonforge-backup-incomplete'].some((name) =>
+        entryExists(join(current, name)),
+      )
+    )
+      return true;
+    if (dirname(current) === current) return false;
+  }
+}
+
 /** Reserved recovery roots never silently become fresh writable databases. */
 function checkLocation(
   path: string,
@@ -32,17 +45,28 @@ function checkLocation(
   validation?: 'backup' | 'restore',
 ): number | undefined {
   const parent = dirname(path);
-  const backup =
-    basename(parent).startsWith('beonforge-backup-') ||
-    ['manifest.json', 'beonforge-backup-incomplete'].some((name) =>
-      entryExists(join(parent, name)),
-    );
+  const backup = backupAncestor(parent) || backupAncestor(artifactRoot);
   if (backup && validation !== 'backup')
     throw new PersistenceError('integrity_failure');
   const restoring = entryExists(join(parent, 'beonforge-restore-incomplete'));
   if (restoring && validation !== 'restore')
     throw new PersistenceError('integrity_failure');
   if (validation) return undefined; // Only internal validation of a newly allocated copy, never public open.
+  for (let current = artifactRoot; ; current = dirname(current)) {
+    const restore =
+      basename(current).startsWith('beonforge-restore-') ||
+      [
+        'beonforge-restore-incomplete',
+        'beonforge-restore.json',
+        'restore-ready.json',
+      ].some((name) => entryExists(join(current, name)));
+    if (
+      restore &&
+      relative(realpathSync.native(current), realpathSync.native(parent)) !== ''
+    )
+      throw new PersistenceError('integrity_failure');
+    if (dirname(current) === current) break;
+  }
   const restored =
     basename(parent).startsWith('beonforge-restore-') ||
     ['beonforge-restore.json', 'restore-ready.json'].some((name) =>

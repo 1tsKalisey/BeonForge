@@ -8,6 +8,12 @@ Ocho regresiones rojas sobre build nuevo: destino dentro del bundle fuente, blob
 
 12 regresiones verdes con stores cerrados, CAS fuera del directorio SQL y SQL con CAS personalizado, junctions y reintentos válidos. Se comprueba inventario sin residuos y backups posteriores. Frozen/peers/check verdes: 62 contratos + 94 persistencia + 7 spike = 163 tests, incluida carga 800/40 sin modificar su implementación. Diff/secretos revisados; siempre temporales controlados. Las raíces CAS cerradas arbitrarias sólo son reconocibles por sus nombres/layout; se conserva la condición de rutas privadas, no una autenticación contra dueño privilegiado.
 
+## Segunda revisión — F-6/P3 artifactRoot
+
+Seis regresiones rojas después de compilar fuentes actuales: una DB externa podía inicializar/publicar mediante putArtifact en CAS, blobs o staging de backups completos, renombrados e incompletos; también se podía crear SQLite bajo un descendiente de backup con CAS externo. La identificación ahora recorre ancestros de SQLite y CAS antes de inicializarlos, conservando el modo interno de validación de nuevas copias. Un CAS de restore sólo puede ser usado por el SQLite de su mismo conjunto validado.
+
+Ocho regresiones verdes (incluye restore ready/incomplete y reapertura legítima). Sin crear DB/CAS externos ni cambiar inventarios protegidos. Frozen/peers/check verdes: 62 + 102 + 7 = 171 tests. F-5 intacto: sólo cambia checkLocation/guardas de marcadores, sin modificar replay, cachés, validaciones de eventos/checkpoints o presupuestos. La clasificación de manifest ajeno queda para el commit P3 separado siguiente.
+
 Veredicto recibido: REQUEST_CHANGES. M01.2 permanece abierto; B02b-03 excluido.
 
 Objetivo: reproducir y corregir F-5 (P1, validación/timeout), F-6 (P2, apertura de copias) y F-7 (P2, destinos anidados), un commit por hallazgo. Dependencia: B02b-02. Archivos: adaptador SQLite/worker, tests y registro de ejecución; contratos de dominio, dependencias, GC, streaming y runtime excluidos.
