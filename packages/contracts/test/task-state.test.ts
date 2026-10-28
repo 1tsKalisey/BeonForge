@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, expectTypeOf, it } from 'vitest';
 import {
   TASK_STATES,
   TASK_TRANSITIONS,
@@ -24,7 +24,7 @@ const expectedTransitions = {
   failed: ['queued'],
   cancelled: [],
   uncertain: ['awaiting_approval', 'failed', 'cancelled'],
-} satisfies Record<TaskState, readonly TaskState[]>;
+} as const satisfies Record<TaskState, readonly TaskState[]>;
 const expectedStates = Object.keys(expectedTransitions) as TaskState[];
 
 describe('task lifecycle contract', () => {
@@ -111,5 +111,58 @@ describe('task lifecycle contract', () => {
         expect(error.to).toBe('running');
       }
     }
+  });
+
+  it('rejects external mutation of the compiled state list', () => {
+    expect(Reflect.set(TASK_STATES, TASK_STATES.length, 'unregistered')).toBe(
+      false,
+    );
+    expect(Reflect.set(TASK_STATES, 0, 'unregistered')).toBe(false);
+    expect(Reflect.deleteProperty(TASK_STATES, 0)).toBe(false);
+    expect(Object.isFrozen(TASK_STATES)).toBe(true);
+    expect(isTaskState('unregistered')).toBe(false);
+    for (const state of expectedStates) expect(isTaskState(state)).toBe(true);
+  });
+
+  it('rejects external mutation of every compiled transition array', () => {
+    for (const state of expectedStates) {
+      const transitions = TASK_TRANSITIONS[state];
+      expect(Reflect.set(transitions, transitions.length, 'running')).toBe(
+        false,
+      );
+      expect(Object.isFrozen(transitions)).toBe(true);
+      expect(transitions).toEqual(expectedTransitions[state]);
+    }
+    expect(canTransition('uncertain', 'running')).toBe(false);
+    expect(canTransition('succeeded', 'running')).toBe(false);
+    expect(canTransition('queued', 'running')).toBe(true);
+  });
+
+  it('rejects external mutation of the compiled transition table', () => {
+    expect(Reflect.set(TASK_TRANSITIONS, 'uncertain', ['running'])).toBe(false);
+    expect(Reflect.deleteProperty(TASK_TRANSITIONS, 'queued')).toBe(false);
+    expect(Reflect.set(TASK_TRANSITIONS, 'unregistered', [])).toBe(false);
+    expect(Object.isFrozen(TASK_TRANSITIONS)).toBe(true);
+    expect(TASK_TRANSITIONS).toEqual(expectedTransitions);
+    expect(canTransition('uncertain', 'running')).toBe(false);
+    expect(transitionTask('queued', 'running')).toBe('running');
+    expect(() => transitionTask('uncertain', 'running')).toThrow(
+      InvalidTaskTransitionError,
+    );
+  });
+
+  it('preserves the published readonly tuple and table types', () => {
+    expectTypeOf(TASK_STATES).toEqualTypeOf<
+      readonly [
+        'queued',
+        'running',
+        'awaiting_approval',
+        'succeeded',
+        'failed',
+        'cancelled',
+        'uncertain',
+      ]
+    >();
+    expectTypeOf(TASK_TRANSITIONS).toEqualTypeOf<typeof expectedTransitions>();
   });
 });

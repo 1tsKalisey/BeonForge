@@ -5,17 +5,21 @@ Actualizado: 2026-10-28. Leer este archivo antes de cualquier tarea.
 ## Posición
 
 - Fase preparada: 01 — Kernel durable sin IA; Foundation y M00.3 permanecen cerrados con revisión independiente y CI histórica verde.
-- Última tarea verificada localmente: B01-02 — contratos mínimos de ejecución en `cccbb16`. B01-01 aceptado por el usuario; F-2/F-3 conservados.
+- Última tarea verificada: corrección F-4 — constantes del lifecycle congeladas en runtime, sin cambios de API/tipos/transiciones. B01-02 permanece en `cccbb16`; F-2/F-3 conservados.
 - Rama de trabajo: `phase/01-execution-contracts`, creada desde `e14cfdd`. `main` permanece en `e14cfdd`, sin merge ni publicación.
-- Tarea activa: ninguna. M01.1 preparado para revisión independiente: `reviews/current-review-packet.md`. Pausa hasta recibir la revisión del usuario; no declarar el milestone aceptado todavía.
-- Siguiente tarea de implementación: B02a-01 — spike mínimo SQLite, desbloqueable sólo tras revisión/aceptación de M01.1. No iniciada.
-- Dependencias posteriores: contratos mínimos y revisión M01.1 antes del spike SQLite; preferencia por `node:sqlite`, sin driver decidido todavía.
+- Tarea activa: ninguna. M01.1 aceptado y cerrado tras revisión `APPROVE_WITH_FOLLOWUPS`, F-4 resuelto y gates verdes. No quedan hallazgos bloqueantes; evidencia en `reviews/current-review-packet.md`.
+- Siguiente nodo ejecutable único: B02a-01 — Spike SQLite. Desbloqueado, no iniciado.
+- Dependencias posteriores: spike mínimo con preferencia por `node:sqlite`, antes de elegir driver o implementar persistencia.
 - Bloqueos de contexto: vault ausente en este checkout; lectura histórica PREP-001 conservada, sin nueva auditoría. El kernel antiguo está incompleto en otro ordenador y no es dependencia.
-- Decisiones pendientes: revisión de contratos M01.1; distribución/referencia del vault; framework HTTP en fase posterior; driver SQLite tras spike. Validación estructural de contratos v1 implementada sin nueva dependencia.
+- Decisiones pendientes: distribución/referencia del vault; framework HTTP en fase posterior; driver SQLite tras spike. Contratos M01.1 revisados; validación estructural v1 sin nueva dependencia.
 - Último commit de cierre antes de registrar la promoción: `629059e` (`docs: close foundation milestone`). `main` y `phase/00-foundation` fueron publicados por fast-forward, sin force ni merge commit.
 - Revisión Claude: formal `APPROVE_WITH_FOLLOWUPS` completada; F-1 confirmado y corregido, F-2/F-3 registrados para Fase 01. M00.3 cerrado. Claude Code no se invoca desde aquí.
 
 ## Gates actuales
+
+- F-4 / reproducción y corrección: hallazgo P3 confirmado mediante tres tests de mutación de exports compilados importados desde `@beonforge/contracts`; antes del cambio fallaron los 3 (59 tests restantes pasaron). `Object.freeze` aplicado a TASK_STATES, cada array de TASK_TRANSITIONS y la tabla; Reflect.set/delete rechazados sin alterar validadores. Cuarto test nuevo confirma tipos readonly/tuplas exactos contra dist. Sin cambios a otros contratos ni dependencias.
+- F-4 / gates: instalación frozen, peers y `pnpm.cmd check` verdes (formato, lint con tipos, typecheck, build, 62/62 tests en 3 archivos). Diff, staged paths y escaneo textual de secretos revisados. Mismo entorno Corepack/pnpm 12.15.0 y Node 24.13.0, PATH temporal; sin nuevo run remoto. Rollback: revertir sólo el commit F-4 y reabrir el seguimiento si fuese necesario.
+- M01.1 / cierre: revisión independiente `APPROVE_WITH_FOLLOWUPS` recibida y confirmada por el usuario; único hallazgo F-4 resuelto con regresión rojo/verde. Se cierra el milestone conforme a la condición de gates. B02a-01 queda preparado, sin ejecutar SQLite ni ampliar alcance; `main` intacta.
 
 - B01-02 / alcance: manifiestos, resultados por intento, errores tipados, eventos de inicio/fin y referencias SHA-256; parsers estrictos desde `unknown`, versión 1 reutilizada y API pública compatible. Sin runtime, storage, DAG, agentes, proveedores, routing ni UI. Fronteras y restricciones en `packages/contracts/README.md`.
 - B01-02 / gates: `pnpm.cmd install --frozen-lockfile`, `pnpm.cmd peers check` y `pnpm.cmd check` pasaron mediante shim temporal Corepack/pnpm 12.15.0 (PATH sólo del proceso, Node 24.13.0). Formato, lint con tipos, typecheck consumidor contra dist, build y 58/58 tests en 3 archivos. No hubo fallos de gates en esta tarea; revisión diff/staged paths y escaneo textual de secretos sin hallazgos. Sin cambios de dependencias/lockfile ni nuevo run remoto.
@@ -49,7 +53,7 @@ Desde la raíz real del checkout en PowerShell: `git rev-parse --show-toplevel`,
 
 ## Instrucciones exactas para continuar
 
-1. Esperar la revisión independiente M01.1 entregada por el usuario. No invocar revisores/agentes ni empezar el spike.
-2. Al recibir hallazgos, reproducir y clasificar antes de corregir; fixes confirmados en commit separado y gates completos. Mantener `main` intacta y trabajar en la rama actual.
-3. Tras aceptación, continuar sólo con B02a-01 según `phases/phase-01.md`: spike SQLite con preferencia por `node:sqlite`. No repetir auditorías ni rediseñar contratos sin hallazgo concreto.
+1. Continuar únicamente con B02a-01 según `phases/phase-01.md`: spike SQLite con preferencia por `node:sqlite`. M01.1 cerrado; no repetir revisión ni planificación de contratos.
+2. Confirmar raíz Git, rama y cambios locales; mantener `main` intacta. No hacer merge ni publicar.
+3. Evaluar WAL, transacciones, reapertura e idempotencia con evidencia antes de decidir driver; no ampliar a persistencia de producto todavía.
 4. Preservar los gates F-2/F-3 y las fronteras documentadas. La siguiente fase debe probar persistencia/recuperación reales; los contratos actuales no las implementan.

@@ -5,7 +5,7 @@
  * attempt, not a replay of effects from the previous one. Succeeded/cancelled
  * are closed orchestration outcomes; cancellation does not undo external work.
  */
-export const TASK_STATES = [
+export const TASK_STATES = Object.freeze([
   'queued',
   'running',
   'awaiting_approval',
@@ -13,7 +13,7 @@ export const TASK_STATES = [
   'failed',
   'cancelled',
   'uncertain',
-] as const;
+] as const);
 
 export type TaskState = (typeof TASK_STATES)[number];
 
@@ -24,21 +24,29 @@ export type TaskState = (typeof TASK_STATES)[number];
  * Running -> succeeded is for work that requires no approval; task success
  * never authorizes a merge. Awaiting approval cannot restart execution.
  */
-export const TASK_TRANSITIONS = {
-  queued: ['running', 'cancelled'],
-  running: [
+export const TASK_TRANSITIONS = Object.freeze({
+  queued: Object.freeze(['running', 'cancelled'] as const),
+  running: Object.freeze([
     'awaiting_approval',
     'succeeded',
     'failed',
     'cancelled',
     'uncertain',
-  ],
-  awaiting_approval: ['succeeded', 'failed', 'cancelled'],
-  succeeded: [],
-  failed: ['queued'],
-  cancelled: [],
-  uncertain: ['awaiting_approval', 'failed', 'cancelled'],
-} as const satisfies Record<TaskState, readonly TaskState[]>;
+  ] as const),
+  awaiting_approval: Object.freeze([
+    'succeeded',
+    'failed',
+    'cancelled',
+  ] as const),
+  succeeded: Object.freeze([] as const),
+  failed: Object.freeze(['queued'] as const),
+  cancelled: Object.freeze([] as const),
+  uncertain: Object.freeze([
+    'awaiting_approval',
+    'failed',
+    'cancelled',
+  ] as const),
+} as const satisfies Record<TaskState, readonly TaskState[]>);
 
 export class InvalidTaskTransitionError extends Error {
   constructor(

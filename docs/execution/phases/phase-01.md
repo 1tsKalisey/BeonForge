@@ -2,7 +2,7 @@
 
 Actualizado: 2026-10-28. Foundation cerrada. B00-01 prepara esta fase; no implementa kernel. Decisiones: D-017/D-018/D-019 y ADR-0001/0002.
 
-Estado: B01-01 aceptado; B01-02 verificado localmente en `cccbb16`. M01.1 preparado y en pausa para revisión independiente. Siguiente implementación B02a-01 sólo tras aceptación; estado/evidencias vigentes en `../status.md`.
+Estado: M01.1 aceptado y cerrado tras APPROVE_WITH_FOLLOWUPS, F-4 resuelto y gates verdes (62/62 tests). B01-01/B01-02 completados; siguiente tarea única B02a-01 — Spike SQLite, desbloqueada y no iniciada. Evidencias vigentes en `../status.md`.
 
 ## Resultado y límites
 
