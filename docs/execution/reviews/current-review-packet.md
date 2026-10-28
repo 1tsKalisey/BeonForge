@@ -1,4 +1,33 @@
-# M01.3 — Runtime determinista y recuperación, revisión pendiente
+# M01.3 — Aceptación formal y cierre de Fase 01
+
+Registrado: 2026-10-28. **M01.3 y Fase 01 aceptados/cerrados.** Veredicto independiente APPROVE_WITH_FOLLOWUPS aceptado por el usuario, sin P0–P2. El cierre estaba condicionado a tres P3 mínimos, ahora reproducidos/corregidos/verificados. No se invocó ningún agente ni se atribuye una nueva revisión independiente a estos commits; se registra la aceptación recibida y sus condiciones satisfechas. Fase 02 no iniciada.
+
+## Commits y evidencias correctivas
+
+Base: `12e3eba` (paquete inicial M01.3). Código final: `c1b8bad`, rama `phase/01-workflow-runtime`. Diff: `git diff 12e3eba..c1b8bad`; milestone completo desde `dada616`. Main permanece `e14cfdd`, sin merge/publicación. Evidencia y semántica temporal en packages/runtime/README.md; paquetes históricos conservados debajo.
+
+| Hallazgo | Rojo antes del cambio | Corrección / verde |
+|---|---|---|
+| P3-1, cancelación/persistencia | 5 tests compilados no podían observar la confirmación/transitoriedad/desconocimiento. | `b178729`: cancellationPersisted true para cancelled confirmado/recuperado, false para parada conocida antes de iniciar el siguiente intento, null antes de leer historia/otros estados/resultados inciertos. 5 nuevos verdes; incluye error SQL real y recuperación sin retry de pending. |
+| P3-2, exit/argumentos | 15 rojas: abort reescribía 0/1/2 a 130, formatos no decimales se aceptaban y rangos inválidos creaban storage antes de fallar. | `8e13a5e`: exit según estado real, blocked=2 con abort, cancelled=130; timeout decimal canónico 1..2147483647 antes de DB. 18 nuevos verdes incluidos ambos límites y cancelación aplicable. |
+| P3-3, inspect | 5 rojas: DB ausente se inicializaba, diagnóstico de parent ausente era genérico, vacío se inicializaba y directory dejaba CAS. | `c1b8bad`: lstat previo, database_not_found para DB/parent ausentes; rechaza vacío/no regular antes de persistencia. 6 nuevos verdes, inventarios/sentinels intactos y operación existente conservada. |
+
+## Gates, compatibilidad y aceptación
+
+- Build de fuentes actuales antes de cada reproducción roja; tests contra exports/CLI compilados, no dist obsoleto. Check recompila fuentes y consumidor de declaraciones. No se borraron ni sustituyeron tests originales.
+- Node 24.19.0/SQLite 3.53.3, frozen install, peers, formato, lint con tipos, typecheck, build y **255/255 tests** verdes: 62 contratos + 115 persistencia + 71 runtime + 7 spike. Son los 226 previos más 29 nuevos (5 + 18 + 6); sin skips/fallos finales. Demo SIGKILL/checkpoint/tail y volumen anteriores siguen incluidos. No se encontraron fallos de gates intermedios ajenos a las regresiones rojas intencionales.
+- Semántica de ejecución intacta: cancelled terminal sigue terminal; pending/uncertain no se reejecutan ni se convierten en reanudables. cancellationPersisted es observación al emitir el reporte, no petición durable global ni permiso para retry. Ante fallo/resultado desconocido de persistencia se propaga error y no se inventa confirmación; recovery sigue siendo autoridad.
+- Campo nuevo opcional en el tipo para compatibilidad de consumidores; error database_not_found y validación CLI son aditivos/acotados. Contratos/eventos/schema y código aceptado de persistencia/F-5 intactos; sin dependencias, root manifests o lockfile nuevos.
+- Pruebas de señales usan proceso real del CLI y SIGINT emitido en fronteras delegadas de process.once/stdout para ser portables; no simulan reportes, durabilidad ni resultados de persistencia. No prometen entrega OS idéntica en todas las plataformas. Inspect es preflight bajo el modelo existente de raíces privadas, no adaptador readonly.
+- Diff/staged paths y escaneo textual de secretos revisados; sólo temporales controlados, limpiados sin residuos. Sin nueva CI remota observada, publicación, merge ni modificación de main.
+
+Aceptación formal: revisión independiente aceptada por el usuario y tres seguimientos verificados con todos los gates. Se cierra M01.3/Fase 01, sin autogenerar otro veredicto. Riesgos R-023/024/025/026/027/031/032 continúan: memoria, ámbito intraproceso, ACL privadas, cancelación cooperativa/handlers confiables, falta de reconciliación y power loss no acreditado.
+
+Rollback: revert sólo de correcciones/registro conservando datos y schemas. Siguiente nodo: acotar la primera tarea de Fase 02 Workspace y contexto según master-plan; no hay phase-02.md ni tarea detallada aún. No se crea plan ni se inicia código de esa fase en este turno.
+
+---
+
+# Histórico — M01.3 runtime y recuperación, paquete previo a revisión
 
 Preparado: 2026-10-28. **B02b-03 verificado localmente; M01.3 no aceptado/cerrado.** Esperar revisión independiente suministrada por el usuario; no invocar agentes ni iniciar Fase 02. M01.1/M01.2 aceptados siguen intactos; registros históricos debajo.
 

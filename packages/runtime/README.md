@@ -1,5 +1,7 @@
 # B02b-03 — Deterministic serial workflows
 
+Final status: M01.3 and Fase 01 accepted/closed after the user's independent APPROVE_WITH_FOLLOWUPS (no P0–P2) and verification of the three P3 corrections. All 255 tests and quality gates pass, including the original 226. The next phase has not started; this record does not claim a further independent review of the corrective commits.
+
 M01.3 review followups (approved APPROVE_WITH_FOLLOWUPS, no P0–P2): bounded correction of cancellation observability, CLI exit/decimal arguments and inspect missing-store creation. Scope: runner/report, CLI, compiled regression tests and execution evidence; accepted persistence/contracts and future phases excluded. Acceptance: distinguish known durable cancellation from observation-only/unknown without changing terminal or uncertainty semantics; actual report determines exit code; inspect missing DB creates nothing. Each P3 gets red/green reproduction, coherent commit and full frozen/peers/check/diff/secret gates. Rollback: revert only corrective commits preserving data. Close M01.3 only after verified followups and recorded acceptance; do not start the next phase.
 
 Objective: execute a bounded DAG, persist evidence and demonstrate safe process-interruption recovery using the accepted DurableStore. Dependencies: M01.1/M01.2. Scope: this package, workspace link in lockfile, tests/CLI and execution/security evidence. Excludes agents/models, routing, worktrees, general tools, distributed scheduling, automatic reconciliation and new SQLite/domain schemas. No external dependencies.
@@ -53,6 +55,6 @@ After build, `pnpm.cmd --filter @beonforge/runtime demo` executes the real child
 
 The harness prints cut/recovery/receipt counters and verifies SQLite/CAS data, then removes only its validated temporary tree. These are process crashes, not power-loss or exactly-once proofs. The remaining CLI tests run/inspect/reopen, known failures/retry, malformed arguments/JSON/handlers and timeout followed by blocked resume.
 
-## Local verification record
+## Initial implementation verification record
 
 Node 24.19.0 / SQLite 3.53.3, no new external dependencies. Root lockfile changes only add workspace links for this package. 42 new tests (35 boundary/runtime + 7 process/CLI), total 226 with the unchanged 184 accepted tests. Frozen install, peers, formatting, typed lint, source/compiled-consumer typecheck, build and full tests verified. The first lint found eight require-await cases in instant fixture handlers; corrected with Promise.resolve or actual asynchronous receipt writes, no rule exceptions. The first parser test's readonly fixture setup was made mutable before consumer typecheck; no accepted contract changes. M01.3 awaits independent review, not self-acceptance.

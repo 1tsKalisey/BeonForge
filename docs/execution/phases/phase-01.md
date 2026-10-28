@@ -2,7 +2,7 @@
 
 Actualizado: 2026-10-28. Foundation cerrada. B00-01 prepara esta fase; no implementa kernel. Decisiones: D-017/D-018/D-019 y ADR-0001/0002.
 
-Estado: M01.1/M01.2 cerrados. B02b-03 implementado y verificado localmente en `1378d38`, 226 tests verdes y demo real de SIGKILL/reanudación segura. M01.3 preparado para revisión independiente, aún no aceptado ni cerrado; Fase 02 no iniciada. Contexto de persistencia/F-5 intacto. Evidencias en `../status.md`, `packages/runtime/README.md` y paquete de revisión actual desde la raíz.
+Estado: Fase 01 cerrada; M01.1/M01.2/M01.3 aceptados. M01.3 APPROVE_WITH_FOLLOWUPS, sin P0–P2; tres P3 corregidos (`b178729`, `8e13a5e`, `c1b8bad`), 255 tests verdes incluyendo los 226 originales. Semántica de estados/recuperación y persistencia/F-5 intactas; aceptación formal en paquete actual. Fase 02 no iniciada, primer nodo aún por acotar según master-plan. Evidencias en `../status.md` y `packages/runtime/README.md`.
 
 ## Resultado y límites
 
