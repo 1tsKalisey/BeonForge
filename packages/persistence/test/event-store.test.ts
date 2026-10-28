@@ -141,7 +141,7 @@ describe('durable event store through compiled exports', () => {
     const records = await store.readEvents();
     const db = files.sql();
     expect(db.prepare('PRAGMA journal_mode').get()?.journal_mode).toBe('wal');
-    expect(db.prepare('PRAGMA user_version').get()?.user_version).toBe(1);
+    expect(db.prepare('PRAGMA user_version').get()?.user_version).toBe(2);
     expect(db.prepare('SELECT sqlite_version() AS v').get()?.v).toBe('3.53.3');
     files.closeSql(db);
     await files.close(store);
@@ -326,7 +326,7 @@ describe('durable event store through compiled exports', () => {
     const files = fixture();
     let db = files.sql();
     db.exec(
-      "CREATE TABLE sentinel(value TEXT); INSERT INTO sentinel VALUES ('kept'); PRAGMA user_version=2;",
+      "CREATE TABLE sentinel(value TEXT); INSERT INTO sentinel VALUES ('kept'); PRAGMA user_version=3;",
     );
     files.closeSql(db);
     await expect(files.open()).rejects.toMatchObject({

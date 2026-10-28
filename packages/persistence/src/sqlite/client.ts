@@ -3,7 +3,15 @@ import { basename, dirname, isAbsolute, join } from 'node:path';
 import process from 'node:process';
 import { setTimeout, clearTimeout } from 'node:timers';
 import { Worker } from 'node:worker_threads';
-import type { BlockExecutionEvent } from '@beonforge/contracts';
+import type {
+  BlockExecutionEvent,
+  ArtifactReference,
+} from '@beonforge/contracts';
+import type {
+  DurableStore,
+  WorkflowCheckpoint,
+  RecoveryLocation,
+} from '../recovery.js';
 import {
   PersistenceError,
   type EventStore,
@@ -22,7 +30,7 @@ interface Pending {
   readonly timer: ReturnType<typeof setTimeout>;
 }
 
-class WorkerEventStore implements EventStore {
+class WorkerEventStore implements DurableStore {
   private readonly pending = new Map<number, Pending>();
   private nextId = 0;
   private closing: Promise<void> | undefined;
@@ -97,7 +105,15 @@ class WorkerEventStore implements EventStore {
       clearTimeout(pending.timer);
       pending.reject(
         new PersistenceError(
-          pending.command === 'append' ? 'outcome_unknown' : 'storage_failure',
+          [
+            'append',
+            'put-artifact',
+            'create-checkpoint',
+            'backup',
+            'restore',
+          ].includes(pending.command)
+            ? 'outcome_unknown'
+            : 'storage_failure',
         ),
       );
     }
@@ -145,6 +161,50 @@ class WorkerEventStore implements EventStore {
     const reply = await this.call({ kind: 'rebuild' });
     if (reply.kind !== 'rebuilt') throw new PersistenceError('storage_failure');
   }
+  async putArtifact(bytes: Uint8Array): Promise<ArtifactReference> {
+    const reply = await this.call({ kind: 'put-artifact', bytes });
+    if (reply.kind !== 'artifact')
+      throw new PersistenceError('storage_failure');
+    return reply.reference;
+  }
+  async readArtifact(reference: ArtifactReference): Promise<Uint8Array> {
+    const reply = await this.call({ kind: 'read-artifact', reference });
+    if (reply.kind !== 'bytes') throw new PersistenceError('storage_failure');
+    return reply.bytes;
+  }
+  async createCheckpoint(checkpointId: string): Promise<WorkflowCheckpoint> {
+    const reply = await this.call({ kind: 'create-checkpoint', checkpointId });
+    if (reply.kind !== 'checkpoint' || reply.checkpoint === null)
+      throw new PersistenceError('storage_failure');
+    return reply.checkpoint;
+  }
+  async loadCheckpoint(
+    checkpointId: string,
+  ): Promise<WorkflowCheckpoint | null> {
+    const reply = await this.call({ kind: 'load-checkpoint', checkpointId });
+    if (reply.kind !== 'checkpoint')
+      throw new PersistenceError('storage_failure');
+    return reply.checkpoint;
+  }
+  async createBackup(destinationParent: string): Promise<RecoveryLocation> {
+    const reply = await this.call({ kind: 'backup', destinationParent });
+    if (reply.kind !== 'location')
+      throw new PersistenceError('storage_failure');
+    return reply.location;
+  }
+  async restore(
+    backupDirectory: string,
+    destinationParent: string,
+  ): Promise<RecoveryLocation> {
+    const reply = await this.call({
+      kind: 'restore',
+      backupDirectory,
+      destinationParent,
+    });
+    if (reply.kind !== 'location')
+      throw new PersistenceError('storage_failure');
+    return reply.location;
+  }
   close(): Promise<void> {
     this.closing ??= this.closeOwned();
     return this.closing;
@@ -174,8 +234,13 @@ class WorkerEventStore implements EventStore {
   }
 }
 
-export async function openSqliteEventStore(path: string): Promise<EventStore> {
+export async function openSqlitePersistence(
+  path: string,
+  artifactRoot?: string,
+): Promise<DurableStore> {
   requireRuntime(process.versions.node);
+  if (artifactRoot !== undefined && typeof artifactRoot !== 'string')
+    throw new PersistenceError('invalid_input');
   if (typeof path !== 'string' || !isAbsolute(path))
     throw new PersistenceError('invalid_input');
   let canonical: string;
@@ -205,7 +270,7 @@ export async function openSqliteEventStore(path: string): Promise<EventStore> {
   try {
     store = new WorkerEventStore(
       new Worker(new URL('./worker.js', import.meta.url), {
-        workerData: { path: canonical },
+        workerData: { path: canonical, artifactRoot },
       }),
       () => activePaths.delete(key),
     );
@@ -219,5 +284,28 @@ export async function openSqliteEventStore(path: string): Promise<EventStore> {
   } catch (error) {
     await store.close();
     throw error;
+  }
+}
+
+export async function openSqliteEventStore(path: string): Promise<EventStore> {
+  return openSqlitePersistence(path);
+}
+
+export async function restoreSqliteBackup(
+  backupDirectory: string,
+  destinationParent: string,
+): Promise<RecoveryLocation> {
+  requireRuntime(process.versions.node);
+  const store = new WorkerEventStore(
+    new Worker(new URL('./worker.js', import.meta.url), {
+      workerData: { restoreOnly: true },
+    }),
+    () => {},
+  );
+  try {
+    await store.ready;
+    return await store.restore(backupDirectory, destinationParent);
+  } finally {
+    await store.close();
   }
 }

@@ -1,4 +1,8 @@
-import type { BlockExecutionEvent } from '@beonforge/contracts';
+import type {
+  BlockExecutionEvent,
+  ArtifactReference,
+} from '@beonforge/contracts';
+import type { WorkflowCheckpoint, RecoveryLocation } from '../recovery.js';
 import type {
   AttemptIdentity,
   AttemptProjection,
@@ -12,6 +16,12 @@ export type Command =
   | { kind: 'events' }
   | { kind: 'attempt'; identity: AttemptIdentity }
   | { kind: 'rebuild' }
+  | { kind: 'put-artifact'; bytes: Uint8Array }
+  | { kind: 'read-artifact'; reference: ArtifactReference }
+  | { kind: 'create-checkpoint'; checkpointId: string }
+  | { kind: 'load-checkpoint'; checkpointId: string }
+  | { kind: 'backup'; destinationParent: string }
+  | { kind: 'restore'; backupDirectory: string; destinationParent: string }
   | { kind: 'close' };
 export interface Request {
   id: number;
@@ -22,6 +32,10 @@ export type Reply =
   | { kind: 'events'; records: readonly StoredEvent[] }
   | { kind: 'attempt'; projection: AttemptProjection | null }
   | { kind: 'rebuilt' }
+  | { kind: 'artifact'; reference: ArtifactReference }
+  | { kind: 'bytes'; bytes: Uint8Array }
+  | { kind: 'checkpoint'; checkpoint: WorkflowCheckpoint | null }
+  | { kind: 'location'; location: RecoveryLocation }
   | { kind: 'closed' };
 export type Response =
   | { kind: 'ready' }

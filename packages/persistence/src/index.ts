@@ -6,4 +6,14 @@ export type {
   AttemptProjection,
   PersistenceErrorCode,
 } from './event-store.js';
-export { openSqliteEventStore } from './sqlite/client.js';
+export {
+  openSqliteEventStore,
+  openSqlitePersistence,
+  restoreSqliteBackup,
+} from './sqlite/client.js';
+export type {
+  ArtifactStore,
+  DurableStore,
+  WorkflowCheckpoint,
+  RecoveryLocation,
+} from './recovery.js';

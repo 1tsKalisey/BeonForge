@@ -45,7 +45,10 @@ export type PersistenceErrorCode =
   | 'busy'
   | 'storage_failure'
   | 'outcome_unknown'
-  | 'closed';
+  | 'closed'
+  | 'unsafe_path'
+  | 'artifact_missing'
+  | 'integrity_failure';
 
 /** Fixed diagnostic only; no SQL, paths, event payloads or raw driver errors. */
 export class PersistenceError extends Error {

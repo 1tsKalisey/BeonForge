@@ -1,5 +1,7 @@
 # B02b-01 — Durable events and attempt projection
 
+The scope below records B02b-01. B02b-02 adds the artifact/checkpoint/backup protocols documented in [RECOVERY.md](RECOVERY.md), including schema v2 migration and unchanged legacy EventStore API.
+
 Objective: implement only versioned migration, append-only events, atomic event/projection writes, idempotency and replay after reopening. Depends on accepted M01.1 and spike B02a-01. Files: this package, root Node/types configuration and lockfile, execution/security evidence. Excludes blobs, checkpoints, backup/restore, executor/runtime/DAG, policy approvals, providers and UI. Rollback: revert this task's commits; preserve database files and obtain authorization before any destructive migration. Fresh databases use schema v1; no downgrade is performed.
 
 ## Boundary

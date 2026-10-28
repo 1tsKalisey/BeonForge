@@ -1,0 +1,43 @@
+# B02b-02 — Artifacts, workflow checkpoints and isolated backup/restore
+
+Objective: SHA-256 CAS, consistent confirmed checkpoints and verifiable recovery of SQLite plus blobs. Depends on B02b-01. Scope: this package, integration fixtures and execution/security evidence. Excludes scheduler/executors, agents, routing, UI and activation/replacement of active data. No new dependencies or changes to `@beonforge/contracts`.
+
+## API and layout
+
+`openSqliteEventStore(path): Promise<EventStore>` remains available. `openSqlitePersistence(path, artifactRoot?): Promise<DurableStore>` exposes the same worker plus `putArtifact`, `readArtifact`, `createCheckpoint`, `loadCheckpoint` and `createBackup(destinationParent)`. By default the CAS is `${databasePath}.artifacts`, with flat `blobs/<lowercase-sha256>` and private `staging/<uuid>.tmp` directories. APIs accept bytes and validated ArtifactReference values, never caller-selected blob filenames.
+
+`restoreSqliteBackup(backupDirectory, destinationParent)` uses the same worker implementation in restore-only mode. Both backup and restore allocate a new private subdirectory and return `{ directory, databasePath, artifactRoot }` only on success. The parent must already exist and be authorized/private. Passing an active directory as parent does not replace it: only a fresh child is created. No API activates a restored copy or overwrites active data; any later substitution requires explicit human approval outside this task.
+
+## Publication and references
+
+1. Hash the bytes in the worker, write an exclusive temporary file, fsync and close it.
+2. Verify the staged content and publish by hard link without replacement. An existing digest is deduplication only after verifying its bytes/length; corrupt existing content is never overwritten. Sync directories where supported, then unlink only that operation's temporary name.
+3. Only after publication can an event or workflow checkpoint commit a SQLite reference. The worker verifies references on append, event/projection reads and startup validation.
+
+There is no transaction spanning SQLite and filesystem. A crash/failure before SQL commit can leave an unreferenced complete blob or a staging file; these are retained, never executed or treated as checkpoint completion. Retries deduplicate complete blobs. There is no GC or deletion of published blobs in this task. Missing/corrupt referenced content fails validation; nothing invents successful work or silently repairs an active store.
+
+Every path component is checked with lstat; traversal, symlinks/junctions, non-files and replaced pinned directories are rejected. File reads use no-follow where available and compare descriptor identity with pre/post lstat. File publication uses exclusive create/link instead of overwriting rename. POSIX roots must be owner-controlled and not group/world-writable; Windows requires a private caller-controlled ACL. UNC paths are rejected on Windows. These checks do not sandbox a privileged owner concurrently replacing ancestors: keep CAS/backup roots outside untrusted worktrees/tools. Node lacks portable openat-style directory-relative operations and Windows directory fsync. File contents are flushed, but power-loss durability of directory metadata on Windows/hardware is not established by process-kill tests.
+
+## Workflow checkpoints versus SQLite WAL checkpoints
+
+Schema 1→2 additively introduces `workflow_checkpoints`, leaving the event log unchanged. A workflow checkpoint is a version-1 JSON snapshot of a confirmed log prefix: checkpointId, sequence and attempt projections, including pending/uncertain outcomes unchanged. Its bytes are a CAS blob; SQLite commits the ID/sequence/hash/length only after verifying publication. Repeating an ID at the same head is idempotent; another head is a conflict, never an overwrite.
+
+Loading verifies the blob and compares it with replay of that exact prefix (temporary projection under a rolled-back SAVEPOINT). It returns reconstructed typed state, not trusted arbitrary JSON. The live latest projection is preserved. Startup validates all checkpoint references. A pending/uncertain snapshot never authorizes effect reexecution. Startup still replays the full log; tail-only optimization is not claimed.
+
+SQLite's own WAL checkpoint copies committed pages from WAL to the database file; it is unrelated to a workflow checkpoint. A raw `.db` file copy is not the backup strategy.
+
+## Backup/restore protocol
+
+The worker queues complete commands, including asynchronous backup work. While a backup runs, normal appends/CAS writes/checkpoints cannot interleave on that owner. External competing control planes are unsupported, as in B02b-01.
+
+Backup uses [`node:sqlite.backup`](https://nodejs.org/download/release/v24.19.0/docs/api/sqlite.html#sqlitebackupsource-path-options), the supported [SQLite Online Backup API](https://sqlite.org/backup.html). It snapshots live WAL state, copies **all published CAS blobs**, verifies the copied database/replay/checkpoints/references, seals the snapshot to standalone journal_mode=DELETE, flushes it and writes a strict versioned manifest with SQLite SHA-256, blob references and sequence. A separate incomplete marker remains until all steps finish. Staging files are excluded; unreferenced complete blobs are retained in the backup. Manifest hashes provide integrity, not authentication against a privileged author rewriting the entire bundle.
+
+Restore requires a complete manifest, no incomplete marker or SQLite sidecars, valid database/blob hashes and exact artifact inventory. It checks integrity_check, foreign_key_check, schema/application ID and sequence. The supported SQLite backup API copies the snapshot to a newly allocated directory; blobs are copied and verified there. Replay, all SQLite references and workflow checkpoints must validate before a ready marker is written and the incomplete marker removed. A failed/crashed restore remains isolated and cannot be opened normally. Retrying uses another fresh directory. The source and active database are not modified or substituted.
+
+All production SQL, hashing, synchronous filesystem work and backup/restore execute inside owned workers. The 10-second watchdog still fails outstanding mutations as outcome_unknown, without automatic retries or activation; native operations can delay physical worker termination. A lost acknowledgement may leave a valid new bundle/checkpoint or only incomplete files. Inspect completion markers and validate, rather than assuming success/failure. Blob payloads, histories and checkpoints are currently materialized in memory; no streaming, GC, encryption or large-volume SLA is claimed.
+
+## Evidence, gates and rollback
+
+Tests consume compiled exports and real controlled temporaries: known SHA-256, empty blobs, concurrent deduplication across two publishers, truncation/corruption, traversal/junctions, missing references, SQL failure after blob publication, checkpoint prefix/reopen/migration, live-WAL backup plus later queued append, real isolated restores, damaged bundles and logically dangling references. SIGKILL fixtures pause the real staging/backup primitives at defined intermediate states and a test-only temporary SQLite trigger after CAS publication but before checkpoint INSERT commit; no production failpoint flag or durability mock is introduced. They also kill after public blob/checkpoint confirmation. These are process crashes, not simulated power cuts.
+
+Run frozen install, peers and root `pnpm.cmd check` using the evaluated Node 24.19.0/SQLite 3.53.3 baseline. Rollback is a focused revert of this task's code/evidence commits, preserving all data. Older code rejects schema v2; no destructive downgrade is attempted. Keep incomplete/orphan directories for diagnosis; cleanup/activation of real data requires a separately authorized operation. M01.2 requires the user's independent review before B02b-03.
