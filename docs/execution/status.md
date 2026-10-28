@@ -4,18 +4,23 @@ Actualizado: 2026-10-28. Leer este archivo antes de cualquier tarea.
 
 ## Posición
 
-- Fase actual: 01 — Kernel durable sin IA, aceptada y cerrada con M01.3. Foundation/M00.3, M01.1/M01.2/M01.3 cerrados; Fase 02 no iniciada.
-- Último trabajo verificado: tres followups P3 de M01.3, P3-1 `b178729`, P3-2 `8e13a5e`, P3-3 `c1b8bad`. B02b-03 `1378d38` conservado, contratos/persistencia/F-5 intactos, sin dependencias ni cambios de schema/lockfile.
-- Rama de trabajo: `phase/01-workflow-runtime`, creada desde `dada616`. `main` permanece en `e14cfdd`, sin merge ni publicación.
-- Tarea activa: ninguna. Revisión independiente M01.3 APPROVE_WITH_FOLLOWUPS aceptada por el usuario, sin hallazgos P0–P2. Tres P3 reproducidos/corregidos/verificados; aceptación y cierre formal registrados en `reviews/current-review-packet.md`. No se atribuye otra revisión a estos commits ni se invocaron agentes.
-- Siguiente nodo único: acotar la primera tarea de Fase 02 — Workspace y contexto — según master-plan (worktree acotado/ContextPackage). Todavía no existe phase-02.md ni tarea detallada; no inventar IDs ni comenzar implementación antes de concretarla. Este turno termina con el cierre, sin iniciar Fase 02.
+- Fase actual: 02 — Workspace y contexto. Fase 01/M01.3 aceptados y cerrados; B03-01 implementado/verificado localmente, pendiente de revisión independiente.
+- Último trabajo verificado: B03-01 `a837e9c`, registro CAS v1 e inspección segura de repositorios/worktrees existentes. Contratos, persistencia/F-5 y runtime aceptados intactos. Sin dependencias externas nuevas ni cambios de schema; lockfile sólo añade vínculos workspace.
+- Rama de trabajo: `phase/02-project-inspection`, desde `485283c`. `main` permanece en `e14cfdd`, sin merge ni publicación.
+- Tarea activa: B03-01 terminado para revisión; paquete en `reviews/current-review-packet.md`. Plan acotado incorporado primero en `c201c0d`. No se invocaron Claude Code ni otros agentes, ni se atribuye aceptación a los gates locales.
+- Siguiente nodo único: revisión independiente B03-01 aportada por el usuario. B03-02 no iniciado ni autorizado en este turno; creación de worktrees y selección de contexto permanecen diferidas.
 - Decisión del spike: adoptar `node:sqlite` sobre Node 24.19.0/SQLite 3.53.3 medidos, WAL/FULL y único escritor serializado en worker dedicado. La instalación global 24.13.0/3.50.4 no queda aprobada para persistencia durable.
 - Bloqueos de contexto: vault ausente en este checkout; lectura histórica PREP-001 conservada, sin nueva auditoría. El kernel antiguo está incompleto en otro ordenador y no es dependencia.
-- Decisiones pendientes: alcance mínimo de primera tarea Fase 02, distribución/referencia del vault y framework HTTP posterior. Runtime mínimo aceptado; reconciliación manual, herramientas aisladas, permisos generales y proveedores no se adelantan.
+- Decisiones pendientes: distribución/referencia del vault y framework HTTP posterior. Primera tarea Fase 02 acotada en phase-02.md; D-025 registra descriptor/identidades/almacenamiento y límites. Reconciliación manual, herramientas aisladas, permisos generales y proveedores no se adelantan.
 - Último commit de cierre antes de registrar la promoción: `629059e` (`docs: close foundation milestone`). `main` y `phase/00-foundation` fueron publicados por fast-forward, sin force ni merge commit.
 - Revisión Claude: formal `APPROVE_WITH_FOLLOWUPS` completada; F-1 confirmado y corregido, F-2/F-3 registrados para Fase 01. M00.3 cerrado. Claude Code no se invoca desde aquí.
 
 ## Gates actuales
+
+- B03-01: Node 24.19.0/SQLite 3.53.3, frozen, peers, formato, lint con tipos, typecheck consumidor dist, build y **278/278 tests**: 255 previos intactos + 23 de workspace. CLI compilado en dos procesos recupera la misma referencia desde almacenamiento privado explícito; registro repetido deduplica. Repositorios reales temporales cubren worktree/permisos separados, detached/unborn, identidad sustituida, rutas/junctions, variables Git/fsmonitor, gitlinks y descriptor incompatible. Inventarios SHA-256/modo/mtime y directorios confirman ausencia de cambios en índice, config y archivos de trabajo/privados. Primer lint detectó un import sin uso, corregido sin excepciones. Diff/secretos/paths revisados; no nueva CI remota observada.
+- B03-01 / límites: raíces/ancestros privados, ACL Windows a cargo del operador; no sandbox ante propietario concurrente ni snapshot Git atómico. Includes/filtros/alternates y git-dir separado no-worktree rechazados; 10 000 entradas metadata, 256 KiB por config/puntero, 5 s/1 MiB por comando. Descriptor contiene rutas privadas; R-034/035. No catálogo, contexto, proveedores ni creación de worktrees. Operación/demo y rollback en packages/workspace/README.md y phase-02.md. Esperar revisión antes de avanzar.
+
+Histórico M01.3 aceptado (preservado):
 
 - Aceptación M01.3: veredicto independiente APPROVE_WITH_FOLLOWUPS comunicado/aceptado por el usuario, sin P0–P2. Cierre autorizado al corregir los tres P3 y pasar gates; condición satisfecha. Fase 01 cerrada sin merge/publicación ni cambios de main. No se autogenera un nuevo veredicto de revisión.
 - P3-1 / `b178729`: 5 regresiones rojas/5 nuevas verdes sobre build actual. Campo cancellationPersisted aditivo/opcional en tipos: true para cancelación terminal confirmada/reabierta, false para parada conocida entre intentos sin cancelación durable, null antes de leer historia o para estados inciertos/no aplicables. No cambia transiciones, no hace reanudable un cancelled terminal ni reejecuta pending/uncertain; SQL finish fallido sigue error y recovery bloquea pending. Semántica temporal documentada en README.

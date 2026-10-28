@@ -1,4 +1,44 @@
-# M01.3 — Aceptación formal y cierre de Fase 01
+# B03-01 — Registro e inspección segura de proyectos Git locales
+
+Preparado: 2026-10-28. **Implementado/verificado localmente, pendiente de revisión independiente aportada por el usuario.** No se invocó Claude Code ni otros agentes. Fase 01/M01.3 siguen aceptados/cerrados; este paquete no atribuye aprobación a B03-01. B03-02 no iniciado.
+
+## Alcance y diff
+
+Base `485283c`, plan `c201c0d`, implementación `a837e9c`, rama `phase/02-project-inspection`. Revisar `git diff 485283c..a837e9c` para plan/código/tests/lockfile y memoria documental posterior de esta misma tarea. Main permanece `e14cfdd`, sin merge/publicación. `packages/contracts`, `packages/persistence` (incluido F-5) y `packages/runtime` no tienen cambios frente a la base. Sin dependencias externas: lockfile sólo incorpora nueve líneas de enlaces workspace.
+
+Únicamente repositorios Git normales y linked worktrees existentes. Descriptor JSON v1 en ArtifactStore aceptado, sin catálogo ni nuevos eventos/migraciones. Inspección de HEAD/rama/detached/unborn, cambios tracked agregados y gitlinks. No creación de worktrees, context selection/indexación, runtime nuevo, agentes, proveedores ni UI.
+
+## Puntos de revisión
+
+- `packages/workspace/src/index.ts`: pathId frente a repositoryId, pins físicos dev/ino/tipo, raíz exacta, punteros `.git`/commondir/backlink y revalidación previa/posterior. Permisos separados checkout/git-dir/common-dir; el común no autoriza otros checkouts. Rutas canónicas por componentes, rechazo de symlinks/junctions/traversal/UNC/ADS y de metadata insegura. Descriptor incompatible o identidad reemplazada falla cerrado; no se actualiza automáticamente.
+- Adaptador Git en el mismo archivo: allowlist privada, argv separados/sin shell, entorno aislado, no-optional-locks/pager off/fsmonitor off, configuración global/system externa desactivada, no safe.directory. Sin untracked/ignored ni contenido de submódulos. Includes/filtros/continuaciones/alternates rechazados; salida y tiempo finitos, errores fijos sin stderr/rutas brutos.
+- `packages/workspace/src/cli.ts`: registro e inspección usan --storage absoluto, existente, privado y separado de raíces autorizadas; projects.sqlite y projects.sqlite.artifacts. SHA-256+byteLength recuperan el descriptor tras reinicio. Inspect exige DB regular no vacía existente. API recibe ArtifactStore confiable externo, sin ampliarlo para descubrir rutas o crear catálogo.
+- `packages/workspace/test/project.test.ts`: repositorios temporales reales, imports públicos y CLI dist; fixtures mutan Git sólo antes del inventario. Inventarios SHA-256/modo/mtime/directorios aseguran ausencia de escrituras, incluyendo índice, configuración, tracked/ignored/privados. No mocks de Git ni durabilidad.
+
+## Evidencia y reproducción
+
+Con runtime portátil verificado Node 24.19.0/SQLite 3.53.3 y Git local:
+
+```powershell
+pnpm.cmd install --frozen-lockfile
+pnpm.cmd peers check
+pnpm.cmd check
+git diff --check
+```
+
+Resultado: **278/278 tests**, cero skips/fallos finales: contratos 62, persistencia 115, runtime 71, workspace 23, spike SQLite 7. Check compila fuentes antes de lint/typecheck/tests; tests y consumidores resuelven dist/index.js y dist/index.d.ts actuales. Formato, lint con tipos, typecheck, build, frozen y peers verdes. Primer lint detectó un import sin uso, corregido sin exclusiones. Escaneo textual de patrones de secretos y paths del diff sin hallazgos; no acredita auditoría exhaustiva ni nueva CI remota.
+
+Demo automatizada: test CLI registra en un proceso, conserva sha256+byteLength e inspecciona en otro sobre el mismo --storage. Resultado repository/0 cambios tracked, inventario original intacto; duplicación de registro devuelve la misma referencia. Fixtures adicionales acreditan un cambio tracked, detached/unborn, worktree con repositoryId compartido y pathId distinto, denegación por permiso git/común faltante, reemplazo de raíz/Git/config/commondir, junctions y prefijos de ruta engañosos, variables Git hostiles, fsmonitor no ejecutado, gitlinks sin checkout, storage superpuesto y DB ausente rechazados sin creación. Comandos manuales y política en packages/workspace/README.md.
+
+## Límites y salida
+
+R-034/035: raíces/ancestros/Git/PATH confiables, ACL privada Windows del operador; no sandbox contra propietario concurrente ni snapshot atómico de HEAD/índice. Dev/ino no disponibles se rechazan. Descriptores contienen rutas privadas y deben protegerse. Git status puede leer tracked para calcular cambios, sin incorporarlos a contexto. Metadata limitada a 10 000 entradas por validación; config/punteros 256 KiB, cada comando 5 s/1 MiB. Repositorios con includes/filtros/alternates, git-dir separado no-worktree, UNC/symlinks/junctions o límites excedidos se rechazan deliberadamente. Verificación local Windows, no nueva CI Linux observada.
+
+Solicitar veredicto independiente sobre este alcance, distinguiendo límites explícitos de defectos reales. No bloquear por creación de worktrees, aislamiento de herramientas o selección/indexación de contexto aún no implementados. Rollback: revertir commits B03-01 conservando datos privados existentes y repositorios; sin borrado, migración o modificación del kernel aceptado. Siguiente nodo único: recibir revisión B03-01. Detenerse, sin iniciar B03-02.
+
+---
+
+# Histórico — M01.3: aceptación formal y cierre de Fase 01
 
 Registrado: 2026-10-28. **M01.3 y Fase 01 aceptados/cerrados.** Veredicto independiente APPROVE_WITH_FOLLOWUPS aceptado por el usuario, sin P0–P2. El cierre estaba condicionado a tres P3 mínimos, ahora reproducidos/corregidos/verificados. No se invocó ningún agente ni se atribuye una nueva revisión independiente a estos commits; se registra la aceptación recibida y sus condiciones satisfechas. Fase 02 no iniciada.
 

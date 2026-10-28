@@ -21,7 +21,8 @@ Actualizado: 2026-10-28. Estados: `catalogada`, `diseñada`, `prototipo`, `verif
 | Resume de ejecución | diseñada | verificada | Demo SIGKILL y fallos SQL conservados, cero reejecuciones confirmadas; P3-1 distingue parada temporal no persistida de cancelación terminal confirmada y mantiene pending/uncertain bloqueados. M01.3 aceptado. Sin reconciliación manual ni exactly-once. |
 | CLI mínima | diseñada | verificada | P3-2 `8e13a5e`: exit codes según estado real, blocked=2 aun con abort, 130 para cancelled; timeout decimal/rango antes de almacenamiento. P3-3 `c1b8bad`: inspect exige DB existente no vacía regular, sin crear DB/CAS ante ausencia/error previo. 31 tests CLI/proceso; demo y operación existente conservadas. |
 | Permisos mínimos de ejecución | diseñada | verificada | Registro explícito por handler/versión/efectos, allowlist externa por bloque y denegación antes de ejecución. API probada con efectos de fixture reales; políticas generales/human approval/sandbox quedan en fases posteriores. |
-| Git/workspace y contexto | diseñada | catalogada | Fase 02. |
+| Registro e inspección Git local | diseñada | verificada | B03-01: descriptor CAS v1, identidad física/ruta, permisos Git/común separados y CLI register/inspect con storage explícito. 23 tests reales/compilados, inventarios SHA-256/modo/mtime intactos, total 278. Pendiente de revisión independiente; límites R-034/035. |
+| Creación/aislamiento de worktrees y contexto | diseñada | catalogada | Fase 02, B03-02 no iniciado. Registro de checkouts existentes no acredita aislamiento, selección o indexación de contexto. |
 | Model registry, provider adapters y probes | diseñada | catalogada | Fases 03, 05; evaluación previa a uso real. |
 | Routing y OmniRoute | diseñada | catalogada | Fase 06, shadow y política de datos. |
 | Agentes y subagentes | diseñada | catalogada | Fase 07, aislamiento y comparación. |

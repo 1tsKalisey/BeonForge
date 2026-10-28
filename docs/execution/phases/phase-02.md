@@ -14,3 +14,7 @@ Fase 01/M01.3 aceptados y cerrados. Este documento incorpora exclusivamente el p
 - Aceptación/tests: temporales Git reales, worktree, detached/unborn, registro duplicado/reinicio, permisos/rutas/identidades/variables maliciosas/fsmonitor; hashes explícitos de índice/config/archivos de trabajo antes/después. Inspecciones no persistidas por defecto; sólo descriptor estable, sin URLs, paths de cambios, configuración ni contenido en output/CAS.
 - Gates: frozen, peers, formato, lint con tipos, typecheck contra dist, build, 255 tests previos+nuevos, diff y secretos. Commits coherentes; actualizar evidencias tras pasar.
 - Rollback: revert acotado conservando artefactos privados y todos los repositorios registrados. Siguiente: revisión independiente B03-01; B03-02 worktree aislado queda diferido, sin implementarse aquí.
+
+### Verificación B03-01 — 2026-10-28
+
+Plan `c201c0d`, implementación `a837e9c`, rama phase/02-project-inspection desde 485283c. Node 24.19.0/SQLite 3.53.3, frozen/peers/formato/lint con tipos/typecheck/build y 278 tests verdes (255 originales + 23 workspace). Inventarios de contenido/modo/mtime/directorios intactos, incluidos índice y configuración. CLI compilado registra e inspecciona en procesos distintos usando referencia CAS y el mismo storage; sin catálogo. Primer lint corrigió import sin uso; sin fallos finales ni excepciones. Límites y demo reproducible en packages/workspace/README.md; R-034/035. Paquete de revisión preparado, aceptación independiente pendiente. B03-02 no iniciado.
