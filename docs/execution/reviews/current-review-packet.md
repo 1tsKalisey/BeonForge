@@ -1,4 +1,23 @@
-# B03-01 — Nueva revisión de la corrección P1 de configuración Git
+# B03-01 — Aceptación independiente y cierre formal
+
+Registrado: 2026-10-29. Segunda auditoría **APPROVE_WITH_FOLLOWUPS** comunicada y aceptada por el usuario: Claude confirma P1 d73466b resuelto, sin bloqueo para cerrar. **B03-01 aceptado y cerrado.** Código final d73466b, evidencias 0cb8e61, rama phase/02-project-inspection. Este turno es exclusivamente documental, sin invocar agentes ni atribuir otra auditoría propia.
+
+Se conservan 312/312 tests funcionales y gates de la corrección como evidencia histórica; las comprobaciones de este cierre se registran en status. Main e14cfdd intacta, sin merge/publicación. Cuatro P3 **aceptados y pendientes, ninguno corregido**:
+
+| Seguimiento | Estado / tratamiento |
+|---|---|
+| R-037: config reemplazado por inode nuevo | Nuevo registro tras revisión manual, conservar referencias; sin relajar pins. |
+| R-038: salida ls-files con muchos tracked | git_limit; procesamiento incremental diferido. |
+| R-039: include externo durante descubrimiento por -C root | Prioridad antes de repositorios no confiables y mutaciones B03-02. Candidato: parser desde directorio privado sin descubrimiento, a demostrar con regresión. --no-includes no garantiza por sí solo ausencia de lectura externa. |
+| R-040: rechazo de barras escapadas legítimas | Compatibilidad limitada; conservar fallo cerrado, corrección diferida con tests pares/impares y CRLF/LF. |
+
+La aceptación cierra el P1 de ejecución arbitraria, no acredita ausencia total de lecturas externas ni corrige los P3. Las afirmaciones previas de no lectura de includes se limitan al parser explícito, no al descubrimiento inicial de Git.
+
+Siguiente nodo: **B03-02 — Creación y verificación de worktrees aislados**, propuesta en docs/execution/phases/phase-02.md con prerequisito R-039. Sin implementación ni aceptación atribuida al plan. Detenerse tras cierre/preparación.
+
+---
+
+# Histórico — B03-01: corrección P1 previa a segunda auditoría
 
 Preparado: 2026-10-29. Veredicto independiente recibido: **REQUEST_CHANGES**, un único P1 bloqueante confirmado. Corrección `d73466b` verificada localmente; **B03-01 sigue abierto hasta verificación independiente y aceptación**. No se invocaron Claude Code ni otros agentes. No iniciar B03-02.
 
