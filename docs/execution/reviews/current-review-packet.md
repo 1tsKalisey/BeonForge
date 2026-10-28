@@ -1,4 +1,40 @@
-# Paquete de revisión independiente — M01.2 Persistencia
+# M01.2 — Segunda revisión tras REQUEST_CHANGES
+
+Preparado: 2026-10-28. **Milestone abierto, aprobación independiente pendiente. No iniciar B02b-03.** Claude Code emitió REQUEST_CHANGES según informe recibido del usuario; no se invoca desde aquí. Los paquetes anteriores se conservan debajo como históricos.
+
+## Base y commits correctivos
+
+Base de esta revisión: `4dc43a8` (B02b-02 y paquete original). Final de código: `0121302`, rama `phase/01-artifacts-recovery`. Diff: `git diff 4dc43a8..0121302`. Para milestone completo, base M01.1 `d960957`: `git diff d960957..0121302`. Main permanece `e14cfdd`, sin merge/publicación.
+
+| Hallazgo | Reproducción antes del cambio | Corrección y evidencia |
+|---|---|---|
+| F-5 P1, degradación/timeouts | Volumen automatizado 800 eventos/40 checkpoints: open directo 26,223 s, 50040 lecturas verificadas/17200 applies; backup 115,215 s, 197842/66400. Open worker falla a 10,018 s, storage_failure. | `605c43d`: validación única, caché SHA por operación y replay incremental ordenado. Final open 0,746 s, 41/800; backup 1,644 s, 82/800. Política finita configurable separa cola/apertura/ejecución/backup/restore; cola expirada sin envío, mutación enviada incierta sin retry. |
+| F-6 P2, apertura insegura | 9 regresiones rojas: backup completo/incompleto aceptado y restores sin ready válido/DB/CAS inicializados. | `773524d`: identificación antes de escritura, ready v1 estricto, nombres/versión/prefijo coherentes; marcador de origen incluso tras rename. 11 nuevas verdes y kills históricos. Restores previos con ready válido compatibles. |
+| F-7 P2, destino anidado | 6 regresiones rojas: SQLite/CAS raíz/hijos, blobs y staging; contaminación de inventario. | `2913393`: rutas reales/relación padre-hijo y rechazo de junctions antes de mkdtemp; 13 nuevas verdes, cero residuos en rechazo y retry/restore válidos; CAS personalizado y nombres de hermanos probados. |
+| P3, diagnóstico de inventario | Regresión roja por error genérico ante entrada ajena a blobs. | `0121302`: unexpected_artifact_entry fijo sin rutas/nombres; no borra ni ignora entradas. Una regresión verde. |
+
+## Gates y reproducción
+
+- Node 24.19.0/SQLite 3.53.3, WAL/FULL, mismo worker; sin dependencias nuevas, cambios al dominio M01.1, schema v2, root manifests o lockfile. API compatible con opciones/diagnósticos aditivos; contratos de manifiestos/resultados/eventos intactos.
+- Frozen install, peers, formato, lint con tipos, typecheck, build, **151/151 tests** (62 contratos + 82 persistencia + 7 spike), sin skips ni fallos finales. Volumen, integridad, idempotencia, rollback, referencia ausente, corrupción, reapertura y SIGKILL incluidos. Diff/alcance/secretos revisados; sólo temporales controlados.
+- Comando de volumen después de build: `pnpm.cmd --filter @beonforge/persistence exec vitest run test/volume.test.ts --silent=false`. Workload: 800 starts independientes, una evidencia compartida, 40 checkpoints cada 20 eventos. Fixture instrumenta ArtifactFiles.read y apply compilados sólo en hijo de test; contadores excluyen hashes de inventario/staging y no observan workers. Tiempos diagnósticos, no SLA. Detalle completo y comparativa en `packages/persistence/REVIEW-FIXES.md`.
+- Muestra final `0121302`: worker abre 0,741 s, backup 1,390 s y restore 1,459 s; restaurado reabre con 800 eventos y checkpoint 800. Los contadores máximos se asertan sin umbrales de velocidad del hardware. La regresión original fue roja antes de modificar producción.
+- Fallos intermedios corregidos: effects inválido en primera fixture (no contado como reproducción); lint de once() y formato Markdown; dos reaperturas con alias Windows 8.3/largo en primer check F-6. Regresiones/gates completos posteriores verdes, sin excepciones.
+
+## Preguntas de revisión y límites pendientes
+
+1. ¿El replay ordenado/caché local conserva cada verificación de integridad y cada prefijo, sin aceptar referencias de longitud incoherente o mantener cachés entre operaciones?
+2. ¿Las clases de timeout mantienen incertidumbre sólo para comandos enviados, sin ejecutar comandos expirados ni reintentar efectos?
+3. ¿Los marcadores distinguen backup/restore de store nuevo antes de mutaciones, incluyendo ausencia, corrupción, rename e interrupciones?
+4. ¿La validación de destino rechaza raíces/descendientes/aliases antes de crear residuos y permite los hermanos válidos?
+
+Seguimientos P3 explícitos en REVIEW-FIXES/R-023/025/026/027: memoria materializada sin streaming/cuotas, retención sin GC, raíces/ancestros y ACL privados, power loss Windows no acreditado, hashes/marcadores sin autenticación privilegiada. No se recibieron IDs/textos P3 externos adicionales; no se atribuyen hallazgos inventados a Claude. Sin runtime, scheduler, agentes, routing, UI ni arquitectura nueva. Sin nueva CI Linux/remota observada.
+
+Rollback: revertir sólo commits correctivos conservando datos y schema; no borrar copias reales ni reemplazar activos. No se cierra M01.2 hasta aprobación independiente; siguiente nodo único: recibir esa revisión, reproducir hallazgos si los hubiera. B02b-03 no iniciado.
+
+---
+
+# Histórico — Primer paquete M01.2 Persistencia
 
 Preparado: 2026-10-28. Estado: **pendiente de revisión del usuario**. B02b-02 terminado con gates locales verdes; no iniciar B02b-03 ni cerrar M01.2 antes de aceptación. No invocar otros agentes. Paquetes históricos M01.1/M00.3 conservados debajo.
 

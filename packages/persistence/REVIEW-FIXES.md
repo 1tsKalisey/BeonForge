@@ -12,15 +12,16 @@ El paquete versionado anterior no incluye el informe externo: se usan F-5/F-6/F-
 
 Fixture `test/volume.test.ts` + `fixtures/recovery-volume.mjs`, 800 starts independientes, evidencia compartida y 40 checkpoints cada 20 eventos. Tras build: `pnpm.cmd --filter @beonforge/persistence exec vitest run test/volume.test.ts --silent=false`. Sólo temporales propios. Contadores sobre métodos compilados exclusivamente en el hijo de test, sin hooks productivos: reads cuenta verificaciones de referencias vía ArtifactFiles.read (excluye hashes de inventario/staging), applies eventos aplicados al reconstruir proyecciones. En operaciones worker se reporta tiempo; sus contadores internos no son observables desde el hijo.
 
-Muestra Windows / Node 24.19.0 / SQLite 3.53.3, mismo equipo, antes (`2e5f9e3`) y después. Tiempos diagnósticos, no SLA. Los tests fijan límites de trabajo y éxito, no velocidad del equipo.
+Muestra Windows / Node 24.19.0 / SQLite 3.53.3, mismo equipo, antes (`2e5f9e3`) y después (muestra final `0121302`, incluyendo F-6/F-7). Tiempos diagnósticos, no SLA. Los tests fijan límites de trabajo y éxito, no velocidad del equipo. Fixtures finales separan live/copies para cumplir F-7; conteos/workload se mantienen.
 
 | Operación      | Antes ms / reads / applies             | Después ms / reads / applies |
 | -------------- | -------------------------------------- | ---------------------------- |
-| Populate       | 29366 / 50080 / 17200                  | 5283 / 920 / 17200           |
-| Open directo   | 26223 / 50040 / 17200                  | 557 / 41 / 800               |
-| Backup directo | 115215 / 197842 / 66400                | 1243 / 82 / 800              |
-| Open worker    | 10018 / storage_failure                | 622 / éxito                  |
-| Backup worker  | No alcanzable con apertura por defecto | 1236 / éxito                 |
+| Populate       | 29366 / 50080 / 17200                  | 5869 / 920 / 17200           |
+| Open directo   | 26223 / 50040 / 17200                  | 746 / 41 / 800               |
+| Backup directo | 115215 / 197842 / 66400                | 1644 / 82 / 800              |
+| Open worker    | 10018 / storage_failure                | 741 / éxito                  |
+| Backup worker  | No alcanzable con apertura por defecto | 1390 / éxito                 |
+| Restore worker | No medido antes                        | 1459 / éxito y reapertura    |
 
 Regresión roja original: apertura worker termina por watchdog fijo a 10 s sobre base válida. Primera fixture contenía effects=pure inválido: corregido a none antes de medir, no cuenta como reproducción. Corregido lint del test por destructuring inseguro de once().
 
