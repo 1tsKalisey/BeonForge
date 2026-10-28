@@ -3,6 +3,7 @@ import { once } from 'node:events';
 import { open as openFile } from 'node:fs/promises';
 import {
   mkdtempSync,
+  mkdirSync,
   realpathSync,
   rmSync,
   writeFileSync,
@@ -94,6 +95,71 @@ async function runCli(
     stderr,
   };
 }
+
+it.each(['missing-file', 'missing-parent', 'existing-artifacts'] as const)(
+  'P3-3 inspect rejects %s without initializing any store',
+  async (kind) => {
+    const root = fixture();
+    const path =
+      kind === 'missing-parent'
+        ? join(root, 'missing', 'events.sqlite')
+        : join(root, 'events.sqlite');
+    if (kind === 'existing-artifacts') {
+      mkdirSync(`${path}.artifacts`, { mode: 0o700 });
+      writeFileSync(join(`${path}.artifacts`, 'sentinel'), 'keep');
+    }
+    const before = readdirSync(root, { recursive: true }).sort();
+    const result = await runCli(['inspect', '--db', path, '--run', 'missing']);
+    expect(result.code).toBe(1);
+    expect(result.stderr).toContain('database_not_found');
+    expect(result.stdout).toBe('');
+    expect(existsSync(path)).toBe(false);
+    expect(readdirSync(root, { recursive: true }).sort()).toEqual(before);
+  },
+);
+
+it.each(['empty-file', 'directory'] as const)(
+  'P3-3 inspect does not initialize an %s as a database',
+  async (kind) => {
+    const root = fixture();
+    const path = join(root, 'events.sqlite');
+    if (kind === 'empty-file') writeFileSync(path, '');
+    else mkdirSync(path, { mode: 0o700 });
+    const result = await runCli(['inspect', '--db', path, '--run', 'invalid']);
+    expect(result.code).toBe(1);
+    expect(result.stdout).toBe('');
+    expect(existsSync(`${path}.artifacts`)).toBe(false);
+    if (kind === 'empty-file') expect(readFileSync(path).byteLength).toBe(0);
+    else expect(readdirSync(path)).toEqual([]);
+  },
+);
+
+it('P3-3 inspect still reads an existing initialized store', async () => {
+  const root = fixture();
+  const path = join(root, 'events.sqlite');
+  const file = join(root, 'workflow.json');
+  writeFileSync(file, JSON.stringify(workflow('fixture.seed')));
+  expect(
+    (
+      await runCli([
+        'run',
+        '--db',
+        path,
+        '--run',
+        'existing',
+        '--workflow',
+        file,
+      ])
+    ).code,
+  ).toBe(0);
+  const before = readdirSync(`${path}.artifacts`, { recursive: true }).sort();
+  const result = await runCli(['inspect', '--db', path, '--run', 'existing']);
+  expect(result.code, result.stderr).toBe(0);
+  expect(result.stdout.trim().split('\n')).toHaveLength(6);
+  expect(readdirSync(`${path}.artifacts`, { recursive: true }).sort()).toEqual(
+    before,
+  );
+});
 
 it.each([
   ['fixture.seed', 'succeeded', 0],

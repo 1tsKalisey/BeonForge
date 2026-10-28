@@ -1,5 +1,5 @@
 import process from 'node:process';
-import { readFile } from 'node:fs/promises';
+import { readFile, lstat } from 'node:fs/promises';
 import { isAbsolute } from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
 import {
@@ -91,6 +91,20 @@ async function main(): Promise<void> {
   const path = options.get('--db');
   const runId = identifier(options.get('--run'));
   if (!path || !isAbsolute(path)) throw new WorkflowError('invalid_options');
+  if (command === 'inspect') {
+    const stat = await lstat(path).catch((error: unknown) => {
+      if (
+        typeof error === 'object' &&
+        error !== null &&
+        'code' in error &&
+        error.code === 'ENOENT'
+      )
+        throw new WorkflowError('database_not_found');
+      throw error;
+    });
+    if (!stat.isFile()) throw new WorkflowError('invalid_options');
+    if (stat.size === 0) throw new PersistenceError('incompatible_database');
+  }
   const timeoutText = options.get('--timeout-ms') ?? '30000';
   const timeoutMs = Number(timeoutText);
   if (

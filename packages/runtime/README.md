@@ -41,6 +41,10 @@ P3-2: exit code follows the actual RunReport before any signal consideration: a 
 
 P3-2 evidence: 15 red regressions before correction (three report/abort priorities and twelve invalid formats/ranges or premature store creations), then all 18 new tests green including cancellation 130 and both valid numeric boundaries. Frozen/peers/check green with 249 tests total, diff/secret scan verified; no signal or persistence result fabricated by the tests.
 
+P3-3: inspect requires an existing nonempty regular DB file before opening persistence. Missing DB/parent reports database_not_found with nonzero exit and creates neither DB nor artifact directories; empty/nonregular paths are rejected too. Existing stores keep their prior inspect/open behavior and protections. This is a CLI preflight in the existing private-root trust model, not a redesigned read-only persistence adapter.
+
+P3-3 evidence: five red regressions (missing file/parent, existing CAS with missing DB, empty file and directory), then six green including existing initialized DB inspection. Inventories/sentinels remain unchanged on rejection. Frozen/peers/check green, 255 tests total including the original 226; compiled exports, diff and secrets verified. No accepted persistence/domain implementation or schema changed.
+
 After build, `pnpm.cmd --filter @beonforge/runtime demo` executes the real child-process demonstration from fresh private temporaries. A child runs the same public runtime and SQLite/CAS. Test-only barriers delegate real append/checkpoint calls or wait after a real exclusive, fsynced receipt write; they do not mock persistence or add production failpoints. Parent sends SIGKILL and reopens:
 
 - After confirmed finish/before checkpoint: recover the older snapshot plus two tail events; finish the remaining node without repeating the confirmed receipt.

@@ -9,6 +9,7 @@ export class WorkflowError extends Error {
       | 'handler_mismatch'
       | 'permission_denied'
       | 'invalid_options'
+      | 'database_not_found'
       | 'run_busy',
   ) {
     super(code);
