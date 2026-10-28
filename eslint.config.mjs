@@ -10,6 +10,12 @@ export default defineConfig(
   },
   {
     files: ['**/*.ts'],
-    extends: [tseslint.configs.recommended],
+    extends: [tseslint.configs.recommendedTypeChecked],
+    languageOptions: {
+      parserOptions: {
+        project: ['packages/*/tsconfig.json', 'packages/*/tsconfig.test.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
   },
 );

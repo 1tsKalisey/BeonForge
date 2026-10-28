@@ -1,10 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "noEmit": true,
-    "paths": {
-      "@beonforge/contracts": ["./src/index.ts"]
-    }
+    "noEmit": true
   },
   "include": ["test/**/*.ts"]
 }
