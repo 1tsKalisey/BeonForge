@@ -49,3 +49,14 @@ Reproducción: 6/6 regresiones rojas, destinos SQLite raíz/hijo y CAS raíz/blo
 13 regresiones verdes: los seis destinos anidados, tres junctions, entradas missing/file/traversal y CAS externo/hermano. Rechazos no cambian directorios/sentinels; retry válido y restore posterior funcionan. Fixtures reorganizadas en un árbol temporal privado con live/ y copies/ hermanos, sin modificar datos reales ni relajar la comprobación para los tests. No se añade limpieza automática ni GC: la prevención no crea residuos; fallos posteriores a una copia real siguen conservando su conjunto incompleto aislado para diagnóstico.
 
 Gates F-7: frozen/peers/check completos verdes, 62 contratos + 81 persistencia + 7 spike = 150 tests. Diff/alcance y secretos revisados; los tests de interrupción y volumen siguen incluidos, sin skips en suite completa.
+
+## Seguimientos P3 explícitos
+
+- Diagnóstico de entradas inesperadas en blobs: mejora acotada, una regresión roja por código genérico integrity_failure, sustituido por unexpected_artifact_entry fijo. Sin nombres/rutas en error, sin borrar/ignorar entrada y sin restaurar un conjunto ambiguo. No cambia hashes ni formato aceptado.
+- Retención/GC de huérfanos/incompletos: pendiente, sin limpieza automática; R-027.
+- Streaming, cuotas y memoria al materializar inventario/log/snapshots: pendiente, R-023; el caché es por operación, no persistente. Volumen medido no es SLA ni elimina ese límite.
+- ACL/ancestros privados y power loss de metadatos Windows: siguen R-025/R-026, sin afirmar aislamiento frente a dueño privilegiado o garantía eléctrica.
+
+No se han recibido textos/IDs adicionales de P3 del informe externo; estos seguimientos corresponden sólo a lo descrito por el usuario y a límites conocidos, no se inventan hallazgos de Claude.
+
+Gates finales de código: frozen, peers, formato, lint con tipos, typecheck, build, 62 contratos + 82 persistencia + 7 spike = 151 tests verdes. Sin skips/fallos finales; diff, paths y escaneo textual de secretos revisados. M01.2 sigue REQUEST_CHANGES pendiente de nueva revisión, no aprobado por estos gates locales.

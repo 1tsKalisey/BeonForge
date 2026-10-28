@@ -243,7 +243,7 @@ export class ArtifactFiles {
       .sort()
       .map((name) => {
         if (!/^[a-f0-9]{64}$/.test(name))
-          throw new PersistenceError('integrity_failure');
+          throw new PersistenceError('unexpected_artifact_entry');
         const bytes = this.blobs.read(name);
         const reference = digest(bytes);
         if (reference.sha256 !== name)

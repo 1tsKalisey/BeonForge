@@ -49,6 +49,7 @@ export type PersistenceErrorCode =
   | 'closed'
   | 'unsafe_path'
   | 'artifact_missing'
+  | 'unexpected_artifact_entry'
   | 'integrity_failure';
 
 /** Fixed diagnostic only; no SQL, paths, event payloads or raw driver errors. */

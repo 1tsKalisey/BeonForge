@@ -166,6 +166,25 @@ async function killedAt(
 }
 
 describe('content-addressed artifacts, workflow checkpoints and isolated recovery', () => {
+  it('reports unexpected blob inventory entries without leaking names or removing them', async () => {
+    const files = fixture();
+    const store = await files.open();
+    const unexpected = join(files.artifacts, 'blobs', 'untrusted-entry.txt');
+    writeFileSync(unexpected, 'sentinel');
+    const failure: unknown = await store.createBackup(files.copies).then(
+      () => null,
+      (error: unknown) => error,
+    );
+    expect(failure).toMatchObject({
+      code: 'unexpected_artifact_entry',
+      message: 'unexpected_artifact_entry',
+    });
+    expect(readFileSync(unexpected, 'utf8')).toBe('sentinel');
+    expect(readdirSync(join(files.artifacts, 'blobs'))).toEqual([
+      'untrusted-entry.txt',
+    ]);
+  });
+
   it.each([
     'sqlite-root',
     'sqlite-child',
