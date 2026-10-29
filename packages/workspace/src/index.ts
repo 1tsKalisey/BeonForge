@@ -20,7 +20,7 @@ import {
 } from 'node:path';
 import { parseArtifactReference } from '@beonforge/contracts';
 import { createHash } from 'node:crypto';
-import { spawn } from 'node:child_process';
+import { spawn, type ChildProcessWithoutNullStreams } from 'node:child_process';
 import process from 'node:process';
 import type { ArtifactReference } from '@beonforge/contracts';
 import type { ArtifactStore } from '@beonforge/persistence';
@@ -297,14 +297,13 @@ async function git(
                   ? [
                       'check-attr',
                       `--source=${command[1]}`,
+                      '--stdin',
                       '-z',
                       'working-tree-encoding',
                       'filter',
                       'text',
                       'eol',
                       'ident',
-                      '--',
-                      ...command[2],
                     ]
                   : [
                       'worktree',
@@ -318,6 +317,11 @@ async function git(
                       command[2]!,
                     ];
   const nullFile = process.platform === 'win32' ? 'NUL' : '/dev/null';
+  const input =
+    typeof command !== 'string' && command[0] === 'attributes'
+      ? Buffer.from(command[2].join('\0') + '\0')
+      : Buffer.alloc(0);
+  if (input.length > 1048576) throw new ProjectError('git_limit');
   const parserDirectory =
     typeof command !== 'string' && command[0] === 'config'
       ? await mkdtemp(join(await realpath(tmpdir()), 'beonforge-config-'))
@@ -349,34 +353,41 @@ async function git(
       : undefined;
   return new Promise<{ code: number; output: string; data: Buffer }>(
     (resolveResult, reject) => {
-      const child = spawn(
-        'git',
-        [
-          '--no-pager',
-          '--no-optional-locks',
-          '-c',
-          'core.fsmonitor=false',
-          '-c',
-          'core.untrackedCache=false',
-          '-c',
-          `core.excludesFile=${nullFile}`,
-          '-c',
-          `core.attributesFile=${nullFile}`,
-          ...(hooks ? ['-c', `core.hooksPath=${hooks}`] : []),
-          ...(parserDirectory ? [] : ['-C', root]),
-          ...args,
-        ],
-        {
-          env,
-          ...(parserDirectory ? { cwd: parserDirectory } : {}),
-          shell: false,
-          windowsHide: true,
-          stdio: ['ignore', 'pipe', 'pipe'],
-        },
-      );
+      let child: ChildProcessWithoutNullStreams;
+      try {
+        child = spawn(
+          'git',
+          [
+            '--no-pager',
+            '--no-optional-locks',
+            '-c',
+            'core.fsmonitor=false',
+            '-c',
+            'core.untrackedCache=false',
+            '-c',
+            `core.excludesFile=${nullFile}`,
+            '-c',
+            `core.attributesFile=${nullFile}`,
+            ...(hooks ? ['-c', `core.hooksPath=${hooks}`] : []),
+            ...(parserDirectory ? [] : ['-C', root]),
+            ...args,
+          ],
+          {
+            env,
+            ...(parserDirectory ? { cwd: parserDirectory } : {}),
+            shell: false,
+            windowsHide: true,
+            stdio: ['pipe', 'pipe', 'pipe'],
+          },
+        );
+      } catch {
+        reject(new ProjectError('git_failure'));
+        return;
+      }
       const chunks: Buffer[] = [];
       let bytes = 0;
       let exceeded = false;
+      let inputFailed = false;
       const timer = setTimeout(() => {
         exceeded = true;
         child.kill('SIGKILL');
@@ -397,11 +408,13 @@ async function git(
       });
       child.once('error', () => {
         clearTimeout(timer);
+        child.kill('SIGKILL');
         reject(new ProjectError('git_failure'));
       });
       child.once('close', (code) => {
         clearTimeout(timer);
         if (exceeded) reject(new ProjectError('git_limit'));
+        else if (inputFailed) reject(new ProjectError('git_failure'));
         else if (
           code === 0 ||
           ((command === 'head' || command === 'branch') && code === 1)
@@ -413,6 +426,16 @@ async function git(
           });
         else reject(new ProjectError('git_failure'));
       });
+      child.stdin.on('error', () => {
+        inputFailed = true;
+        child.kill('SIGKILL');
+      });
+      try {
+        child.stdin.end(input);
+      } catch {
+        inputFailed = true;
+        child.kill('SIGKILL');
+      }
     },
   ).finally(async () => {
     if (parserDirectory) await rmdir(parserDirectory);

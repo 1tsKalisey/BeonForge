@@ -1100,3 +1100,84 @@ it.each([
       1,
   ).toBe(1);
 });
+it('P33 checks 500 long names through bounded stdin and rejects hostile attributes', async () => {
+  const f = await workFixture();
+  for (let i = 0; i < 500; i++)
+    writeFileSync(
+      join(f.repo, `file-${String(i).padStart(3, '0')}-${'x'.repeat(95)}`),
+      'data',
+    );
+  git(f.repo, 'add', '.');
+  git(f.repo, 'commit', '-qm', '500 long names');
+  const oid = git(f.repo, 'rev-parse', 'HEAD');
+  const ref = await prepareWorktree(
+    f.project,
+    oid,
+    f.execution,
+    f.policy,
+    f.store,
+  );
+  expect((await inspectWorktree(ref, f.policy, f.store)).state).toBe(
+    'prepared',
+  );
+  const before = readdirSync(f.execution);
+  writeFileSync(
+    join(f.repo, '.git', 'info', 'attributes'),
+    '* filter=hostile\n',
+  );
+  await expect(
+    prepareWorktree(f.project, oid, f.execution, f.policy, f.store),
+  ).rejects.toMatchObject({ code: 'unsafe_path' });
+  expect(readdirSync(f.execution)).toEqual(before);
+}, 180000);
+it.each(['throw', 'error', 'stdin', 'timeout'] as const)(
+  'P33 sanitizes Git process failure %s',
+  async (kind) => {
+    const f = await workFixture();
+    const original = childProcess.spawn;
+    childProcess.spawn = ((...args: Parameters<typeof original>) => {
+      if (!Array.isArray(args[1]) || !args[1].includes('check-attr'))
+        return original(...args);
+      if (kind === 'throw')
+        throw Object.assign(new Error('private-sensitive-path'), {
+          spawnargs: args[1],
+        });
+      if (kind === 'error')
+        return original('beonforge-nonexistent-executable', [], args[2]);
+      if (kind === 'timeout')
+        return original(
+          process.execPath,
+          ['-e', 'process.stdin.resume();setInterval(()=>{},1000)'],
+          args[2],
+        );
+      const child = original(...args);
+      setImmediate(() =>
+        child.stdin?.emit('error', new Error('private-sensitive-path')),
+      );
+      return child;
+    }) as typeof original;
+    syncBuiltinESMExports();
+    try {
+      const error: unknown = await prepareWorktree(
+        f.project,
+        f.commit,
+        f.execution,
+        f.policy,
+        f.store,
+      ).then(
+        () => null,
+        (e: unknown) => e,
+      );
+      expect(error).toMatchObject({
+        code: kind === 'timeout' ? 'git_limit' : 'git_failure',
+      });
+      expect(String(error)).not.toContain('private-sensitive-path');
+      expect(error).not.toHaveProperty('spawnargs');
+      expect(readdirSync(f.execution)).toEqual([]);
+    } finally {
+      childProcess.spawn = original;
+      syncBuiltinESMExports();
+    }
+  },
+  15000,
+);
