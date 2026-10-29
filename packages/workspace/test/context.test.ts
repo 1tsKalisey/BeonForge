@@ -164,6 +164,77 @@ it('B0304 publishes the compiled minimal context API', () => {
 });
 
 it.each([
+  'GITHUB_TOKEN=',
+  'DB_PASSWORD=',
+  'POSTGRES_PASSWORD: ',
+  'OPENAI_API_KEY=',
+])('P31 detects compound assignment %s', async (prefix) => {
+  const f = await fixture({ 'config.txt': prefix + 'fixture_value_123456\n' });
+  const r = recorder(f.store);
+  await expect(
+    buildContextPackage(f.intent, ['config.txt'], f.policy, r.store),
+  ).rejects.toMatchObject({ code: 'context_sensitive' });
+  expect(r.writes).toHaveLength(0);
+});
+it('P32 permits TypeScript expressions and explicit placeholders', async () => {
+  const f = await fixture({
+    'references.ts':
+      'const token = options.token;\nreq.headers.authorization;\nprocess.env.DB_PASSWORD;\nthis.token = response.data.token;\n',
+    'placeholders.txt': 'DB_PASSWORD=changeme\n{"token":"example"}\n',
+  });
+  const ref = await buildContextPackage(
+    f.intent,
+    ['references.ts', 'placeholders.txt'],
+    f.policy,
+    f.store,
+  );
+  expect((await readContextPackage(ref, f.policy, f.store)).files).toHaveLength(
+    2,
+  );
+});
+it('P32 rejects literals in tests and consistently rehashed historical packages', async () => {
+  const f = await fixture({
+    'password.test.ts': 'const password = "hardcoded_fixture_password";\n',
+  });
+  const r = recorder(f.store);
+  await expect(
+    buildContextPackage(f.intent, ['password.test.ts'], f.policy, r.store),
+  ).rejects.toMatchObject({ code: 'context_sensitive' });
+  expect(r.writes).toHaveLength(0);
+  const ref = await buildContextPackage(
+    f.intent,
+    ['README.md'],
+    f.policy,
+    f.store,
+  );
+  for (const value of [
+    'GITHUB_TOKEN=fixture_value_123456',
+    '{"OPENAI_API_KEY":"fixture_value_123456"}',
+    'POSTGRES_PASSWORD: fixture_value_123456',
+    'DB_PASSWORD=my.actual.password',
+    'DB_PASSWORD=abc',
+  ]) {
+    const bytes = Buffer.from(value);
+    const artifact = await f.store.putArtifact(bytes);
+    const altered = await mutate(f, ref, (m) => ({
+      ...m,
+      files: [{ ...m.files[0], artifact }],
+      totals: {
+        ...m.totals,
+        byteLength: bytes.length,
+        tokenEstimate: { ...m.totals.tokenEstimate, value: bytes.length },
+      },
+    }));
+    await expect(
+      readContextPackage(altered, f.policy, f.store),
+    ).rejects.toMatchObject({
+      code: 'context_sensitive',
+      message: 'context_sensitive',
+    });
+  }
+});
+
+it.each([
   'sk-ant-api03-',
   'sk-proj-',
   'github_pat_',

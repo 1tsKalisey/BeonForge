@@ -157,7 +157,30 @@ function authorize(
   )
     return fail('context_denied');
 }
-function text(bytes: Uint8Array): void {
+function sensitiveAssignment(value: string, path: string): boolean {
+  const assignments =
+    /(?<![A-Za-z0-9])(?:[A-Za-z][A-Za-z0-9]*_)*(?:password|api[_-]?key|client[_-]?secret|secret[_-]access[_-]key|access[_-]key[_-]id|session[_-]token|(?:access[_-]|auth[_-]|refresh[_-])?token)["']?\s*([:=])\s*("[^"\r\n]*"|'[^'\r\n]*'|[^\s;,}\r\n]+)/gi;
+  for (const match of value.matchAll(assignments)) {
+    const raw = match[2]!;
+    const quoted = raw.startsWith('"') || raw.startsWith("'");
+    const literal = quoted ? raw.slice(1, -1) : raw;
+    if (!literal || /^(example|changeme)$/i.test(literal)) continue;
+    const prefix = value.slice(0, match.index);
+    // Only narrow source-code declarations/property assignments permit a dotted
+    // expression. Dotenv/YAML dotted values remain potentially secret literals.
+    if (
+      !quoted &&
+      match[1] === '=' &&
+      /\.[cm]?[jt]sx?$/.test(path) &&
+      /(?:\b(?:const|let|var)\s+|\bthis\.)$/.test(prefix) &&
+      /^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*)+$/.test(raw)
+    )
+      continue;
+    return true;
+  }
+  return false;
+}
+function text(bytes: Uint8Array, path: string): void {
   let value: string;
   try {
     value = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
@@ -166,9 +189,10 @@ function text(bytes: Uint8Array): void {
   }
   if (
     value.includes('\0') ||
-    /-----BEGIN [A-Z ]*PRIVATE KEY-----|\b(?:ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|sk-(?:(?:ant-api03-|proj-)[A-Za-z0-9_-]{20,}|[A-Za-z0-9]{20,})|(?:AKIA|ASIA)[A-Z0-9]{16})\b|\b(?:password|api[_-]?key|client[_-]?secret|(?:aws[_-])?(?:secret[_-]access[_-]key|access[_-]key[_-]id|session[_-]token)|(?:access[_-]|auth[_-]|refresh[_-])?token)["']?\s*[:=]\s*["']?[^\s"';,}]{8,}/i.test(
+    /-----BEGIN [A-Z ]*PRIVATE KEY-----|\b(?:ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|sk-(?:(?:ant-api03-|proj-)[A-Za-z0-9_-]{20,}|[A-Za-z0-9]{20,})|(?:AKIA|ASIA)[A-Z0-9]{16})\b/i.test(
       value,
-    )
+    ) ||
+    sensitiveAssignment(value, path)
   )
     fail('context_sensitive');
 }
@@ -319,7 +343,7 @@ export async function buildContextPackage(
         .digest('hex');
       if (oid !== source.files.find((f) => f.path === path)?.oid)
         return fail('context_changed');
-      text(file.bytes);
+      text(file.bytes, path);
       total += file.bytes.length;
       if (total > LIMITS.maxTotalBytes) return fail('context_limit');
       captured.push(file);
@@ -473,7 +497,7 @@ export async function readContextPackage(
     for (const file of files) {
       authorize(intent, [file.path], policy);
       const bytes = await verified(store, file.artifact, LIMITS.maxFileBytes);
-      text(bytes);
+      text(bytes, file.path);
       content.push({ path: file.path, bytes });
     }
     return {
