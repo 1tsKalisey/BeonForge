@@ -29,6 +29,8 @@ Activos: código y propiedad intelectual, especificación `knowledge/`, credenci
 
 ## Seguimiento
 
+Revisión focalizada recibida: confirmación histórica/estado actual y atributos validados independientemente. Nuevo P3 Windows: check-attr recibe nombres NUL por stdin (1 MiB), sin nombres en argv. EOF/error de escritura/spawn/timeout controlados y errores sanitizados sin spawnargs ni causa. Cinco pruebas nuevas incluyen 500 nombres largos y atributos hostiles; límites de salida/aislamiento/permisos permanecen. B03-03 sólo propuesto, sin nuevas acciones ni permiso implícito por marker histórico.
+
 B03-02 auditado APPROVE_WITH_FOLLOWUPS, R-039/creación/recuperación confirmados independientemente. Correcciones P3 posteriores: marker exclusivo fsync prueba historia sin autorizar efectos, drift actual separado; ausencia/corrupción/corte previo al marker no se reconfirma. Atributos efectivos se evalúan mediante check-attr sin filtros, antes de reserva/despacho, globales/system desactivados. Revisión focalizada pendiente; compatibilidad limitada R-044 no resuelta, R-041 y raíces privadas vigentes.
 
 B03-02: R-039 aislado primero (79ba91e), parser privado sin descubrimiento, tests de frontera y ancestro/include hostil. 17243e8 crea sólo destino nuevo bajo raíz autorizada, grants de escritura Git/común separados. Hooks vacíos, sin checkout/filtros/conversiones/submódulos: blobs regulares wx/fsync y read-tree para índice propio. Marcador de despacho exclusivo antes de Git, lock con SHA de intención, verificación física/HEAD/bytes/índice/inventario antes de recibo CAS. Cortes inciertos no autorizan repetir ni limpiar; R-041 conserva límites de procesos/ACL/power loss/compatibilidad. Pruebas temporales y auditoría pendiente, no sandbox de ejecución de código.

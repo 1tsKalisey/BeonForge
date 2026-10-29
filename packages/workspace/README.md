@@ -2,6 +2,8 @@
 
 ## Worktrees — B03-02
 
+Actualización focalizada: P3-1 (historia durable) y P3-2 (atributos) verificados independientemente, APPROVE_WITH_FOLLOWUPS. Check-attr ahora usa --stdin -z --source=<OID> con nombres NUL y EOF explícito, sin nombres en argv. Entrada/salida limitadas a 1 MiB, timeout Git 5 s; errores de spawn/stdin sanitizados git_failure y límites git_limit, sin spawnargs/causa/rutas de entrada en error. Backpressure queda acotada por el buffer de entrada máximo; fin/error de escritura y cierre de proceso manejados sin retry. Mantiene la política de atributos y no altera historia/current ni grants. Pruebas de 500 nombres largos en Windows y atributos hostiles; compatibilidad .gitignore/.git* aún pendiente.
+
 Auditoría APPROVE_WITH_FOLLOWUPS recibida, sin P0–P2. Correcciones P3 pendientes de revisión focalizada: confirmed.json v1 wx/write/fsync enlaza intención y receipt CAS original tras verificar. Inspect conserva ese receipt; state=confirmed es historia, current=clean/modified/drift/invalid es estado actual. No concede permisos; create rechaza todo dispatch previo. Marker ausente/inválido/truncado o corte previo a su persistencia -> uncertain, sin reparación/retry/limpieza. CAS huérfano no sustituye el marker. No se acredita power loss de directorios Windows.
 
 Preflight: check-attr --source al OID exacto, salida NUL acotada y validada para working-tree-encoding/filter/text/eol/ident, info/attributes incluido. Rechaza todo valor distinto de unspecified (incluido unset), antes de reserva y otra vez antes de dispatch. Sin ejecutar filtros; atributos globales/system desactivados, entorno aislado/R-039 conservados. Salida no fiable -> fallo cerrado.

@@ -1,5 +1,9 @@
 # Registro de riesgos
 
+Aceptación focalizada 2026-10-29: R-042/P3-1 y R-043/P3-2 cerrados por verificación independiente APPROVE_WITH_FOLLOWUPS comunicada por el usuario. R-039 y baseline B03-02 ya validados. Las etiquetas de revisión pendiente inferiores son históricas y quedan sustituidas por esta aceptación; no se repite auditoría.
+
+- R-045 / P3 stdin Windows: reproducido ENAMETOOLONG con árbol válido de 500 nombres largos y fuga de spawnargs en error síncrono. Corrección local usa stdin NUL <=1 MiB, EOF explícito, salida <=1 MiB/5 s, captura de errores síncronos/eventos/stdin y terminación. Cinco casos verdes (árbol válido/hostil y cuatro fallos de proceso), sin reservas al rechazar. Revisión del cambio preparada, sin modificar garantías ni permitir actuar en drift/invalid/uncertain. Mantener R-044 prioritario: .gitignore aún no soportado, no listo para proyectos reales habituales.
+
 Actualización correctiva B03-02: aceptación independiente APPROVE_WITH_FOLLOWUPS sin P0–P2, R-039 validado y cerrado. R-041 mantiene límites; nueva revisión focalizada sólo para correcciones siguientes. Histórico inferior conservado.
 
 - R-042 / P3-1: corregido localmente en eadc346, pendiente de revisión focalizada. Marker wx/fsync posterior al receipt conserva historia, current informa clean/modified/drift/invalid. Pérdida/corrupción/corte antes del marker queda uncertain aunque exista receipt CAS. Marker nunca concede permisos; dispatch sigue impidiendo repetición. Sin garantía eléctrica de directorios Windows ni autenticación contra dueño privilegiado.

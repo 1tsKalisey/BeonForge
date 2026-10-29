@@ -4,11 +4,11 @@ Actualizado: 2026-10-29. Leer este archivo antes de cualquier tarea.
 
 ## Posición
 
-- Fase actual: 02 — Workspace y contexto. B03-02 aceptado y cerrado tras APPROVE_WITH_FOLLOWUPS, sin P0–P2; usuario confirma R-039, creación y SIGKILL. Dos P3 correctivos verificados localmente, pendientes de revisión focalizada. B03-01/Fase 01 siguen cerrados.
-- Último trabajo funcional: P3-1 eadc346 y P3-2 bf81d93, confirmación histórica/estado actual separados y atributos antes de reserva/despacho, 347 tests. Baseline B03-02 17243e8 y R-039 79ba91e validados independientemente; correcciones pendientes de revisión focalizada. Fase 01/contratos/persistencia/F-5/runtime/dependencias/schema/lockfile intactos.
+- Fase actual: 02 — Workspace y contexto. B03-02 y sus P3-1/P3-2 aceptados y verificados independientemente, APPROVE_WITH_FOLLOWUPS. Nuevo P3 stdin acotado corregido localmente. B03-01/Fase 01 siguen cerrados; no se repite auditoría.
+- Último trabajo funcional: stdin check-attr 204eca1, 352 tests. P3-1 eadc346 y P3-2 bf81d93 verificados independientemente APPROVE_WITH_FOLLOWUPS; R-039/baseline B03-02 ya aceptados. Fase 01/contratos/persistencia/F-5/runtime/dependencias/schema/lockfile intactos.
 - Rama de trabajo: `phase/02-project-inspection`, desde `485283c`. `main` permanece en `e14cfdd`, sin merge ni publicación.
-- Tarea activa: cierre B03-02 y dos correcciones P3, sin ampliar compatibilidad. No se invocaron agentes; R-039 validado independientemente, R-037/038/040 siguen pendientes.
-- Siguiente nodo único: revisión independiente focalizada de confirmación durable y atributos. B03-03 no iniciado. Rechazo .gitignore/.git* prioritario antes de uso en proyectos reales habituales.
+- Tarea activa: corrección stdin 204eca1 completada para revisión y propuesta B03-03 preparada. 352/352 y gates verdes; no se invocaron agentes ni se amplían permisos/compatibilidad. Detenerse, sin implementar B03-03.
+- Siguiente nodo único: B03-03 no estaba delimitado; propuesta ejecutable nueva en phase-02.md, sin implementación. Prioridad .gitignore y validación actual del worktree; revisión de la corrección stdin preparada, sin inventar bloqueantes a la aceptación focalizada recibida.
 - Decisión del spike: adoptar `node:sqlite` sobre Node 24.19.0/SQLite 3.53.3 medidos, WAL/FULL y único escritor serializado en worker dedicado. La instalación global 24.13.0/3.50.4 no queda aprobada para persistencia durable.
 - Bloqueos de contexto: vault ausente en este checkout; lectura histórica PREP-001 conservada, sin nueva auditoría. El kernel antiguo está incompleto en otro ordenador y no es dependencia.
 - Decisiones pendientes: distribución/referencia del vault y framework HTTP posterior. Primera tarea Fase 02 acotada en phase-02.md; D-025 registra descriptor/identidades/almacenamiento y límites. Reconciliación manual, herramientas aisladas, permisos generales y proveedores no se adelantan.
@@ -16,6 +16,10 @@ Actualizado: 2026-10-29. Leer este archivo antes de cualquier tarea.
 - Revisión Claude: formal `APPROVE_WITH_FOLLOWUPS` completada; F-1 confirmado y corregido, F-2/F-3 registrados para Fase 01. M00.3 cerrado. Claude Code no se invoca desde aquí.
 
 ## Gates actuales
+
+- 204eca1: **352/352 tests**, sin skips/fallos: 62 contratos + 115 persistencia + 71 runtime + 97 workspace + 7 spike. Incluye los 347 previos y 5 nuevos. Rojo: ENAMETOOLONG real Windows con 500 nombres largos, error síncrono sin sanear y error stdin omitido; cinco verdes después, incluyendo ejecutable inexistente y timeout. Frozen/peers/formato/lint/typecheck/build/dist actual/tests/diff/secretos verdes, sin nuevas dependencias o CI remota observada. Plan B03-03 sólo diseñado, no implementado; paquete focalizado de stdin actualizado.
+
+Histórico previo a la aceptación focalizada recibida:
 
 - Cierre correctivo: **347/347 verdes**, sin skips/fallos: 62 contratos + 115 persistencia + 71 runtime + 92 workspace + 7 spike. Los 335 anteriores conservados, 12 nuevos (6 confirmación + 1 SIGKILL durante confirmación + 5 atributos). Frozen/peers/formato/lint/typecheck/build/diff/secretos verdes sobre dist actual. P3-1 eadc346 (4 rojos iniciales), P3-2 bf81d93 (5 rojos). Selector con pipe interpretado por pnpm.cmd, corregido usando selectores separados; sin excepciones de gates. Sin cambios Fase 01/dependencias/lockfile ni CI nueva. Aceptación independiente baseline registrada; correcciones pendientes de revisión focalizada. B03-03 no iniciado.
 

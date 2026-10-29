@@ -1,4 +1,20 @@
-# B03-02 — Aceptación y revisión focalizada de dos P3
+# B03-02 — Aceptación focalizada y corrección menor de stdin
+
+2026-10-29: usuario aporta APPROVE_WITH_FOLLOWUPS, confirma P3-1 eadc346 y P3-2 bf81d93 corregidos; no hay bloqueantes para B03-03. Aceptación registrada sin repetir auditoría ni invocar agentes. Histórico debajo. Este paquete revisa sólo el nuevo P3 check-attr/Windows.
+
+Base c15973e. Código en workspace/src/index.ts y tests existentes: --stdin -z --source=<OID>, buffer NUL <=1 MiB, cierre explícito, límites 5 s/1 MiB de salida; entorno y política intactos. Spawn síncrono y evento error se convierten en ProjectError git_failure sin causa/spawnargs. Error stdin mata proceso y espera cierre, timeout/overflow git_limit; captura de end síncrono también. No shell, filtros, retry ni cambios de permisos.
+
+Commit independiente 204eca1; diff git diff c15973e..204eca1. Suite final **352/352** sin skips/fallos: 62 contratos + 115 persistencia + 71 runtime + 97 workspace + 7 spike, todos los 347 previos intactos. Frozen/peers/formato/lint/typecheck/build/tests/diff/secretos verdes sobre dist recompilado. No nueva CI remota, dependencias ni contratos Fase 01 modificados. Resultado local no atribuye aprobación independiente al nuevo cambio stdin.
+
+Rojo antes de cambiar: 3 casos fallan, incluyendo ENAMETOOLONG real en Windows con 500 nombres largos, error síncrono sin sanear y error stdin no manejado. Verde enfocado: 5/5, mismo árbol válido y luego atributos hostiles rechazados sin reservas nuevas, spawn throw, ejecutable inexistente, error stdin y timeout con proceso Node inocuo. Los fallos usan delegación de spawn real o un error sintético explícito; no se falsifica el resultado de Git. Sin ejecuciones inesperadas ni secretos reales en fixtures. Dist actual recompilado; gate completo final en status.
+
+No existe todavía implementación B03-03: el plan previo no la definía. Nueva propuesta en phase-02.md, sólo .gitignore regular y salidas explícitas de validación actual; no agentes/contexto/routing/dashboard, ni compatibilidad general o grants nuevos. Historia confirmada nunca autoriza efectos; drift/invalid/uncertain no se admiten automáticamente.
+
+Reproducción: pnpm.cmd install --frozen-lockfile, pnpm.cmd peers check, pnpm.cmd check y git diff --check. Revisar sólo stdin/EOF/límites/errores/terminación y ausencia de regresiones; P3-1/P3-2 ya aceptados. Rollback por revert acotado preservando datos/worktrees; reintroducir argv largo limitaría Windows de nuevo. Main intacta, sin publicación/merge. Detenerse tras esta corrección y propuesta B03-03.
+
+---
+
+# Histórico — B03-02: revisión de confirmación y atributos
 
 2026-10-29: auditoría APPROVE_WITH_FOLLOWUPS comunicada por el usuario, sin P0–P2; confirma R-039, creación y SIGKILL. Baseline aceptado; correcciones siguientes sólo verificadas localmente, requieren revisión focalizada. No invocar agentes ni iniciar B03-03.
 
