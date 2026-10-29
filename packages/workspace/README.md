@@ -1,3 +1,5 @@
+Estado vigente de fase: D-036 ACCEPTED por aprobación expresa del propietario; Fase 02 cerrada tras diez criterios y 442/442 con gates verdes. Exclusión/rechazo conservador implementados; redacción transformadora no implementada, diferida a frontera de exportación/proveedor. Sin permiso implícito de envío/procesamiento de secretos, ejecución o herramientas. Fase 03 no iniciada. Menciones inferiores de fase abierta/D-036 pendiente son históricas y se conservan como trazabilidad.
+
 # Proyectos Git locales y worktrees — B03-01/B03-02
 
 ## B03-05 — ContextEnvelope (aceptado/cerrado)

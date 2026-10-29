@@ -1,5 +1,26 @@
 # Registro de riesgos
 
+## D-036 ACCEPTED — aceptación residual del propietario para Fase 02/MVP
+
+Autorización expresa del propietario en esta sesión. Aceptar el riesgo permite evaluar el cierre acotado de Fase 02; **no** lo resuelve ni autoriza procesar/transmitir secretos. Las referencias históricas inferiores a D-036 pendiente quedan sustituidas por su aceptación actual, sin reescribir los hechos anteriores.
+
+| Riesgo/defecto | Estado y tratamiento vigente |
+|---|---|
+| R-049: clean global/case Windows | Riesgo aceptado en Fase 02: selección de contexto comprueba spelling exacto y OID; no se considera corregido globalmente. Un futuro uso operativo no puede basarse sólo en clean: requiere validación de identidad/rutas/estado adecuada al acceso real. |
+| R-055 y R-052: secretos/privacidad | Heurística con falsos positivos/negativos y placeholders; aceptada para recopilación local explícita, no DLP ni redacción. Revisión/clasificación y autorización de payload/destino obligatorias antes de proveedores; secretos detectados siguen excluidos/rechazados. |
+| R-056: fragilidad/pruebas plataforma | Aceptado sin cerrar: instrumentación de carreras depende de stack/build; symlink nativo de archivo no probado con privilegio en Windows, fallback a entrada Git 120000 no equivale a cobertura nativa. Mantener evidencia y ampliar plataforma cuando ese soporte sea necesario. |
+| R-057: CAS | Integridad por SHA-256 y lineage verificados, no autenticidad frente a propietario. Aceptado bajo CAS/ACL/caller privados y confiables; importación de terceros requerirá otra frontera de confianza. Un manifest nunca concede permisos de uso/exportación. |
+| R-058/R-059/R-060 | Defectos resueltos y confirmados por segunda auditoría: publicación exige flag explícito, bytes canónicos originales y políticas malformadas tipadas. No son riesgos aceptados sin corregir. |
+| R-054: bytes/OID | Defecto resuelto y aceptado independientemente; comparación de bytes capturados con blob Git del commit autorizado SHA-1/SHA-256 antes de CAS. No se presenta como riesgo pendiente ni se altera al aceptar D-036. |
+| R-062: flags heredados/accessors | Corrección local de96f51 con regresiones rojas/verdes, paquete/envelope bajo permisos propios vivos y revocación. B03-05 aceptado/cerrado por propietario; no se atribuye auditoría externa adicional del último correctivo. |
+| R-061 | Intermitencia no reproducida y **causa aún no identificada**. Aceptada como seguimiento del MVP, no resuelta. Mantener logs completos; cualquier reproducción que haga fallar gates bloquea el cierre/avance correspondiente. |
+| R-041/R-053: huérfanos/concurrencia | Aceptados: Git/CAS/SQLite no forman transacción distribuida; restos conservados, sin retry/limpieza automática ni reejecución de efectos inciertos. Operador garantiza raíces privadas/exclusión; no snapshot atómico contra dueño privilegiado concurrente. |
+| ACL y pérdida eléctrica | Aceptados dentro de modelo privado del operador. WAL/FULL/fsync y recuperación de procesos probadas no acreditan ensayo de corte eléctrico ni fsync portable de directorios Windows. Sin nuevas garantías de power loss atribuidas al cierre. |
+| Worktree/sandbox | Worktree aísla checkout/índice con metadatos compartidos autorizados, **no** procesos/red/credenciales. Cualquier futuro ejecutor requiere permisos y controles de efectos/sandbox explícitos; nunca inferirlos del worktree o envelope. |
+| R-037/R-038/R-040 y compatibilidad | Persisten límites: reemplazo de inode/config requiere registro revisado, límites de salida/archivos/nombres y continuaciones conservadoras. Demo válida con proyecto TypeScript compatible, sin prometer repositorios arbitrarios. |
+
+Dependencias futuras: Fase 03 debe definir política/clasificación, destino local autorizado, límites/cancelación/evals y control de logs antes de consumir datos por un modelo. Redacción transformadora se diseñará en frontera exportación/proveedor si se habilita contenido que la requiera, nunca considerada implementada por D-036. Fase 05 deberá controlar herramientas, accesos reales a disco/red y permisos sobre worktree, privacidad fuera del contexto seleccionado y recuperación incierta. No se inicia ninguna de ellas aquí.
+
 ## Segunda aceptación B03-05 y P3 transversal
 
 APPROVE_WITH_FOLLOWUPS independiente recibido, tres defectos anteriores confirmados corregidos. R-062/P3: flags heredados o contaminados desde Object.prototype no conceden autorización; se consultan descriptores propios de datos en cada punto (sin snapshot duradero), faltantes -> context_denied, accessors/políticas malformadas/Proxy -> context_invalid sanitizado. No invocar getters; grants de lectura y publicación siguen separados. Política/grants propios legítimos siguen admitidos, incluso con prototipo null. Revocación revalidada en paquetes/envelopes y antes de publicaciones sucesivas. Corrección local con regresiones; no se atribuye revisión independiente adicional del último código. R-061 permanece **intermitencia no reproducida, causa aún no identificada**, no resuelta. R-055/056/057 y límites previos se conservan. Fase 02 abierta y D-036 no aceptada, criterio original de redacción intacto.

@@ -22,7 +22,7 @@ BeonForge será un plano de control local-first, vendor-neutral, con contratos d
 |---|---|---|
 | 00 Foundation | Repo aislado, workspace estricto, comandos repetibles, CI inicial, ADR, threat model y AGENTS.md | Informe de preparación |
 | 01 Kernel durable sin IA | CLI ejecuta un DAG determinista, falla, conserva evidencia, reanuda sin repetir nodos válidos y termina verificablemente | 00 |
-| 02 Workspace y contexto | Worktree acotado y ContextPackage reproducible con instrucciones, mapa y redacción | 01 |
+| 02 Workspace y contexto | Worktree acotado y ContextPackage reproducible con instrucciones, mapa, exclusión de rutas privadas y rechazo conservador previo a persistencia; sin redacción transformadora ni autorización implícita de envío. | 01 |
 | 03 Primer proveedor local | Registry, probes y Ollama candidato evaluado con salida estructurada y cancelación | 02, clasificación de datos, política, evals |
 | 04 Vertical bugfix | Workflow sobre fixture: reproducir, test rojo, cambio, gates, revisión y rollback | 01–03 |
 | 05 Harness externos | Adaptadores soportados de OpenCode y Codex CLI, perfiles y contract tests; Claude Code independiente | 04 |
@@ -56,3 +56,5 @@ Estado vigente B03-05: nodo registrado d7121e8 y código 901290a, ContextEnvelop
 B03-05 correctivo 0c662fc: 439/439 dos corridas completas, gates con exit nativo 0, pendiente de revisión focalizada. Nodo y Fase 02 abiertos. D-036 es propuesta no aceptada: se mantiene sin cambios el criterio original de redacción hasta aprobación expresa del propietario. No otro nodo ni proveedor.
 
 Cierre vigente B03-05: segunda aceptación independiente APPROVE_WITH_FOLLOWUPS, defectos originales corregidos; P3 transversal local de96f51 y 442/442 con gates verdes. No se atribuye auditoría independiente adicional del correctivo. Fase 02 abierta, R-061 no reproducida/sin causa y demás seguimientos vigentes; D-036 no aceptada y criterio original de redacción intacto. Ningún otro nodo/proveedor/agente iniciado.
+
+Estado vigente: D-036 ACCEPTED por autorización expresa del propietario (alternativa B); Fase 02 cerrada tras matriz de diez criterios y 442/442 de referencia repetidos con gates nuevos exit nativo 0. Exclusión/rechazo no constituye redacción transformadora ni autoriza envío/procesamiento de secretos; redacción diferida a frontera de proveedor/exportación. Riesgos aceptados para MVP no resueltos, R-061 no reproducida/sin causa. Sustituye estados históricos anteriores de fase abierta/D-036 pendiente. Siguiente Fase 03, no iniciada; propuesta B05-01 probe local seguro de Ollama sin inferencia ni contexto, respetando clasificación/política/evals antes de consumo de datos. No otros objetivos/contratos cambiados.
