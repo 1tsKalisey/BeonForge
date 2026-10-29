@@ -1279,10 +1279,12 @@ it('B0304 fixes attribute origin and exposes tracked-only validation scope', asy
   const original = childProcess.spawn;
   const sources: string[] = [];
   childProcess.spawn = ((...args: Parameters<typeof original>) => {
-    if (Array.isArray(args[1]) && args[1].includes('status'))
-      sources.push(
-        args[1].find((a) => a.startsWith('--attr-source=')) ?? 'missing',
+    if (Array.isArray(args[1]) && args[1].includes('status')) {
+      const value: unknown = args[1].find(
+        (a: unknown) => typeof a === 'string' && a.startsWith('--attr-source='),
       );
+      sources.push(typeof value === 'string' ? value : 'missing');
+    }
     return original(...args);
   }) as typeof original;
   syncBuiltinESMExports();
