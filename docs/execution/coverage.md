@@ -1,6 +1,6 @@
 # Matriz de cobertura de implementación
 
-Actualizado: 2026-10-29. Estados: `catalogada`, `diseñada`, `prototipo`, `verificada`, `producción`. Un documento de arquitectura del vault es diseño, no evidencia de implementación. B00-01 reconcilia documentación; no añade capacidad de kernel. Cierre B03-03 APPROVE_WITH_FOLLOWUPS registrado; Fase 02 sigue abierta. P3-5 documental resuelto, los otros cuatro siguen pendientes.
+Actualizado: 2026-10-29. Estados: `catalogada`, `diseñada`, `prototipo`, `verificada`, `producción`. Un documento de arquitectura del vault es diseño, no evidencia de implementación. B03-01/02/03 aceptados/cerrados; Fase 02 sigue abierta. B03-04 implementado y verificado localmente, pendiente de auditoría independiente; R-047/050 corregidos localmente, R-049 global/R-048 parcial conservados.
 
 | Capacidad | Estado del plan | Estado de implementación | Evidencia / próximo gate |
 |---|---|---|---|
@@ -23,8 +23,8 @@ Actualizado: 2026-10-29. Estados: `catalogada`, `diseñada`, `prototipo`, `verif
 | Permisos mínimos de ejecución | diseñada | verificada | Registro explícito por handler/versión/efectos, allowlist externa por bloque y denegación antes de ejecución. API probada con efectos de fixture reales; políticas generales/human approval/sandbox quedan en fases posteriores. |
 | Registro e inspección Git local | diseñada | verificada | B03-01 aceptado/cerrado; P1 d73466b y R-039 79ba91e validados independientemente, B03-02/followups aceptados. R-037/038/040 siguen pendientes; no sandbox. |
 | Creación y verificación de worktrees aislados | diseñada | verificada | B03-02/followups aceptados; B03-03 también aceptado/cerrado, .gitignore regular soportado. Historia/receipt/grants conservados; compatibilidad general limitada. No marca toda Fase 02 como completada. |
-| Compatibilidad mínima de árboles Git | diseñada | verificada | B03-03 600dfb0/evidencias 9815731 aceptado y cerrado APPROVE_WITH_FOLLOWUPS; auditor verificó 373/373, sin P0–P2. P3 R-047–050 pendientes, P3-5/R-051 documental corregido. Sin nueva ejecución atribuida al cierre ni preparación general para agentes. |
-| Recopilación explícita de contexto | diseñada | catalogada | CTX-MIN provisional, propuesta en phase-02.md. No implementada; atributos/alcance de clean y case drift son prerequisitos. Reutilizar CAS, sin reconstruir workspace/kernel. |
+| Compatibilidad mínima de árboles Git | diseñada | verificada | B03-03 aceptado/cerrado APPROVE_WITH_FOLLOWUPS. B03-04 añade atributos desde commit y validationScope, pendientes de revisión independiente. Case exacto se exige para contexto, no se corrige clasificación global de renames case-only. Límites/Git privado conservados. |
+| Recopilación explícita de contexto | diseñada | prototipo | B03-04 (CTX-MIN): API compilada build/read, manifest v1 determinista, bytes UTF-8 working tree, privacidad/límites, grants actuales y lineage CAS verificados. 36 nuevos tests de contexto + 1 prerrequisito; suite 410/410. Demo productor termina/lector nuevo verifica mismos bytes, originales/índices/config intactos en prueba controlada. Paquete de revisión listo; no aceptación independiente ni agentes/indexación/exportación. |
 | Indexación/recuperación de contexto | diseñada | catalogada | Diferida; no incluida en ContextPackage mínimo. |
 | Model registry, provider adapters y probes | diseñada | catalogada | Fases 03, 05; evaluación previa a uso real. |
 | Routing y OmniRoute | diseñada | catalogada | Fase 06, shadow y política de datos. |

@@ -1,5 +1,15 @@
 # Registro de riesgos
 
+## B03-04 — actualización local pendiente de auditoría
+
+- R-047: corregido localmente en 9a0bddb/07f9cc4. Status requiere --attr-source=<OID> autorizado; unborn usa hash del árbol vacío sin escritura. Check-attr conserva --source/stdin y políticas info/global/system. Regresión de frontera con Git real y .gitattributes untracked hostil, sin atribuir ejecución de filtros a la versión previa en este Git. Confirmación independiente pendiente.
+- R-050: corregido localmente, validationScope v1 aditivo/frozen en contrato y reportes máquina; clean sólo tracked contra creación, no untracked/ignored, sandbox ni snapshot atómico. Prueba CLI real con .gitignore incorporada; independiente pendiente.
+- R-049 sigue abierto globalmente: ContextPackage comprueba case exacto de cada componente y sus identidades antes/después, sin confiar en clean. No se corrige aquí la clasificación global de renames case-only. R-048 tiene nuevas aserciones de códigos, staging con bytes restaurados y CLI .gitignore; no se declara saldada toda la deuda de pruebas histórica.
+- R-052 — ContextPackage: perfil conservador de rutas/UTF-8 y patrones de secretos limitado; falsos positivos y secretos no detectados son posibles. Revisar antes de exportar. Hashes de bytes del working tree, no Git OIDs; estimación de tokens aproximada por bytes, futuros adaptadores deben recalcular. Refs CAS/lineage acreditan integridad, no firmas ni autenticidad frente al propietario del CAS.
+- R-053 — Captura: requiere raíces/ancestros privados, ACL/Git confiables y exclusión del operador (R-034/041); identidades/stamps y validación antes/después detectan cambios observables, no snapshot atómico contra actor privilegiado concurrente. CAS y Git no forman transacción: corte al publicar puede dejar blobs huérfanos, sin manifest devuelto/GC/retry. Lectura histórica exige grants actuales, no permite operar sobre checkout drift/invalid/uncertain. Validar clean sigue leyendo los tracked autorizados existentes; sólo la selección se publica, no se afirma ausencia de toda lectura tracked ajena a ella.
+
+Los registros inferiores son históricos: no sustituyen estos estados locales ni acreditan aceptación independiente de B03-04. R-037/038/040 y límites existentes se conservan, Fase 02 abierta.
+
 ## Followups de aceptación B03-03 (2026-10-29)
 
 Veredicto APPROVE_WITH_FOLLOWUPS recibido, 373/373 verificados por Claude, sin P0–P2: B03-03 cerrado, Fase 02 abierta. Riesgos existentes conservados. Cuatro P3 aceptados y pendientes; sólo P3-5 documental corregido. No se implementan correcciones funcionales en este turno.

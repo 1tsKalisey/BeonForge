@@ -1,4 +1,41 @@
-# B03-03 — Aceptación independiente y cierre
+# B03-04 — ContextPackage mínimo: revisión independiente pendiente
+
+2026-10-29. CTX-MIN recibe identificador definitivo **B03-04** antes de implementar. **Abierto hasta auditoría aportada por el usuario**; no cerrar Fase 02 ni iniciar otro nodo. B03-01/02/03 y Fase 01 siguen aceptados. Sin agentes invocados, merges, publicación, cambios de main/dependencias/lockfile/knowledge/.claude.
+
+## Commits y alcance
+
+- Base aceptada `f953473`. `ab7bd03` registra el nodo antes de implementar.
+- `9a0bddb`: R-047/R-050, status con --attr-source=<OID> autorizado y validationScope aditivo/frozen; unborn usa árbol vacío calculado sin escritura. `07f9cc4` corrige únicamente el tipado de la instrumentación de ese test (lint recibido después del commit previo).
+- `4e47e23`: API buildContextPackage/readContextPackage, ContextError y manifest v1 en workspace/src/context.ts; tests compilados reales, contrato/demo en CONTEXT.md. src/index.ts pasa a barrel y la implementación anterior se conserva **exactamente** en workspace.ts hasta el nuevo puente interno contextWorkspaceSnapshot (comparación automatizada de texto normalizando CRLF). No reconstrucción de worktrees ni kernel. Revisar `git diff f953473..4e47e23` y los archivos nuevos; los cambios aparentes de 1088 líneas corresponden a esta extracción.
+
+## Comportamiento y fronteras
+
+Build: permiso CAS lectura/publicación, intención/path grants exactos, creación históricamente confirmed y actualmente clean, permisos workspace revalidados antes/después; selección tracked explícita y case exacto. Componentes sin enlaces/junctions, identidades físicas y stamps de archivos/ancestros antes/después; lectura acotada/UTF-8, privacidad y presupuesto completos antes del primer put. La validación existente lee los tracked autorizados necesarios para clean; sólo la selección se recopila/publica. No enumeración de contenidos untracked/ignored ni aumento de permisos.
+
+Manifest v1 determinista, rutas relativas/lineage refs CAS, política de captura hash v1, límites 16 archivos/16 KiB/32 KiB, hashes de **bytes exactos del working tree**, no de objetos Git ni texto normalizado. Estimación utf8-byte-units-v1 = bytes, aproximada/sin proveedor. No paths absolutos/timestamps. Publicación de blobs seguros primero, manifest al final, hash/longitud y relectura verificados; no transacción Git/CAS/SQLite ni paquete parcial retornado ante fallo.
+
+Read: grants **actuales** por intención y ruta, manifest/lineage/artefactos/hash/longitud/totales/versión/privacidad verificados. Devuelve bytes con `sourceValidation: historical-not-revalidated`; una edición posterior conserva el snapshot y nunca autoriza nuevas acciones. Contenido del repo es dato no confiable, no instrucciones/autoridad del control plane. No adaptador/modelo/SDK/exportación/herramientas ejecutables del proyecto. CLI contexto sigue futura según propuesta; CLI worktree existente expone alcance explícito.
+
+## Evidencias reproducibles
+
+Node **24.19.0**, SQLite **3.53.3**, pnpm **12.15.0**, Git **2.52.0.windows.1**, Windows. Resolver paquete devuelve workspace/dist/index.js; NodeNext/typecheck consume declaraciones publicadas dist/index.d.ts, sin alias a fuente. Build ejecutado por check antes de tests, sin dist obsoleto.
+
+- `pnpm.cmd install --frozen-lockfile`, `pnpm.cmd peers check`, `pnpm.cmd check`: **verdes**, sin dependencias nuevas. Check incluye formato/lint con tipos/typecheck/build/tests/spike. Suite **410/410**, sin skips/fallos: contratos 62, persistencia 115, runtime 71, workspace 155, spike 7. Conserva todos los 373 previos; añade 1 prerrequisito y 36 contexto. Workspace completo 318.13 s; focal contexto inicial 36/36 en 274.03 s.
+- Rojo inicial: frontera de atributos/scope faltante en Git real y API ausente en exports compilados antes del cambio. No atribuir explotación de atributos al Git anterior: se reproduce la ausencia de la protección/metadata. Verde con .gitattributes untracked hostil, origen de status explícito y fixtures válidos/unborn. Secretos de prueba son ficticios y confinados a temporales.
+- Nuevos tests: selección ordenada/repetida/autorización, .gitignore/CRLF/determinismo, untracked/ignored/privados, texto sospechoso/NUL/UTF-8 inválido, staging con bytes restaurados, HEAD/identidad/case/junction, marker ausente/uncertain, edición durante read sin publicación, límites 16/17 archivos y 16/32 KiB, corrupción/ref ausente/receipt inválido/manifest manipulado/put con hash falso y corte simulado entre blobs. Los tests anteriores de hooks/filtros/SIGKILL/recuperación permanecen; no afirmar power loss ni SIGKILL nuevo específico de ContextPackage.
+- Demo final reforzada: `pnpm.cmd --filter @beonforge/workspace exec vitest run test/context.test.ts -t 'TypeScript demo'`: **1/1 verde, 12.07 s** (35 no seleccionados por filtro). Proyecto TypeScript temporal real, selección explícita → productor independiente publica CAS y **termina** → otro proceso reabre store → mismos hashes y bytes base64. CLI inspect con .gitignore devuelve confirmed/clean y scope tracked-only. Prueba controlada adicional conserva índice original/índice del worktree/config y hashes de todos los archivos tracked antes/después.
+- Fallos intermedios corregidos: tipado/lint de instrumentación; primera batería con timeout Vitest 5 s agotado al crear fixtures reales, sin clasificarlo como fallo del producto. Se fija 60 s por test/30 s cleanup sólo en esa batería. Timeouts Git/persistencia de producción intactos. Gate completo y comprobación focal final pasan; sin excepciones ni fallos pendientes.
+- Diff/paths y secretos: sin cambios fuera de workspace/docs de ejecución; escaneo textual sólo reconoce cabecera sintética de clave en test negativo, no credenciales reales. Main e14cfdd intacta; sin CI remota nueva.
+
+## Foco y riesgos de revisión
+
+Revisar la frontera CAS/autoridad, validadores de manifest/ref/lineage, protección exacta de paths/identidades/TOCTOU observable, privacidad antes de publicar, y origen de atributos/scope en compilación actual. Distinguir integridad de autenticidad: refs no son firmas contra propietario del CAS. No bloquear por agentes/exportación/DLP universal/indexación/GC o catálogo deliberadamente fuera de alcance.
+
+R-047/050 **corregidos localmente, sin aceptación independiente todavía**. R-049 continúa global; contexto falla cerrado con spelling exacto. R-048 parcialmente cubierto, no se cierra toda deuda histórica. R-037/038/040/041 y límites de compatibilidad siguen vigentes. R-052/053: privacidad heurística, datos no confiables, estimación aproximada, raíces/ACL privadas, propietario concurrente fuera del modelo de snapshot atómico, blobs huérfanos posibles sin retry/GC. Rollback por revert acotado conservando artefactos/worktrees y referencias; no borrar datos ni volver a validación insegura. **Siguiente paso exclusivo: revisión independiente B03-04; detener implementación.**
+
+---
+
+# Histórico — B03-03: aceptación independiente y cierre
 
 2026-10-29: usuario comunica auditoría Claude **APPROVE_WITH_FOLLOWUPS**, 373/373 verificados, sin P0–P2; confirma cierre. **B03-03 aceptado/cerrado**, código 600dfb0/evidencias 9815731. No se repite auditoría ni se invocan agentes. Fase 02 permanece abierta, no se atribuye ContextPackage ni preparación general para agentes. Este commit sólo documental, main e14cfdd intacta, sin merge/publicación.
 

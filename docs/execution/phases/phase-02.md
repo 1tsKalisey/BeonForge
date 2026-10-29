@@ -4,11 +4,13 @@
 
 Identificador definitivo registrado antes de implementar: **B03-04**, siguiente nodo B03 del plan, alias CTX-MIN. Autorizado por el usuario; abierto hasta auditoría. Se ejecuta la propuesta inferior con límites 16 archivos/16 KiB/32 KiB, bytes del working tree y estimación UTF-8 versionada. Primero R-047/R-050 y case exacto, luego captura/lectura CAS. Archivos previstos workspace/src (contexto y reutilización mínima de validación), tests/CLI/README/memoria; sin dependencias ni cambios Fase 01/kernel. Gates completos, regresiones y recuperación entre procesos. Rollback por revert conservando CAS/worktrees; sin retry/GC ni agentes. Alcance/criterios/exclusiones originales inferiores siguen aplicando; sólo este nodo se implementa.
 
-## Estado vigente — cierre B03-03
+Verificación local: prerequisitos 9a0bddb/07f9cc4, APIs build/read y manifest v1 implementados con CAS existente. 410/410 tests verdes (373 anteriores + 37 nuevos), frozen/peers/check completos, dist actual/diff/secretos. La captura no autoriza acciones; lectura histórica con grants nuevos. Demo TypeScript productor independiente → CAS → fin del proceso → lector independiente, mismos bytes/hashes. CLI de contexto sigue futura como en propuesta; se prueba CLI worktree inspect con .gitignore y scope aditivo. R-047/050 corregidos localmente, case exacto protegido en contexto; R-049 global y deuda restante no se cierran. **B03-04 abierto hasta aceptación independiente**, Fase 02 no completada. Próximo gate revisión del usuario, no otro nodo. Detalle de contratos/seguridad en packages/workspace/CONTEXT.md y paquete actual; rollback por revert acotado conservando referencias y sin borrar huérfanos.
+
+## Histórico aceptado — cierre B03-03
 
 2026-10-29: usuario comunica auditoría independiente APPROVE_WITH_FOLLOWUPS, 373/373 verificados, sin P0–P2. **B03-03 aceptado y cerrado**, código 600dfb0/evidencias 9815731. Fase 02 sigue abierta. Cuatro P3 funcionales/de contrato pendientes R-047–050; P3-5/R-051 corregido documentalmente en coverage. No se repite auditoría ni se cambia código. Estados previos inferiores se conservan como trazabilidad y quedan sustituidos por este cierre.
 
-## CTX-MIN — ContextPackage mínimo y verificable (alias provisional)
+## Propuesta original conservada — CTX-MIN (ahora B03-04)
 
 Identificador **propuesto**, sin asignación definitiva B03-04 ni compromiso de numeración. Estado diseñado, no implementado. El plan vigente exige worktree acotado antes de ContextPackage y lo satisface B03-01–03; no exige agentes ni una indexación previa. Sin embargo, antes de capturar hay que validar los prerrequisitos de seguridad siguientes. Este turno sólo documenta la propuesta y termina.
 
