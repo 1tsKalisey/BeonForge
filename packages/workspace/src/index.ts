@@ -18,6 +18,7 @@ export {
   buildContextEnvelope,
   readContextEnvelope,
   type ContextEnvelope,
+  type ContextEnvelopePolicy,
   type ContextEnvelopeManifest,
   buildContextPackage,
   readContextPackage,

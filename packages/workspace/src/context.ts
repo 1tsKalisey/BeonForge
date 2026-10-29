@@ -101,6 +101,30 @@ export interface ContextEnvelope {
   }>[];
   readonly authority: 'historical-data-only';
 }
+/** Existing read policies remain usable for reads; publication requires explicit true. */
+export interface ContextEnvelopePolicy extends ContextReadPolicy {
+  readonly canPublish?: boolean;
+}
+function envelopePolicy(
+  value: unknown,
+): asserts value is ContextEnvelopePolicy {
+  try {
+    if (!value || typeof value !== 'object' || Array.isArray(value))
+      return fail('context_invalid');
+    const p = value as Record<string, unknown>;
+    if (
+      typeof p.canRead !== 'boolean' ||
+      !Array.isArray(p.allowedIntents) ||
+      !Array.isArray(p.allowedPaths) ||
+      p.allowedPaths.some((v: unknown) => typeof v !== 'string') ||
+      (p.canPublish !== undefined && typeof p.canPublish !== 'boolean')
+    )
+      return fail('context_invalid');
+    for (const ref of p.allowedIntents) parseArtifactReference(ref);
+  } catch {
+    return fail('context_invalid');
+  }
+}
 function instructions(input: string | Uint8Array): Uint8Array {
   if (input?.length > 4096) return fail('context_limit');
   if (typeof input === 'string' && !input.isWellFormed())
@@ -117,16 +141,22 @@ function instructions(input: string | Uint8Array): Uint8Array {
 export async function buildContextEnvelope(
   packageRef: ArtifactReference,
   operatorInstructions: string | Uint8Array,
-  readPolicy: ContextReadPolicy,
+  readPolicy: ContextEnvelopePolicy,
   store: ArtifactStore,
 ): Promise<ArtifactReference> {
   try {
+    envelopePolicy(readPolicy);
+    if (readPolicy.canPublish !== true) return fail('context_denied');
     const ref = reference(packageRef);
     const bytes = instructions(operatorInstructions);
     await readContextPackage(ref, readPolicy, store);
+    envelopePolicy(readPolicy);
+    if (readPolicy.canPublish !== true) return fail('context_denied');
     const instructionRef = await publish(store, bytes);
     // Recheck caller grants after asynchronous publication. Orphans are safe to retain.
     await readContextPackage(ref, readPolicy, store);
+    envelopePolicy(readPolicy);
+    if (readPolicy.canPublish !== true) return fail('context_denied');
     const manifest: ContextEnvelopeManifest = {
       schemaVersion: 1,
       kind: 'context-envelope',
@@ -144,22 +174,23 @@ export async function readContextEnvelope(
   readPolicy: ContextReadPolicy,
   store: ArtifactStore,
 ): Promise<ContextEnvelope> {
+  envelopePolicy(readPolicy);
   if (readPolicy.canRead !== true) return fail('context_denied');
-  const raw = object(
-    decode(await verified(store, reference(envelopeRef), 4096)),
-  );
+  const original = await verified(store, reference(envelopeRef), 4096);
+  const raw = object(decode(original));
   const manifest: ContextEnvelopeManifest = {
     schemaVersion: 1,
     kind: 'context-envelope',
     package: reference(raw.package),
     operatorInstructions: reference(raw.operatorInstructions),
   };
-  if (JSON.stringify(manifest) !== JSON.stringify(raw))
+  if (!Buffer.from(JSON.stringify(manifest)).equals(Buffer.from(original)))
     return fail('context_integrity');
   const context = await readContextPackage(manifest.package, readPolicy, store);
   const bytes = instructions(
     await verified(store, manifest.operatorInstructions, 4096),
   );
+  envelopePolicy(readPolicy);
   authorize(
     context.manifest.source.intent,
     context.manifest.files.map((f) => f.path),

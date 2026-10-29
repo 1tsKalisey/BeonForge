@@ -38,6 +38,7 @@ import {
   createWorktree,
   type ContextPolicy,
   type ContextManifest,
+  type ContextReadPolicy,
 } from '@beonforge/workspace';
 
 const temp = realpathSync(tmpdir());
@@ -163,6 +164,108 @@ async function mutate(
 it('B0304 publishes the compiled minimal context API', () => {
   expect(workspace).toHaveProperty('buildContextPackage');
   expect(workspace).toHaveProperty('readContextPackage');
+});
+
+it('B0305Fix R58 envelope publication requires an explicit grant and detects revocation', async () => {
+  const f = await fixture();
+  const pkg = await buildContextPackage(
+    f.intent,
+    ['README.md'],
+    f.policy,
+    f.store,
+  );
+  const { canPublish: _grant, ...readOnly } = f.policy;
+  void _grant;
+  const r = recorder(f.store);
+  for (const policy of [readOnly, { ...f.policy, canPublish: false }])
+    await expect(
+      buildContextEnvelope(pkg, 'Inspect', policy, f.store),
+    ).rejects.toMatchObject({ code: 'context_denied' });
+  for (const policy of [readOnly, { ...f.policy, canPublish: false }])
+    await expect(
+      buildContextEnvelope(pkg, 'Inspect', policy, r.store),
+    ).rejects.toMatchObject({ code: 'context_denied' });
+  expect(r.writes).toHaveLength(0);
+  const ref = await buildContextEnvelope(pkg, 'Inspect', f.policy, f.store);
+  expect(
+    (await readContextEnvelope(ref, readOnly, f.store)).operatorInstructions,
+  ).toBe('Inspect');
+  const policy = { ...f.policy };
+  let puts = 0;
+  const revoke: ArtifactStore = {
+    readArtifact: f.store.readArtifact.bind(f.store),
+    putArtifact: async (bytes) => {
+      const ref = await f.store.putArtifact(bytes);
+      puts++;
+      policy.canPublish = false;
+      return ref;
+    },
+  };
+  await expect(
+    buildContextEnvelope(pkg, 'Inspect', policy, revoke),
+  ).rejects.toMatchObject({ code: 'context_denied' });
+  expect(puts).toBe(1);
+});
+it('B0305Fix R59 envelope checks original canonical bytes', async () => {
+  const f = await fixture();
+  const pkg = await buildContextPackage(
+    f.intent,
+    ['README.md'],
+    f.policy,
+    f.store,
+  );
+  const ref = await buildContextEnvelope(pkg, 'Inspect', f.policy, f.store);
+  const m = (await readContextEnvelope(ref, f.policy, f.store)).manifest;
+  for (const bytes of [
+    ' ' + JSON.stringify(m),
+    JSON.stringify(m, null, 2),
+    JSON.stringify({ ...m, extra: true }),
+    JSON.stringify({
+      operatorInstructions: m.operatorInstructions,
+      package: m.package,
+      kind: m.kind,
+      schemaVersion: 1,
+    }),
+    JSON.stringify({ ...m, package: { sha256: 'bad', byteLength: 1 } }),
+  ]) {
+    const altered = await f.store.putArtifact(Buffer.from(bytes));
+    await expect(
+      readContextEnvelope(altered, f.policy, f.store),
+    ).rejects.toMatchObject({ code: 'context_integrity' });
+  }
+});
+it('B0305Fix R60 envelope malformed policies fail with typed diagnostics', async () => {
+  const f = await fixture();
+  const pkg = await buildContextPackage(
+    f.intent,
+    ['README.md'],
+    f.policy,
+    f.store,
+  );
+  const ref = await buildContextEnvelope(pkg, 'Inspect', f.policy, f.store);
+  const r = recorder(f.store);
+  for (const raw of [
+    null,
+    {},
+    { canRead: true, allowedIntents: null, allowedPaths: [] },
+    { canRead: true, allowedIntents: [null], allowedPaths: [] },
+    { ...f.policy, allowedPaths: [42] },
+  ]) {
+    const policy = raw as unknown as ContextReadPolicy;
+    await expect(
+      buildContextEnvelope(pkg, 'Inspect', policy, r.store),
+    ).rejects.toMatchObject({
+      code: 'context_invalid',
+      message: 'context_invalid',
+    });
+    await expect(
+      readContextEnvelope(ref, policy, f.store),
+    ).rejects.toMatchObject({
+      code: 'context_invalid',
+      message: 'context_invalid',
+    });
+  }
+  expect(r.writes).toHaveLength(0);
 });
 
 it('B0305 builds deterministic authorized envelopes and derives only the package map', async () => {
