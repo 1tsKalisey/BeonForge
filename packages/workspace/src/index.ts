@@ -502,6 +502,7 @@ interface WorktreeIntent {
   reservation: Pin;
 }
 export interface WorktreeReport {
+  readonly current?: 'clean' | 'modified' | 'drift' | 'invalid';
   readonly state: 'prepared' | 'pending' | 'uncertain' | 'confirmed';
   readonly intent: ArtifactReference;
   readonly destination: string;
@@ -697,6 +698,14 @@ export async function inspectWorktree(
   policy: WorktreePolicy,
   store: ArtifactStore,
 ): Promise<WorktreeReport> {
+  return inspectWorktreeInternal(ref, policy, store, false);
+}
+async function inspectWorktreeInternal(
+  ref: ArtifactReference,
+  policy: WorktreePolicy,
+  store: ArtifactStore,
+  confirm: boolean,
+): Promise<WorktreeReport> {
   const { commit, d, destination, reservation } = await loadIntent(
     ref,
     policy,
@@ -713,6 +722,81 @@ export async function inspectWorktree(
     throw new ProjectError('identity_changed');
   if (activeWorktrees.has(d.commonDirectory))
     return { ...base, state: 'pending' };
+  const marker = join(reservation.path, 'confirmed.json');
+  let historical: ArtifactReference | undefined;
+  if (await exists(marker)) {
+    try {
+      const record = JSON.parse(await small(marker)) as {
+        schemaVersion?: unknown;
+        receipt?: unknown;
+        intent?: unknown;
+      };
+      if (
+        record.schemaVersion !== 1 ||
+        JSON.stringify(record.intent) !== JSON.stringify(ref) ||
+        Object.keys(record).sort().join() !== 'intent,receipt,schemaVersion'
+      )
+        throw new ProjectError('invalid_descriptor');
+      historical = parseArtifactReference(record.receipt);
+      const receipt = (await json(store, historical)) as {
+        schemaVersion?: unknown;
+        kind?: unknown;
+        intent?: unknown;
+        project?: unknown;
+        commit?: unknown;
+      };
+      if (
+        receipt.schemaVersion !== 1 ||
+        receipt.kind !== 'worktree-receipt' ||
+        receipt.commit !== commit ||
+        JSON.stringify(receipt.intent) !== JSON.stringify(ref)
+      )
+        throw new ProjectError('invalid_descriptor');
+      const project = parseArtifactReference(receipt.project);
+      const descriptor = (await json(store, project)) as ProjectDescriptor;
+      const targetPolicy = {
+        ...policy,
+        roots: [destination],
+        gitDirectories: [join(d.commonDirectory, 'worktrees')],
+        commonDirectories: [d.commonDirectory],
+      };
+      try {
+        if (
+          descriptor.root !== destination ||
+          JSON.stringify(await layout(destination, targetPolicy)) !==
+            JSON.stringify(descriptor)
+        )
+          return {
+            ...base,
+            state: 'confirmed',
+            receipt: historical,
+            current: 'drift',
+          };
+        if (
+          (await small(join(descriptor.gitDirectory, 'locked'))).trim() !==
+          `beonforge:${ref.sha256}`
+        )
+          throw new ProjectError('identity_changed');
+        const current = await inspect(descriptor, targetPolicy);
+        if (!current.detached || current.head !== commit)
+          return {
+            ...base,
+            state: 'confirmed',
+            receipt: historical,
+            current: 'drift',
+          };
+      } catch {
+        return {
+          ...base,
+          state: 'confirmed',
+          receipt: historical,
+          current: 'invalid',
+        };
+      }
+    } catch {
+      return { ...base, state: 'uncertain' };
+    }
+  }
   try {
     const targetPolicy = {
       ...policy,
@@ -771,6 +855,14 @@ export async function inspectWorktree(
       inspection.trackedChanges !== 0
     )
       throw new ProjectError('identity_changed');
+    if (historical)
+      return {
+        ...base,
+        state: 'confirmed',
+        receipt: historical,
+        current: 'clean',
+      };
+    if (!confirm) return { ...base, state: 'uncertain' };
     const project = await store.putArtifact(
       Buffer.from(JSON.stringify(descriptor)),
     );
@@ -785,8 +877,20 @@ export async function inspectWorktree(
         }),
       ),
     );
-    return { ...base, state: 'confirmed', receipt };
+    await canonical(reservation.path);
+    await writeExclusive(
+      marker,
+      Buffer.from(JSON.stringify({ schemaVersion: 1, intent: ref, receipt })),
+    );
+    return { ...base, state: 'confirmed', receipt, current: 'clean' };
   } catch {
+    if (historical)
+      return {
+        ...base,
+        state: 'confirmed',
+        receipt: historical,
+        current: 'modified',
+      };
     return { ...base, state: 'uncertain' };
   }
 }
@@ -843,5 +947,5 @@ export async function createWorktree(
   } finally {
     activeWorktrees.delete(d.commonDirectory);
   }
-  return inspectWorktree(ref, policy, store);
+  return inspectWorktreeInternal(ref, policy, store, true);
 }

@@ -941,7 +941,7 @@ it('B0302 CLI creates then inspects evidence in another process', async () => {
     state: 'confirmed',
   });
 }, 15000);
-it.each(['before', 'during', 'after'])(
+it.each(['before', 'during', 'confirmation', 'after'])(
   'B0302 SIGKILL %s creation recovers in a new process without repeating effects',
   async (stage) => {
     const f = await workFixture();
@@ -969,6 +969,7 @@ const store = await openSqlitePersistence(${JSON.stringify(join(f.storage, 'proj
 const pause = () => { process.stdout.write('BARRIER\\n'); Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0); };
 if (process.argv[2] === 'recover') { console.log(JSON.stringify(await inspectWorktree(ref, policy, store))); await store.close(); }
 else { const original = cp.spawn; cp.spawn = (...args) => { if (${JSON.stringify(stage)} === 'during' && args[1].includes('read-tree')) pause(); return original(...args); }; syncBuiltinESMExports();
+if (${JSON.stringify(stage)} === 'confirmation') { const put = store.putArtifact.bind(store); store.putArtifact = async data => { const result = await put(data); try { if (JSON.parse(Buffer.from(data).toString()).kind === 'worktree-receipt') pause(); } catch {} return result; }; }
 if (${JSON.stringify(stage)} === 'before') pause(); await createWorktree(ref, policy, store); pause(); }
 `,
     );
@@ -1028,9 +1029,53 @@ it('B0302 materializes binary/nested blobs and rejects later extra files', async
   );
   writeFileSync(join(result.destination, 'unexpected'), 'keep');
   expect((await inspectWorktree(ref, f.policy, f.store)).state).toBe(
-    'uncertain',
+    'confirmed',
   );
   expect(readFileSync(join(result.destination, 'unexpected'), 'utf8')).toBe(
     'keep',
   );
 }, 15000);
+it.each(['edit', 'missing', 'invalid', 'cut', 'head', 'gone'] as const)(
+  'P31 durable confirmation %s',
+  async (kind) => {
+    const f = await workFixture();
+    const ref = await prepareWorktree(
+      f.project,
+      f.commit,
+      f.execution,
+      f.policy,
+      f.store,
+    );
+    const result = await createWorktree(ref, f.policy, f.store);
+    const marker = join(dirname(result.destination), 'confirmed.json');
+    expect(existsSync(marker)).toBe(true);
+    if (kind === 'edit')
+      writeFileSync(join(result.destination, 'tracked.txt'), 'edited');
+    if (kind === 'missing') rmSync(marker);
+    if (kind === 'gone')
+      renameSync(result.destination, result.destination + '-moved');
+    if (kind === 'head')
+      writeFileSync(
+        git(result.destination, 'rev-parse', '--git-path', 'HEAD'),
+        '0'.repeat(40) + '\n',
+      );
+    if (kind === 'invalid' || kind === 'cut')
+      writeFileSync(marker, kind === 'cut' ? '' : '{}');
+    await f.store.close();
+    const store = await openSqlitePersistence(
+      join(f.storage, 'projects.sqlite'),
+    );
+    f.stores.push(store);
+    const report = await inspectWorktree(ref, f.policy, store);
+    expect(report.state).toBe(
+      ['edit', 'head', 'gone'].includes(kind) ? 'confirmed' : 'uncertain',
+    );
+    if (kind === 'head' || kind === 'gone')
+      expect(['drift', 'invalid']).toContain(report.current);
+    if (kind === 'edit') {
+      expect(report.receipt).toEqual(result.receipt);
+      expect(report).toMatchObject({ current: 'modified' });
+    }
+  },
+  15000,
+);
