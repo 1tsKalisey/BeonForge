@@ -1,5 +1,15 @@
 # ContextPackage — B03-04 (CTX-MIN)
 
+## B03-05 — ContextEnvelope v1 (pendiente de revisión)
+
+`buildContextEnvelope(packageRef, operatorInstructions, readPolicy, store)` publica un sobre CAS canónico `{schemaVersion:1, kind:'context-envelope', package, operatorInstructions}` con dos ArtifactReference. `readContextEnvelope(envelopeRef, readPolicy, store)` devuelve manifest, operatorInstructions (string), context (ContextPackage verificado), map ordenado `{path, artifact, byteLength}` y authority: historical-data-only. El mapa se deriva de las entradas del paquete, no se persiste duplicado ni descubre archivos nuevos. No se modifica ContextPackage v1/binding Git. El store es capacidad de almacenamiento confiable entregada por el caller; readPolicy conserva los grants explícitos existentes por intención/ruta, sin deducir permisos de referencias o instrucciones.
+
+Instrucciones aceptan string o Uint8Array, máximo 4096 bytes UTF-8. Vacío permitido y estable; Unicode preservado sin normalización, incluido BOM. Surrogates aislados en string -> context_invalid; bytes UTF-8 inválidos/NUL/secretos -> context_sensitive; tamaño excedido -> context_limit. Se aplica la heurística existente como texto, sin excepciones de expresión JS/TS. Se valida privacidad/límites y paquete autorizado antes del primer put; se verifica hash/longitud/relectura y se revalida paquete/grants después de publicar instrucciones y antes del manifest. Publicación interrumpida/revocación puede dejar instrucciones huérfanas; nunca retry/GC/limpieza automática ni transacción nueva. Errores de almacenamiento sanitizados context_integrity; sin eco de valores privados.
+
+Lectura verifica envelope, paquete, instrucciones y grants actuales, incluyendo autorización tras leer instrucciones. Mismo contenido autorizado produce misma referencia. Se mantienen separados instrucciones explícitas del operador y archivos del repositorio no confiables. Ninguno concede autoridad para herramientas, checkout vivo, ejecución o envío. **No existe envío a proveedores ni ejecución de agentes.** Lectura histórica no revalida un checkout vivo. La heurística de secretos no es infalible y el rechazo conservador **no constituye redacción transformadora**.
+
+Demo ampliada en test/context.test.ts: proyecto TypeScript real autorizado → worktree confirmado → selección → ContextPackage → instrucciones → envelope CAS → fin del productor → lector independiente con mismo mapa/instrucciones/bytes. Build actual obligatorio antes de ejecutar el filtro 'TypeScript demo'. No se instala/ejecuta código del fixture. Límite y casos negativos complementarios en filtro B0305.
+
 API local, sin agentes, ejecución de código del proyecto ni exportación. Requiere un `ArtifactStore` confiable (el mismo CAS durable ya existente); no añade catálogo, tablas SQL ni dependencias. B03-04 aceptado/cerrado tras segunda auditoría APPROVE_WITH_FOLLOWUPS y correcciones finales con gates verdes; seguimientos heurísticos y de tests conservados, no acredita Fase 02 completa.
 
 ```ts

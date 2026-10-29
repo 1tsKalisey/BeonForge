@@ -1,5 +1,9 @@
 # Proyectos Git locales y worktrees — B03-01/B03-02
 
+## B03-05 — ContextEnvelope (pendiente de revisión)
+
+API build/read, instrucciones explícitas CAS y mapa derivado del paquete autorizado; contrato y demo en CONTEXT.md. 436/436 tests y gates verdes, sin envío/proveedores/agentes ni cierre de Fase 02.
+
 ## B03-04 — ContextPackage mínimo (aceptado/cerrado)
 
 Segunda auditoría APPROVE_WITH_FOLLOWUPS, P2/OID resuelto e intacto; correctivo final de heurística a1f4c97, 432/432 tests y gates verdes. P3-3/P3-4 aceptados pendientes, sin siguiente nodo ni agentes. Estado histórico de implementación inferior sustituido por este cierre; contrato y límites actuales en CONTEXT.md.

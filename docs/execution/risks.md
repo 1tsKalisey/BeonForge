@@ -1,5 +1,9 @@
 # Registro de riesgos
 
+## B03-05 — ContextEnvelope
+
+R-057: instrucciones explícitas y contenido del repositorio se conservan separados, pero el sobre no autentica al propietario del CAS ni concede permisos de herramientas/envío. Caller/store/ACL privados siguen siendo confiables; lectura histórica requiere grants actuales y nunca habilita checkout vivo. Instrucciones no se ejecutan/interpolan ni se usan como política. Heurística de privacidad existente no es infalible, mantiene falsos positivos/negativos y placeholders documentados; rechazo conservador no es redacción transformadora. Corte o revocación tras publicar instrucciones puede dejar huérfanos, sin envelope devuelto, limpieza o retry. No transacción distribuida nueva, modelos o proveedores. R-055/056 y riesgos previos intactos, sin cierre de Fase 02.
+
 ## Segunda auditoría B03-04 — seguimientos aceptados
 
 APPROVE_WITH_FOLLOWUPS recibido; P2/OID confirmado resuelto independientemente y no modificado en este correctivo. P3-1/P3-2 corregidos localmente con seis rojas previas: claves compuestas, propiedades JS/TS vs literales y política finita de placeholders. R-055/P3-3 — patrones/sintaxis residuales fuera de heurística siguen pendientes; sin pretender lista exhaustiva ni DLP/parser de todos los lenguajes. Los placeholders vacío/example/changeme son excepciones declaradas, no prueba de ausencia de una credencial real; revisión previa a exportación permanece necesaria, así como falsos positivos/negativos y rechazos conservadores.

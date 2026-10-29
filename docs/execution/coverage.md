@@ -4,6 +4,7 @@ Actualizado: 2026-10-29. Estados: `catalogada`, `diseñada`, `prototipo`, `verif
 
 | Capacidad | Estado del plan | Estado de implementación | Evidencia / próximo gate |
 |---|---|---|---|
+| Instrucciones y mapa explícitos del contexto | diseñada | prototipo | B03-05 901290a: envelope CAS v1, instrucciones <=4 KiB, mapa derivado del paquete autorizado, integridad y grants actuales build/read. 436/436, cuatro tests agregados nuevos y demo ampliada productor/lector con mismas instrucciones/mapa/bytes. Sin descubrimiento/envío/agentes/redacción transformadora. Pendiente de auditoría independiente, Fase 02 abierta. |
 | Repositorio y memoria operativa | diseñada | verificada | Foundation cerrada; B00-01 incorpora objetivo de producto y plan ejecutable de Fase 01. Gates actuales en `status.md`. |
 | pnpm workspace y TypeScript estricto | diseñada | verificada | `3fc9d52`, actualizado por `b4d56e4`; TypeScript 6.0.3, instalación frozen, typecheck y build pasan. |
 | lint, format y tests | diseñada | verificada | `b4d56e4`; ESLint, Prettier, Vitest 1/1 y gate integrado pasan; lint detectó `any` de prueba. |
