@@ -1,4 +1,20 @@
-# B03-02 — Worktrees aislados, paquete para auditoría independiente
+# B03-02 — Aceptación y revisión focalizada de dos P3
+
+2026-10-29: auditoría APPROVE_WITH_FOLLOWUPS comunicada por el usuario, sin P0–P2; confirma R-039, creación y SIGKILL. Baseline aceptado; correcciones siguientes sólo verificadas localmente, requieren revisión focalizada. No invocar agentes ni iniciar B03-03.
+
+P3-1 eadc346: confirmed.json v1 wx/write/fsync referencia intención y receipt CAS original después de verificar. state histórica separada de current clean/modified/drift/invalid; no concede permisos ni permite nuevo create. Marker/receipt/pins/HEAD/lock validados; ausencia/corrupción/corte previo al marker -> uncertain, sin reconstrucción automática. Cuatro rojos iniciales sin marker; seis verdes de edición/reinicio, pérdida/corrupción/truncado, HEAD/destino alterados. SIGKILL adicional entre publicación del receipt y marker conserva incertidumbre. El test de archivo extra pasa a exigir confirmación histórica.
+
+P3-2: cinco rojos info/attributes (encoding/filter/text/eol/ident) aceptaban reservas. check-attr --source=<OID> -z valida triples/recuento antes de reserva y dispatch; rechaza asignaciones explícitas, sin filtros/shell. GIT_ATTR_NOSYSTEM=1, atributos globales NUL, aislamiento R-039 intacto. Comprobar rechazo sin reservas/worktrees residuales. No compatibilidad ampliada.
+
+Código P3-2 bf81d93; base de ambas correcciones f8206a6, diff git diff f8206a6..bf81d93. Gates finales 347/347 sin skips: 62 contratos + 115 persistencia + 71 runtime + 92 workspace + 7 spike, incluye 335 previos. Frozen/peers/formato/lint/typecheck/build/diff/secretos verdes; exports dist actuales recompilados. Selector de tests con pipe falló por interpretación de pnpm.cmd; repetido correctamente por separado. Sin cambios de dependencias, contratos Fase 01 o datos reales. No atribuir nueva aprobación independiente a estas correcciones.
+
+Prioridad: rechazo de .gitignore/.git* y límites ASCII/512 archivos/1 MiB/32 MiB/16 componentes impiden considerar preparado para proyectos reales habituales. R-037/038/040 pendientes. Revisar especialmente que historia no autoriza efectos nuevos, drift no es éxito actual, crash previo a marker no se reconfirma, y atributos se evalúan sin ejecución implícita. Gates finales/commits en status; histórico conservado debajo.
+
+Reproducción: pnpm.cmd install --frozen-lockfile, pnpm.cmd peers check, pnpm.cmd check, git diff --check. Rollback por revert acotado conservando markers/receipts/worktrees; sin reparación/borrado automático. Main intacta, sin merge/publicación. Detenerse hasta revisión focalizada.
+
+---
+
+# Histórico — B03-02: paquete previo a auditoría
 
 Preparado 2026-10-29. Implementado, pendiente de revisión; no se atribuye aceptación independiente. Base 84d60ae, rama phase/02-project-inspection, R-039 79ba91e (antes de mutaciones), B03-02 17243e8. Main e14cfdd intacta. Diff de código: git diff 84d60ae..17243e8; documentación posterior de evidencias en este cierre de tarea. B03-01 sigue aceptado/cerrado. Sin agentes invocados ni B03-03 iniciado.
 

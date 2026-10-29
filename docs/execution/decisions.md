@@ -1,5 +1,7 @@
 # Registro de decisiones
 
+- D-028 — Cierre B03-02 autorizado por APPROVE_WITH_FOLLOWUPS independiente, sin P0–P2. Correcciones P3 locales eadc346/bf81d93: historia confirmada mediante marker exclusivo fsync y receipt original, validación actual separada; ausencia/corrupción no se reconfirma. Atributos efectivos incompatibles rechazados antes de reserva/despacho. No nuevos permisos, retry, limpieza o compatibilidad. Revisión focalizada pendiente, B03-03 diferido. Rechazo .gitignore/.git* prioritario antes de proyectos reales habituales.
+
 Actualizado: 2026-10-28. Las decisiones de la especificación se citan, no se atribuyen a una implementación inexistente.
 
 | ID | Estado | Decisión y fundamento | Revisión |

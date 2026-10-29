@@ -37,10 +37,12 @@ BeonForge será un plano de control local-first, vendor-neutral, con contratos d
 
 Los bloques del objetivo son hitos de producto, no sustituyen las dependencias de fase: B00 corresponde a esta reconciliación; B01/B02 al kernel de Fase 01; B03 a Fase 02; B04 a Fase 05; B05 a Fase 03; B06 a la API y Fase 09; B07 a Fase 06; B08 a la coordinación de Fases 01/07; B09 es transversal; B10 agrupa evolución posterior. No se adelantan proveedores ni UI por el orden numérico de los bloques. Entrenamiento, OmniRoute y plugins permanecen diferidos fuera del MVP.
 
-Fase 01 y B03-01 aceptados/cerrados. B03-02 implementado para auditoría en 17243e8, precondición R-039 79ba91e antes de mutaciones; R-037/038/040 siguen pendientes. Siguiente nodo único: revisión independiente B03-02. Persistencia/runtime intactos, B03-03/contexto/indexación diferidos. Sin merge/publicación ni cambios de main.
+Fase 01, B03-01 y B03-02 aceptados/cerrados; auditoría B03-02 APPROVE_WITH_FOLLOWUPS sin P0–P2 confirma R-039/creación/SIGKILL. Correcciones locales eadc346/bf81d93 pasan 347 tests; siguiente único nodo: revisión focalizada de ambos P3. R-037/038/040 y compatibilidad .gitignore/.git* siguen pendientes. Persistencia/runtime intactos, B03-03/contexto/indexación diferidos. Sin merge/publicación ni cambios de main.
 
 Cada fase conserva seguridad, threat model, paridad, migración, backup/restore, observabilidad, documentación y cobertura. No se incorporan Nx, Turborepo, NgRx, LangGraph, Temporal, Graphiti, vector DB, Kubernetes o microservicios por anticipación. Repositorios y frameworks citados en el vault son candidatos. Fases 00–01 usan un solo escritor, sin IA de producto, modelos locales, OmniRoute, routing automático ni dashboard.
 
 ## Operación por tarea
+
+B03-02 aceptado/cerrado tras APPROVE_WITH_FOLLOWUPS sin P0–P2; correcciones P3 de confirmación/atributos requieren revisión focalizada. Ése es el único siguiente nodo, no B03-03. Compatibilidad .gitignore/.git* prioritaria antes de proyectos reales habituales, sin ampliarla ahora.
 
 Antes de editar: leer `status.md`, verificar Git y baseline, confirmar alcance, archivos y comandos. Después: cambio mínimo, pruebas pertinentes, gates, diff y secretos, commit cohesionado, actualización de estado/cobertura/decisiones/riesgos y siguiente nodo. La plantilla concreta y desglose de Fase 00 están en `phases/phase-00.md`. Cada milestone importante produce `reviews/current-review-packet.md` y espera la revisión externa entregada por el usuario.

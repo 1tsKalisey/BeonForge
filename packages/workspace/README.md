@@ -2,6 +2,12 @@
 
 ## Worktrees — B03-02
 
+Auditoría APPROVE_WITH_FOLLOWUPS recibida, sin P0–P2. Correcciones P3 pendientes de revisión focalizada: confirmed.json v1 wx/write/fsync enlaza intención y receipt CAS original tras verificar. Inspect conserva ese receipt; state=confirmed es historia, current=clean/modified/drift/invalid es estado actual. No concede permisos; create rechaza todo dispatch previo. Marker ausente/inválido/truncado o corte previo a su persistencia -> uncertain, sin reparación/retry/limpieza. CAS huérfano no sustituye el marker. No se acredita power loss de directorios Windows.
+
+Preflight: check-attr --source al OID exacto, salida NUL acotada y validada para working-tree-encoding/filter/text/eol/ident, info/attributes incluido. Rechaza todo valor distinto de unspecified (incluido unset), antes de reserva y otra vez antes de dispatch. Sin ejecutar filtros; atributos globales/system desactivados, entorno aislado/R-039 conservados. Salida no fiable -> fallo cerrado.
+
+**Compatibilidad prioritaria:** .gitignore y todo nombre .git* siguen rechazados, además de nombres no ASCII, >512 archivos, blobs/salida >1 MiB, total >32 MiB o profundidad >16. No se amplía aquí. Resolver y probar antes de considerar BeonForge preparado para proyectos reales habituales.
+
 API: prepareWorktree(projectRef, commitOid, executionRoot, policy, store) publica intención v1 en CAS y reserva un padre exclusivo; createWorktree(intentRef, policy, store) realiza una única tentativa; inspectWorktree(intentRef, policy, store) verifica o recupera evidencia sin repetir efectos. WorktreePolicy añade executionRoots, metadataWriteRoots y storageRoot privado real del store. Store y policy son configuración confiable del operador, no datos concedidos por un descriptor.
 
 CLI (build actual, mismo --storage de project register):

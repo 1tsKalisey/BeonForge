@@ -1,5 +1,11 @@
 # Fase 02 — Workspace y contexto
 
+## Cierre correctivo B03-02 — 2026-10-29
+
+Estado final: B03-02 aceptado y cerrado; correcciones eadc346/bf81d93 verificadas localmente, revisión focalizada preparada. 347/347 tests, frozen/peers/formato/lint/typecheck/build/diff/secretos verdes; 335 previos conservados. P3 de confirmación/atributos no se atribuyen a una nueva aceptación independiente. Compatibilidad .gitignore/.git* pendiente prioritaria, sin ampliar aquí. Históricos inferiores describen estados anteriores. Siguiente único nodo: revisión focalizada, no B03-03.
+
+Auditoría APPROVE_WITH_FOLLOWUPS recibida del usuario, sin P0–P2; R-039/creación/SIGKILL confirmados independientemente. Única tarea autorizada: P3-1 confirmación durable con receipt original y estado actual separado; P3-2 atributos efectivos incompatibles antes de reserva/despacho. Archivos workspace/src/index.ts, tests y memoria. Sin dependencias, contratos Fase 01 o compatibilidad ampliada. Aceptación: regresiones rojas/verdes, edición/reinicio/marker/corte y rechazo info/attributes sin residuos; todos los gates. Rollback por revert acotado preservando markers/receipts/worktrees; sin retry/limpieza. Preparar revisión focalizada; B03-03 no iniciado.
+
 Estado actual 2026-10-29: **B03-01 aceptado y cerrado**, segunda auditoría APPROVE_WITH_FOLLOWUPS; P1 validado independientemente. B03-02 implementado para revisión; R-039 corregido localmente, otros tres P3 pendientes. El histórico inferior conserva la secuencia de revisiones.
 
 Actualización de ejecución: B03-02 autorizado posteriormente por el usuario e implementado en 17243e8, R-039 en 79ba91e previo a mutaciones; pendiente de auditoría. La propuesta inferior se conserva como alcance aprobado, no como estado actual. Demostración automática: CLI create publica intención y confirma; inspect en otro proceso recupera recibo. Cortes reales SIGKILL dejan prepared/uncertain/confirmed según frontera, sin repetición. Materialización raw de blobs + read-tree en índice propio, no checkout/conversiones. Límites de compatibilidad, seguridad y rollback explícitos en README. Sin dependencias ni modificaciones Fase 01. Siguiente único nodo: revisión B03-02, sin B03-03.

@@ -1,5 +1,11 @@
 # Registro de riesgos
 
+Actualización correctiva B03-02: aceptación independiente APPROVE_WITH_FOLLOWUPS sin P0–P2, R-039 validado y cerrado. R-041 mantiene límites; nueva revisión focalizada sólo para correcciones siguientes. Histórico inferior conservado.
+
+- R-042 / P3-1: corregido localmente en eadc346, pendiente de revisión focalizada. Marker wx/fsync posterior al receipt conserva historia, current informa clean/modified/drift/invalid. Pérdida/corrupción/corte antes del marker queda uncertain aunque exista receipt CAS. Marker nunca concede permisos; dispatch sigue impidiendo repetición. Sin garantía eléctrica de directorios Windows ni autenticación contra dueño privilegiado.
+- R-043 / P3-2: preflight oficial de atributos efectivos, rechaza encoding/filter/text/eol/ident explícitos antes de reserva y despacho. Cinco rojos reproducidos; verdes enfocados. Sin filtros ni atributos globales/system; R-039 intacto. Revisión focalizada pendiente, no ampliar compatibilidad.
+- R-044 / compatibilidad prioritaria: .gitignore y todos los nombres .git* rechazados; límites ASCII, 512 archivos, 1 MiB por blob/salida, 32 MiB y 16 componentes. No corregidos en esta tarea. Resolver antes de considerar BeonForge preparado para proyectos reales habituales; no implica reabrir la aceptación independiente del alcance limitado.
+
 Actualizado: 2026-10-28. Severidad estimada: alta, media o baja.
 
 | ID | Severidad | Riesgo y evidencia | Mitigación / condición de cierre |
