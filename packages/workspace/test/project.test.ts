@@ -1181,3 +1181,332 @@ it.each(['throw', 'error', 'stdin', 'timeout'] as const)(
   },
   15000,
 );
+it('B0303 representative TypeScript project materializes regular gitignores and keeps private extras out of validation', async () => {
+  const f = await workFixture();
+  git(f.repo, 'config', 'core.autocrlf', 'false');
+  mkdirSync(join(f.repo, 'src'));
+  writeFileSync(
+    join(f.repo, '.gitignore'),
+    '.env\nnode_modules/\ndist/\n.private/\n',
+  );
+  writeFileSync(join(f.repo, 'src', '.gitignore'), '*.log\n');
+  writeFileSync(
+    join(f.repo, 'package.json'),
+    '{"name":"sample-local-app","private":true,"type":"module"}\n',
+  );
+  writeFileSync(
+    join(f.repo, 'tsconfig.json'),
+    '{"compilerOptions":{"strict":true},"include":["src"]}\n',
+  );
+  writeFileSync(
+    join(f.repo, 'src', 'app.ts'),
+    'export const greeting: string = "hello";\n',
+  );
+  writeFileSync(join(f.repo, 'README.md'), '# Sample local project\n');
+  git(f.repo, 'add', '.');
+  git(f.repo, 'commit', '-qm', 'representative project');
+  const project = await registerProject(f.repo, f.policy, f.store);
+  const oid = git(f.repo, 'rev-parse', 'HEAD');
+  const originalSnapshot = snapshot(f.repo);
+  const ref = await prepareWorktree(
+    project,
+    oid,
+    f.execution,
+    f.policy,
+    f.store,
+  );
+  const created = await createWorktree(ref, f.policy, f.store);
+  expect(created).toMatchObject({ state: 'confirmed', current: 'clean' });
+  expect(readFileSync(join(created.destination, '.gitignore'), 'utf8')).toBe(
+    git(f.repo, 'show', 'HEAD:.gitignore') + '\n',
+  );
+  expect(git(created.destination, 'rev-parse', 'HEAD')).toBe(oid);
+  expect(lstatSync(join(created.destination, '.gitignore')).isFile()).toBe(
+    true,
+  );
+  expect(git(created.destination, 'hash-object', '.gitignore')).toBe(
+    git(f.repo, 'rev-parse', 'HEAD:.gitignore'),
+  );
+  expect(git(created.destination, 'check-ignore', '.env')).toBe('.env');
+  for (const name of ['.private', 'node_modules', 'dist'])
+    mkdirSync(join(created.destination, name));
+  writeFileSync(join(created.destination, '.env'), 'fixture-private-value');
+  writeFileSync(
+    join(created.destination, 'node_modules', 'private'),
+    'fixture-private-value',
+  );
+  writeFileSync(join(created.destination, 'untracked.txt'), 'untracked');
+  expect(await inspectWorktree(ref, f.policy, f.store)).toMatchObject({
+    state: 'confirmed',
+    current: 'clean',
+    receipt: created.receipt,
+  });
+  writeFileSync(
+    join(created.destination, 'src', 'app.ts'),
+    'export const greeting = "changed";\n',
+  );
+  await f.store.close();
+  const store = await openSqlitePersistence(join(f.storage, 'projects.sqlite'));
+  f.stores.push(store);
+  expect(await inspectWorktree(ref, f.policy, store)).toMatchObject({
+    state: 'confirmed',
+    current: 'modified',
+    receipt: created.receipt,
+  });
+  await expect(createWorktree(ref, f.policy, store)).rejects.toBeInstanceOf(
+    Error,
+  );
+  const sourceAfter = snapshot(f.repo);
+  for (const [path, value] of Object.entries(originalSnapshot))
+    if (!['/.git', '/.git/logs'].includes(path))
+      expect(sourceAfter[path], path).toBe(value);
+}, 30000);
+it('B0303 reports HEAD drift observed by the final validation', async () => {
+  const f = await workFixture();
+  const ref = await prepareWorktree(
+    f.project,
+    f.commit,
+    f.execution,
+    f.policy,
+    f.store,
+  );
+  const created = await createWorktree(ref, f.policy, f.store);
+  const original = childProcess.spawn;
+  let changed = false;
+  childProcess.spawn = ((...args: Parameters<typeof original>) => {
+    if (
+      !changed &&
+      Array.isArray(args[1]) &&
+      args[1].includes(created.destination) &&
+      args[1].includes('--show-toplevel')
+    ) {
+      changed = true;
+      git(created.destination, 'symbolic-ref', 'HEAD', 'refs/heads/another');
+    }
+    return original(...args);
+  }) as typeof original;
+  syncBuiltinESMExports();
+  try {
+    expect(await inspectWorktree(ref, f.policy, f.store)).toMatchObject({
+      state: 'confirmed',
+      current: 'drift',
+      receipt: created.receipt,
+    });
+    expect(changed).toBe(true);
+  } finally {
+    childProcess.spawn = original;
+    syncBuiltinESMExports();
+  }
+}, 20000);
+it.each([
+  '.git',
+  '.gitmodules',
+  '.gitattributes',
+  '.GITIGNORE',
+  '.gitignore.',
+  'GITIGN~1',
+  '.gitignore/child',
+  'collision',
+])(
+  'B0303 rejects unsafe tree name %s',
+  async (name) => {
+    const f = await workFixture();
+    const oid = git(f.repo, 'rev-parse', 'HEAD:tracked.txt');
+    if (name === '.git' || name === '.gitignore.') {
+      // Git's index rejects these names itself. Build a real local tree object
+      // without materializing it, to exercise the application's boundary too.
+      const raw = Buffer.concat([
+        Buffer.from(`100644 ${name}\0`),
+        Buffer.from(oid, 'hex'),
+      ]);
+      const treeOid = execFileSync(
+        'git',
+        [
+          '-C',
+          f.repo,
+          'hash-object',
+          '--literally',
+          '-w',
+          '-t',
+          'tree',
+          '--stdin',
+        ],
+        { input: raw, encoding: 'utf8', windowsHide: true },
+      ).trim();
+      const commit = git(
+        f.repo,
+        'commit-tree',
+        treeOid,
+        '-m',
+        'invalid path fixture',
+      );
+      await expect(
+        prepareWorktree(f.project, commit, f.execution, f.policy, f.store),
+      ).rejects.toMatchObject({ code: 'unsafe_path' });
+      expect(readdirSync(f.execution)).toEqual([]);
+      return;
+    }
+    git(
+      f.repo,
+      'update-index',
+      '--add',
+      '--cacheinfo',
+      `100644,${oid},${name === 'collision' ? '.gitignore' : name}`,
+    );
+    if (name === 'collision')
+      git(
+        f.repo,
+        'update-index',
+        '--add',
+        '--cacheinfo',
+        `100644,${oid},.GITIGNORE`,
+      );
+    git(f.repo, 'commit', '-qm', 'unsafe name');
+    const commit = git(f.repo, 'rev-parse', 'HEAD');
+    await expect(
+      prepareWorktree(f.project, commit, f.execution, f.policy, f.store),
+    ).rejects.toBeInstanceOf(Error);
+    expect(readdirSync(f.execution)).toEqual([]);
+  },
+  10000,
+);
+it.each([
+  'clean',
+  'modified',
+  'drift',
+  'invalid',
+  'identity',
+  'uncertain',
+  'prepared',
+  'outside',
+])(
+  'B0303 CLI current eligibility %s preserves history and denies repeat',
+  async (scenario) => {
+    const f = await workFixture();
+    const ref = await prepareWorktree(
+      f.project,
+      f.commit,
+      f.execution,
+      f.policy,
+      f.store,
+    );
+    const created =
+      scenario === 'prepared'
+        ? await inspectWorktree(ref, f.policy, f.store)
+        : await createWorktree(ref, f.policy, f.store);
+    if (scenario === 'modified')
+      writeFileSync(join(created.destination, 'tracked.txt'), 'modified');
+    if (scenario === 'drift')
+      git(created.destination, 'symbolic-ref', 'HEAD', 'refs/heads/another');
+    if (scenario === 'invalid')
+      renameSync(created.destination, created.destination + '-gone');
+    if (scenario === 'identity') {
+      renameSync(created.destination, created.destination + '-old');
+      mkdirSync(created.destination);
+      writeFileSync(
+        join(created.destination, '.git'),
+        readFileSync(join(created.destination + '-old', '.git')),
+      );
+    }
+    if (scenario === 'uncertain')
+      rmSync(join(dirname(created.destination), 'confirmed.json'));
+    await f.store.close();
+    const cli = fileURLToPath(new URL('../dist/cli.js', import.meta.url));
+    const output = spawnSync(
+      process.execPath,
+      [
+        cli,
+        'project',
+        'worktree',
+        'inspect',
+        '--storage',
+        f.storage,
+        '--ref',
+        ref.sha256,
+        '--bytes',
+        String(ref.byteLength),
+        '--allow-root',
+        scenario === 'outside' ? f.execution : f.repo,
+        '--write-root',
+        join(f.repo, '.git'),
+        '--execution-root',
+        f.execution,
+      ],
+      { encoding: 'utf8' },
+    );
+    expect(output.status, output.stdout + output.stderr).toBe(
+      scenario === 'clean' ? 0 : scenario === 'outside' ? 1 : 2,
+    );
+    if (scenario !== 'outside') {
+      const report = JSON.parse(output.stdout) as {
+        state: string;
+        receipt?: unknown;
+      };
+      if (
+        ['clean', 'modified', 'drift', 'invalid', 'identity'].includes(scenario)
+      ) {
+        expect(report.state).toBe('confirmed');
+        expect(report.receipt).toEqual(created.receipt);
+      }
+    }
+    if (scenario !== 'prepared') {
+      const reopened = await openSqlitePersistence(
+        join(f.storage, 'projects.sqlite'),
+      );
+      f.stores.push(reopened);
+      await expect(
+        createWorktree(ref, f.policy, reopened),
+      ).rejects.toBeInstanceOf(Error);
+      expect(
+        git(f.repo, 'worktree', 'list', '--porcelain').split('worktree ')
+          .length - 1,
+      ).toBe(2);
+    }
+  },
+  20000,
+);
+it.each(['deleted', 'staged', 'junction'])(
+  'B0303 tracked validation handles %s without reading outside',
+  async (kind) => {
+    const f = await workFixture();
+    mkdirSync(join(f.repo, 'src'));
+    writeFileSync(join(f.repo, 'src', 'app.ts'), 'export const value = 1;\n');
+    git(f.repo, 'add', 'src');
+    git(f.repo, 'commit', '-qm', 'source fixture');
+    const ref = await prepareWorktree(
+      f.project,
+      git(f.repo, 'rev-parse', 'HEAD'),
+      f.execution,
+      f.policy,
+      f.store,
+    );
+    const created = await createWorktree(ref, f.policy, f.store);
+    if (kind === 'deleted') rmSync(join(created.destination, 'src', 'app.ts'));
+    if (kind === 'staged') {
+      writeFileSync(join(created.destination, 'src', 'app.ts'), 'modified');
+      git(created.destination, 'add', 'src/app.ts');
+    }
+    if (kind === 'junction') {
+      const outside = join(f.root, 'outside');
+      mkdirSync(outside);
+      writeFileSync(join(outside, 'app.ts'), 'private');
+      renameSync(
+        join(created.destination, 'src'),
+        join(created.destination, 'src-old'),
+      );
+      symlinkSync(
+        outside,
+        join(created.destination, 'src'),
+        process.platform === 'win32' ? 'junction' : 'dir',
+      );
+    }
+    const report = await inspectWorktree(ref, f.policy, f.store);
+    expect(report).toMatchObject({
+      state: 'confirmed',
+      current: kind === 'junction' ? 'invalid' : 'modified',
+      receipt: created.receipt,
+    });
+    expect(JSON.stringify(report)).not.toContain('private');
+  },
+  20000,
+);

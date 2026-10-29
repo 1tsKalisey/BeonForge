@@ -588,10 +588,11 @@ async function tree(root: string, oid: string) {
     if (
       parts.length > 16 ||
       parts.some(
-        (p) =>
+        (p, index) =>
           !/^[A-Za-z0-9_. -]+$/.test(p) ||
           /[. ]$/.test(p) ||
-          /^\.git/i.test(p) ||
+          (/^\.git/i.test(p) &&
+            !(p === '.gitignore' && index === parts.length - 1)) ||
           /^(?:con|prn|aux|nul|com[0-9]|lpt[0-9])(?:\.|$)/i.test(p),
       )
     )
@@ -840,8 +841,15 @@ async function inspectWorktreeInternal(
           `beonforge:${ref.sha256}`
         )
           throw new ProjectError('identity_changed');
-        const current = await inspect(descriptor, targetPolicy);
-        if (!current.detached || current.head !== commit)
+        // Check metadata only here. Filesystem safety is validated below before
+        // any Git status call can inspect tracked paths through altered parents.
+        const head = await git(destination, 'head');
+        const branch = await git(destination, 'branch');
+        if (
+          branch.code === 0 ||
+          head.code !== 0 ||
+          head.output.trim() !== commit
+        )
           return {
             ...base,
             state: 'confirmed',
@@ -893,11 +901,19 @@ async function inspectWorktreeInternal(
           await checkEntries(join(dir, name), relativeName + '/');
       }
     }
-    await checkEntries(destination);
+    // Creation must be exact. Later inspections deliberately ignore untracked/ignored
+    // names and contents: clean means tracked state, not an empty private workspace.
+    if (!historical) await checkEntries(destination);
     for (const f of files) {
-      const path = await canonical(join(destination, f.name));
+      let path = destination;
+      for (const part of f.name.split('/')) {
+        path = join(path, part);
+        if (!(await exists(path))) throw new ProjectError('identity_changed');
+        path = await canonical(path);
+      }
       const stat = await lstat(path);
-      if (!stat.isFile() || stat.size !== f.data.length)
+      if (!stat.isFile()) throw new ProjectError('unsafe_path');
+      if (stat.size !== f.data.length)
         throw new ProjectError('identity_changed');
       if (!(await readFile(path)).equals(f.data))
         throw new ProjectError('identity_changed');
@@ -911,12 +927,34 @@ async function inspectWorktreeInternal(
       JSON.stringify(files.map((f) => `${f.mode} ${f.oid} 0\t${f.name}`).sort())
     )
       throw new ProjectError('identity_changed');
-    const inspection = await inspect(descriptor, targetPolicy);
-    if (
-      !inspection.detached ||
-      inspection.head !== commit ||
-      inspection.trackedChanges !== 0
-    )
+    let inspection: ProjectInspection;
+    try {
+      inspection = await inspect(descriptor, targetPolicy);
+    } catch (error: unknown) {
+      if (
+        historical &&
+        error instanceof ProjectError &&
+        error.code === 'identity_changed'
+      )
+        return {
+          ...base,
+          state: 'confirmed',
+          receipt: historical,
+          current: 'drift',
+        };
+      throw error;
+    }
+    if (!inspection.detached || inspection.head !== commit) {
+      if (historical)
+        return {
+          ...base,
+          state: 'confirmed',
+          receipt: historical,
+          current: 'drift',
+        };
+      throw new ProjectError('identity_changed');
+    }
+    if (inspection.trackedChanges !== 0)
       throw new ProjectError('identity_changed');
     if (historical)
       return {
@@ -946,13 +984,16 @@ async function inspectWorktreeInternal(
       Buffer.from(JSON.stringify({ schemaVersion: 1, intent: ref, receipt })),
     );
     return { ...base, state: 'confirmed', receipt, current: 'clean' };
-  } catch {
+  } catch (error: unknown) {
     if (historical)
       return {
         ...base,
         state: 'confirmed',
         receipt: historical,
-        current: 'modified',
+        current:
+          error instanceof ProjectError && error.code === 'identity_changed'
+            ? 'modified'
+            : 'invalid',
       };
     return { ...base, state: 'uncertain' };
   }

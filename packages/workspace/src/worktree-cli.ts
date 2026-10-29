@@ -83,7 +83,7 @@ export async function runWorktreeCli(args: string[]): Promise<void> {
       const report = await inspectWorktree(reference, policy, store);
       process.stdout.write(JSON.stringify(report) + '\n');
       process.exitCode =
-        report.state === 'confirmed' || report.state === 'prepared' ? 0 : 2;
+        report.state === 'confirmed' && report.current === 'clean' ? 0 : 2;
     } else {
       const intent = await prepareWorktree(
         reference,
@@ -97,7 +97,8 @@ export async function runWorktreeCli(args: string[]): Promise<void> {
       );
       const report = await createWorktree(intent, policy, store);
       process.stdout.write(JSON.stringify(report) + '\n');
-      process.exitCode = report.state === 'confirmed' ? 0 : 2;
+      process.exitCode =
+        report.state === 'confirmed' && report.current === 'clean' ? 0 : 2;
     }
   } finally {
     await store.close();
