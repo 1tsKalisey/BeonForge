@@ -1,5 +1,19 @@
 # Registro de riesgos
 
+## Followups de aceptación B03-03 (2026-10-29)
+
+Veredicto APPROVE_WITH_FOLLOWUPS recibido, 373/373 verificados por Claude, sin P0–P2: B03-03 cerrado, Fase 02 abierta. Riesgos existentes conservados. Cuatro P3 aceptados y pendientes; sólo P3-5 documental corregido. No se implementan correcciones funcionales en este turno.
+
+- R-047 / B03-03 P3-1 — Prioritario antes de agentes/contexto: Git puede consultar .gitattributes untracked durante inspección aunque no enumere untracked. Evaluar fijar origen de atributos al commit y verificar todos los comandos relevantes, incluidas conversiones y atributos info/system/global. No confundir con R-039 ni afirmar corregido por --no-includes o check-attr --source actual. Prerequisito de seguridad de CTX-MIN antes de lecturas/validación que dependan de Git status.
+- R-048 / P3-2 — Pendiente: fortalecer aserciones de códigos/diagnósticos (no sólo instancia Error), staging independiente de edición de bytes y CLI real con .gitignore. Los tests actuales no acreditan esos casos con suficiente precisión. No se añaden pruebas ni se declara resuelto aquí.
+- R-049 / P3-3 — Pendiente: renombrados sólo de mayúsculas pueden aparecer clean en Windows. No usar ese resultado como prueba de identidad/case exactos. Selección futura de contexto debe comprobar spelling canónico explícito o resolver el defecto antes de confiar en él; fallo cerrado si no es verificable.
+- R-050 / P3-4 — Prioritario antes de agentes: documentar alcance exacto de current: clean en contrato público y salida máquina; hoy no indica cobertura de untracked/ignored. Definir metadatos explícitos/versionados de alcance antes de integraciones, sin asumir directorio estéril ni permisos por receipt. No se modifica contrato/salida en este cierre.
+- R-051 / P3-5 — Resuelto sólo documentalmente: coverage seguía declarando B03-03 pendiente de auditoría y fecha anterior. Alineado con aceptación/cierre y .gitignore soportado; ContextPackage sólo diseñado, Fase 02 abierta. No implica corrección de los otros P3.
+
+## Registro previo (conservado; limitaciones de las afirmaciones anteriores)
+
+La aplicación no enumera extras durante validación tracked, pero ello no acredita ausencia de toda lectura por Git (R-047). current: clean no cubre untracked/ignored ni prueba nombres exactos frente a case-only renames Windows (R-049/050). Estas salvedades prevalecen sobre formulaciones históricas más amplias.
+
 - R-046 / B03-03: clean cubre tracked contra commit de creación, no extras untracked/ignored (sin enumerar ni leer privados). No implica directorio estéril o permiso de consumir extras/ejecutar herramientas. Historia persiste ante modified/drift/invalid; CLI 0 sólo current=clean, create despachado nunca se repite. Fallo cerrado ante permisos/rutas inseguras, sin override automático. Raíces privadas/actores privilegiados concurrentes R-041 siguen vigentes: no snapshot atómico ni sandbox. Auditoría pendiente.
 
 Aceptación focalizada 2026-10-29: R-042/P3-1 y R-043/P3-2 cerrados por verificación independiente APPROVE_WITH_FOLLOWUPS comunicada por el usuario. R-039 y baseline B03-02 ya validados. Las etiquetas de revisión pendiente inferiores son históricas y quedan sustituidas por esta aceptación; no se repite auditoría.

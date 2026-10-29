@@ -1,6 +1,8 @@
 # Proyectos Git locales y worktrees — B03-01/B03-02
 
-## B03-03 — gitignore y estado actual (auditoría pendiente)
+## B03-03 — gitignore y estado actual (aceptado y cerrado)
+
+APPROVE_WITH_FOLLOWUPS independiente comunicado por el usuario, 373/373 verificados, sin P0–P2. Fase 02 sigue abierta. Cuatro P3 pendientes: Git puede consultar .gitattributes untracked pese a no enumerar extras; faltan aserciones/staging independiente/CLI .gitignore más precisos; case-only renames Windows pueden parecer clean; contrato público/salida máquina deben explicitar alcance de clean. Sólo la inconsistencia documental de coverage se corrige ahora. Estas salvedades limitan afirmaciones anteriores; no se cambia código, contrato público o salida máquina ni se declaran resueltos esos P3. Atributos/alcance son prioritarios antes de agentes. CTX-MIN es sólo propuesta de recopilación, no ejecución.
 
 Única ampliación: `.gitignore` exacto como archivo regular final, raíz/anidado; nunca directorio, symlink, mayúsculas, alias o colisión Windows. `.git`, `.gitmodules`, `.gitattributes` y demás `.git*` siguen bloqueados. Blobs raw/OID, atributos, hooks y grants intactos; límites ASCII/512 archivos/1 MiB por blob o salida/32 MiB/16 componentes sin ampliar. No acredita compatibilidad general con todos los repositorios.
 

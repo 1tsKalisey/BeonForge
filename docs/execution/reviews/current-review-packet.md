@@ -1,4 +1,22 @@
-# B03-03 — Gitignore y validación actual: auditoría independiente
+# B03-03 — Aceptación independiente y cierre
+
+2026-10-29: usuario comunica auditoría Claude **APPROVE_WITH_FOLLOWUPS**, 373/373 verificados, sin P0–P2; confirma cierre. **B03-03 aceptado/cerrado**, código 600dfb0/evidencias 9815731. No se repite auditoría ni se invocan agentes. Fase 02 permanece abierta, no se atribuye ContextPackage ni preparación general para agentes. Este commit sólo documental, main e14cfdd intacta, sin merge/publicación.
+
+| Followup B03-03 | Registro y estado |
+|---|---|
+| P3-1: .gitattributes untracked puede ser consultado por Git | R-047, aceptado pendiente; fijar/evaluar origen de atributos al commit, prioritario antes de agentes y captura. No se implementa. |
+| P3-2: aserciones/staging/CLI | R-048, aceptado pendiente; códigos de error precisos, staging independiente y CLI con .gitignore. No tests nuevos aquí. |
+| P3-3: case-only rename Windows puede parecer clean | R-049, aceptado pendiente; no confiar en clean para spelling exacto. |
+| P3-4: alcance clean en contrato público/salida máquina | R-050, aceptado pendiente y prioritario antes de agentes; no implica untracked/ignored o ausencia de lecturas Git. Contrato/salida no modificados. |
+| P3-5: inconsistencia coverage | R-051, corregido documentalmente: fecha/filas/cierre/.gitignore alineados y ContextPackage no implementado, Fase 02 abierta. Otros cuatro P3 no corregidos. |
+
+Propuesta del siguiente nodo: **CTX-MIN**, alias provisional, no B03-04 definitivo. ContextPackage explícito tracked/UTF-8 autorizado, manifest v1 y refs CAS, límites/privacidad/recovery, sin ejecutar agentes. Plan ejecutable en phase-02.md; antes de capturar, resolver/verificar atributos y alcance de clean, y gate de case exacto Windows. No dependencias de agentes/RAG; no reconstruir kernel/workspaces. No código de propuesta ni correcciones P3 funcionales en este turno.
+
+Gates del cierre en status: formato, frozen/peers, diff/secretos/paths. Evidencia funcional conservada: 373/373 verificados por auditor, no reejecutados por cambios exclusivamente Markdown. Rollback sólo revert documental preservando código/datos/artefactos; ningún efecto externo que reconciliar. Detenerse tras cierre/propuesta.
+
+---
+
+# Histórico — B03-03: paquete previo a aceptación
 
 2026-10-29. Implementado localmente, **abierto hasta aceptación independiente**. Base df064c8, phase/02-project-inspection. Código en workspace/src/index.ts, worktree-cli.ts y tests; commit/gates finales en status. Contratos/persistencia/runtime/lockfile/dependencias intactos. Main e14cfdd sin cambios, sin agentes, merge/publicación ni otra tarea iniciada.
 

@@ -1,5 +1,7 @@
 # Registro de decisiones
 
+- D-031 — Aceptación del usuario 2026-10-29: B03-03 cerrado APPROVE_WITH_FOLLOWUPS, sin P0–P2 y 373/373 verificados independientemente. Fase 02 no completada; P3 R-047–050 aceptados pendientes y R-051 corregido documentalmente. R-047/050 prioritarios antes de agentes. Siguiente candidato CTX-MIN provisional, sin asignación de ID definitivo ni implementación; recopilar contexto no ejecuta adaptadores ni amplía grants.
+
 - D-030 — B03-03 autorizado: sólo .gitignore regular exacto final, otros bloqueos/límites intactos. Current valida tracked contra commit de creación, sin enumerar extras untracked/ignored tras confirmación. Historia/receipt inmutables; CLI 0 sólo confirmed+clean, otros reportes 2/error 1. Sin grants nuevos, retry, limpieza o aprobación genérica; auditar antes de cerrar B03-03.
 
 - D-029 — 2026-10-29: usuario aporta APPROVE_WITH_FOLLOWUPS focalizado, confirma P3-1/P3-2 corregidos, sin bloqueantes para delimitar B03-03. Se registra sin nueva auditoría. Corrección menor autorizada: check-attr stdin NUL acotado y errores sanitizados. B03-03 no tenía definición ejecutable; sólo propuesta de compatibilidad .gitignore y validación actual, no implementación ni permisos nuevos.
