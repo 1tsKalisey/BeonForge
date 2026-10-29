@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { types } from 'node:util';
 import { constants } from 'node:fs';
 import { lstat, open, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -111,9 +112,14 @@ function envelopePolicy(
   try {
     if (!value || typeof value !== 'object' || Array.isArray(value))
       return fail('context_invalid');
-    const p = value as Record<string, unknown>;
+    const p = {
+      canRead: ownData(value, 'canRead'),
+      canPublish: ownData(value, 'canPublish'),
+      allowedIntents: ownData(value, 'allowedIntents'),
+      allowedPaths: ownData(value, 'allowedPaths'),
+    };
     if (
-      typeof p.canRead !== 'boolean' ||
+      (p.canRead !== undefined && typeof p.canRead !== 'boolean') ||
       !Array.isArray(p.allowedIntents) ||
       !Array.isArray(p.allowedPaths) ||
       p.allowedPaths.some((v: unknown) => typeof v !== 'string') ||
@@ -121,6 +127,24 @@ function envelopePolicy(
     )
       return fail('context_invalid');
     for (const ref of p.allowedIntents) parseArtifactReference(ref);
+  } catch {
+    return fail('context_invalid');
+  }
+}
+/** Inspect live own descriptors on every authorization; never invoke accessors. */
+function ownData(policy: unknown, key: string): unknown {
+  try {
+    if (
+      !policy ||
+      typeof policy !== 'object' ||
+      Array.isArray(policy) ||
+      types.isProxy(policy)
+    )
+      return fail('context_invalid');
+    const descriptor = Object.getOwnPropertyDescriptor(policy, key);
+    if (!descriptor) return undefined;
+    if (!Object.hasOwn(descriptor, 'value')) return fail('context_invalid');
+    return descriptor.value as unknown;
   } catch {
     return fail('context_invalid');
   }
@@ -146,17 +170,20 @@ export async function buildContextEnvelope(
 ): Promise<ArtifactReference> {
   try {
     envelopePolicy(readPolicy);
-    if (readPolicy.canPublish !== true) return fail('context_denied');
+    if (ownData(readPolicy, 'canPublish') !== true)
+      return fail('context_denied');
     const ref = reference(packageRef);
     const bytes = instructions(operatorInstructions);
     await readContextPackage(ref, readPolicy, store);
     envelopePolicy(readPolicy);
-    if (readPolicy.canPublish !== true) return fail('context_denied');
+    if (ownData(readPolicy, 'canPublish') !== true)
+      return fail('context_denied');
     const instructionRef = await publish(store, bytes);
     // Recheck caller grants after asynchronous publication. Orphans are safe to retain.
     await readContextPackage(ref, readPolicy, store);
     envelopePolicy(readPolicy);
-    if (readPolicy.canPublish !== true) return fail('context_denied');
+    if (ownData(readPolicy, 'canPublish') !== true)
+      return fail('context_denied');
     const manifest: ContextEnvelopeManifest = {
       schemaVersion: 1,
       kind: 'context-envelope',
@@ -175,7 +202,7 @@ export async function readContextEnvelope(
   store: ArtifactStore,
 ): Promise<ContextEnvelope> {
   envelopePolicy(readPolicy);
-  if (readPolicy.canRead !== true) return fail('context_denied');
+  if (ownData(readPolicy, 'canRead') !== true) return fail('context_denied');
   const original = await verified(store, reference(envelopeRef), 4096);
   const raw = object(decode(original));
   const manifest: ContextEnvelopeManifest = {
@@ -277,8 +304,9 @@ function authorize(
   paths: readonly string[],
   policy: ContextReadPolicy,
 ): void {
+  envelopePolicy(policy);
   if (
-    policy.canRead !== true ||
+    ownData(policy, 'canRead') !== true ||
     !policy.allowedIntents.some((r) => equal(reference(r), intent)) ||
     paths.some((p) => !policy.allowedPaths.includes(p))
   )
@@ -452,10 +480,10 @@ export async function buildContextPackage(
     const intent = reference(intentRef);
     const paths = selection(selectedPaths);
     authorize(intent, paths, policy);
-    if (policy.canPublish !== true) return fail('context_denied');
+    if (ownData(policy, 'canPublish') !== true) return fail('context_denied');
     const source = await contextWorkspaceSnapshot(
       intent,
-      policy.workspace,
+      ownData(policy, 'workspace') as WorktreePolicy,
       store,
     );
     if (paths.some((p) => !source.files.some((f) => f.path === p)))
@@ -477,7 +505,7 @@ export async function buildContextPackage(
     }
     const after = await contextWorkspaceSnapshot(
       intent,
-      policy.workspace,
+      ownData(policy, 'workspace') as WorktreePolicy,
       store,
     );
     if (JSON.stringify(after) !== JSON.stringify(source))
@@ -491,14 +519,19 @@ export async function buildContextPackage(
         return fail('context_changed');
     }
     authorize(intent, paths, policy);
-    if (policy.canPublish !== true) return fail('context_denied');
+    if (ownData(policy, 'canPublish') !== true) return fail('context_denied');
     const files: ContextFile[] = [];
-    for (const f of captured)
+    for (const f of captured) {
+      authorize(intent, paths, policy);
+      if (ownData(policy, 'canPublish') !== true) return fail('context_denied');
       files.push({
         path: f.path,
         artifact: await publish(store, f.bytes),
         mediaType: 'text/plain;charset=utf-8',
       });
+    }
+    authorize(intent, paths, policy);
+    if (ownData(policy, 'canPublish') !== true) return fail('context_denied');
     const manifest: ContextManifest = {
       schemaVersion: 1,
       kind: 'context-package',
@@ -552,7 +585,8 @@ export async function readContextPackage(
   store: ArtifactStore,
 ): Promise<ContextPackage> {
   try {
-    if (policy.canRead !== true) return fail('context_denied');
+    envelopePolicy(policy);
+    if (ownData(policy, 'canRead') !== true) return fail('context_denied');
     const raw = object(
       decode(await verified(store, reference(packageRef), MAX_MANIFEST)),
     );
@@ -627,6 +661,7 @@ export async function readContextPackage(
       text(bytes, file.path);
       content.push({ path: file.path, bytes });
     }
+    authorize(intent, paths, policy);
     return {
       manifest,
       files: content,

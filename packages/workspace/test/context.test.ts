@@ -166,6 +166,135 @@ it('B0304 publishes the compiled minimal context API', () => {
   expect(workspace).toHaveProperty('readContextPackage');
 });
 
+it('OwnPolicy rejects inherited flags and prototype contamination without puts', async () => {
+  const f = await fixture();
+  const pkg = await buildContextPackage(
+    f.intent,
+    ['README.md'],
+    f.policy,
+    f.store,
+  );
+  const env = await buildContextEnvelope(pkg, 'Inspect', f.policy, f.store);
+  const r = recorder(f.store);
+  for (const flag of ['canRead', 'canPublish'] as const) {
+    const inherited = { ...f.policy };
+    Reflect.deleteProperty(inherited, flag);
+    Object.setPrototypeOf(inherited, { [flag]: true });
+    await expect(
+      buildContextEnvelope(pkg, 'Inspect', inherited, r.store),
+    ).rejects.toMatchObject({ code: 'context_denied' });
+    await expect(
+      buildContextPackage(f.intent, ['README.md'], inherited, r.store),
+    ).rejects.toMatchObject({ code: 'context_denied' });
+    if (flag === 'canRead') {
+      await expect(
+        readContextPackage(pkg, inherited, f.store),
+      ).rejects.toMatchObject({ code: 'context_denied' });
+      await expect(
+        readContextEnvelope(env, inherited, f.store),
+      ).rejects.toMatchObject({ code: 'context_denied' });
+    }
+  }
+  for (const flag of ['canRead', 'canPublish'] as const) {
+    const previous = Object.getOwnPropertyDescriptor(Object.prototype, flag);
+    Object.defineProperty(Object.prototype, flag, {
+      value: true,
+      configurable: true,
+    });
+    try {
+      const policy = { ...f.policy };
+      Reflect.deleteProperty(policy, flag);
+      await expect(
+        buildContextEnvelope(pkg, 'Inspect', policy, r.store),
+      ).rejects.toMatchObject({ code: 'context_denied' });
+      await expect(
+        buildContextPackage(f.intent, ['README.md'], policy, r.store),
+      ).rejects.toMatchObject({ code: 'context_denied' });
+    } finally {
+      if (previous) Object.defineProperty(Object.prototype, flag, previous);
+      else Reflect.deleteProperty(Object.prototype, flag);
+    }
+  }
+  expect(r.writes).toHaveLength(0);
+});
+it('OwnPolicy never invokes policy accessors and permits own data properties', async () => {
+  const f = await fixture();
+  const pkg = await buildContextPackage(
+    f.intent,
+    ['README.md'],
+    f.policy,
+    f.store,
+  );
+  const env = await buildContextEnvelope(pkg, 'Inspect', f.policy, f.store);
+  const r = recorder(f.store);
+  let calls = 0;
+  for (const key of [
+    'canRead',
+    'canPublish',
+    'allowedPaths',
+    'allowedIntents',
+  ]) {
+    const policy = { ...f.policy };
+    Object.defineProperty(policy, key, {
+      get() {
+        calls++;
+        throw Error('private-fixture-value');
+      },
+    });
+    for (const op of [
+      () => buildContextPackage(f.intent, ['README.md'], policy, r.store),
+      () => buildContextEnvelope(pkg, 'Inspect', policy, r.store),
+      () => readContextPackage(pkg, policy, f.store),
+      () => readContextEnvelope(env, policy, f.store),
+    ])
+      await expect(op()).rejects.toMatchObject({
+        code: 'context_invalid',
+        message: 'context_invalid',
+      });
+  }
+  expect(calls).toBe(0);
+  expect(r.writes).toHaveLength(0);
+  const own = Object.assign(Object.create(null) as object, f.policy);
+  expect(
+    (
+      await readContextEnvelope(
+        await buildContextEnvelope(pkg, 'Inspect', own, f.store),
+        own,
+        f.store,
+      )
+    ).operatorInstructions,
+  ).toBe('Inspect');
+});
+it('OwnPolicy detects deletion and inherited replacement between CAS writes', async () => {
+  const f = await fixture();
+  const pkg = await buildContextPackage(
+    f.intent,
+    ['README.md'],
+    f.policy,
+    f.store,
+  );
+  for (const envelope of [false, true]) {
+    const policy = { ...f.policy };
+    let puts = 0;
+    const revoke: ArtifactStore = {
+      readArtifact: f.store.readArtifact.bind(f.store),
+      putArtifact: async (bytes) => {
+        const ref = await f.store.putArtifact(bytes);
+        puts++;
+        Reflect.deleteProperty(policy, 'canPublish');
+        Object.setPrototypeOf(policy, { canPublish: true });
+        return ref;
+      },
+    };
+    await expect(
+      envelope
+        ? buildContextEnvelope(pkg, 'Inspect', policy, revoke)
+        : buildContextPackage(f.intent, ['README.md'], policy, revoke),
+    ).rejects.toMatchObject({ code: 'context_denied' });
+    expect(puts).toBe(1);
+  }
+});
+
 it('B0305Fix R58 envelope publication requires an explicit grant and detects revocation', async () => {
   const f = await fixture();
   const pkg = await buildContextPackage(
