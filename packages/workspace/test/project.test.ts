@@ -1079,3 +1079,24 @@ it.each(['edit', 'missing', 'invalid', 'cut', 'head', 'gone'] as const)(
   },
   15000,
 );
+it.each([
+  'working-tree-encoding=UTF-16',
+  'filter=x',
+  'text',
+  'eol=crlf',
+  'ident',
+])('P32 rejects info attributes %s before reservation', async (attribute) => {
+  const f = await workFixture();
+  writeFileSync(
+    join(f.repo, '.git', 'info', 'attributes'),
+    `tracked.txt ${attribute}\n`,
+  );
+  await expect(
+    prepareWorktree(f.project, f.commit, f.execution, f.policy, f.store),
+  ).rejects.toBeInstanceOf(Error);
+  expect(readdirSync(f.execution)).toEqual([]);
+  expect(
+    git(f.repo, 'worktree', 'list', '--porcelain').split('worktree ').length -
+      1,
+  ).toBe(1);
+});

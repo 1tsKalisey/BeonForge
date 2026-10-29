@@ -269,7 +269,8 @@ async function git(
   command:
     | keyof typeof commands
     | readonly ['config' | 'tree' | 'blob' | 'commit' | 'index', string]
-    | readonly ['add', string, string, string],
+    | readonly ['add', string, string, string]
+    | readonly ['attributes', string, readonly string[]],
 ): Promise<{ code: number; output: string; data: Buffer }> {
   const args =
     typeof command === 'string'
@@ -292,17 +293,30 @@ async function git(
               ? ['cat-file', '-t', command[1]]
               : command[0] === 'index'
                 ? ['read-tree', command[1]]
-                : [
-                    'worktree',
-                    'add',
-                    '--detach',
-                    '--no-checkout',
-                    '--lock',
-                    '--reason',
-                    command[3]!,
-                    command[1],
-                    command[2]!,
-                  ];
+                : command[0] === 'attributes'
+                  ? [
+                      'check-attr',
+                      `--source=${command[1]}`,
+                      '-z',
+                      'working-tree-encoding',
+                      'filter',
+                      'text',
+                      'eol',
+                      'ident',
+                      '--',
+                      ...command[2],
+                    ]
+                  : [
+                      'worktree',
+                      'add',
+                      '--detach',
+                      '--no-checkout',
+                      '--lock',
+                      '--reason',
+                      command[3]!,
+                      command[1],
+                      command[2]!,
+                    ];
   const nullFile = process.platform === 'win32' ? 'NUL' : '/dev/null';
   const parserDirectory =
     typeof command !== 'string' && command[0] === 'config'
@@ -313,6 +327,7 @@ async function git(
     SystemRoot: process.env.SystemRoot,
     WINDIR: process.env.WINDIR,
     GIT_CONFIG_NOSYSTEM: '1',
+    GIT_ATTR_NOSYSTEM: '1',
     GIT_CONFIG_GLOBAL: nullFile,
     GIT_CONFIG_SYSTEM: nullFile,
     GIT_OPTIONAL_LOCKS: '0',
@@ -573,6 +588,31 @@ async function tree(root: string, oid: string) {
     if (files.length >= 512 || total > 33554432)
       throw new ProjectError('git_limit');
     files.push({ name, mode: match[1], oid: match[2], data });
+  }
+  if (files.length) {
+    const output = (
+      await git(root, ['attributes', oid, files.map((f) => f.name)])
+    ).output;
+    if (!output.endsWith('\0')) throw new ProjectError('git_failure');
+    const fields = output.slice(0, -1).split('\0');
+    if (fields.length !== files.length * 15)
+      throw new ProjectError('git_failure');
+    const attributes = [
+      'working-tree-encoding',
+      'filter',
+      'text',
+      'eol',
+      'ident',
+    ];
+    for (let i = 0; i < fields.length; i += 3) {
+      if (
+        fields[i] !== files[Math.floor(i / 15)]?.name ||
+        fields[i + 1] !== attributes[(i / 3) % 5]
+      )
+        throw new ProjectError('git_failure');
+      if (fields[i + 2] !== 'unspecified')
+        throw new ProjectError('unsafe_path');
+    }
   }
   return files;
 }
