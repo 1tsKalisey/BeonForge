@@ -1,5 +1,9 @@
 # Proyectos Git locales y worktrees — B03-01/B03-02
 
+## B03-04 — ContextPackage mínimo (abierto)
+
+API `buildContextPackage` / `readContextPackage`, manifest determinista y referencias CAS, captura explícita tracked/UTF-8 y permisos separados. Contrato, privacidad, límites, lectura histórica y demo en [CONTEXT.md](CONTEXT.md). Atributos de status fijados al commit y `validationScope` público/máquina tracked-only implementados localmente; pendientes de auditoría B03-04. Las salvedades siguientes de B03-03 son el registro histórico anterior a estas correcciones; case-only global y otros riesgos siguen vigentes.
+
 ## B03-03 — gitignore y estado actual (aceptado y cerrado)
 
 APPROVE_WITH_FOLLOWUPS independiente comunicado por el usuario, 373/373 verificados, sin P0–P2. Fase 02 sigue abierta. Cuatro P3 pendientes: Git puede consultar .gitattributes untracked pese a no enumerar extras; faltan aserciones/staging independiente/CLI .gitignore más precisos; case-only renames Windows pueden parecer clean; contrato público/salida máquina deben explicitar alcance de clean. Sólo la inconsistencia documental de coverage se corrige ahora. Estas salvedades limitan afirmaciones anteriores; no se cambia código, contrato público o salida máquina ni se declaran resueltos esos P3. Atributos/alcance son prioritarios antes de agentes. CTX-MIN es sólo propuesta de recopilación, no ejecución.
