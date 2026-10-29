@@ -1261,6 +1261,51 @@ it('B0303 representative TypeScript project materializes regular gitignores and 
     if (!['/.git', '/.git/logs'].includes(path))
       expect(sourceAfter[path], path).toBe(value);
 }, 30000);
+it('B0304 fixes attribute origin and exposes tracked-only validation scope', async () => {
+  const f = await workFixture();
+  const ref = await prepareWorktree(
+    f.project,
+    f.commit,
+    f.execution,
+    f.policy,
+    f.store,
+  );
+  const created = await createWorktree(ref, f.policy, f.store);
+  writeFileSync(
+    join(created.destination, '.gitattributes'),
+    '* working-tree-encoding=INVALID-ENCODING\n',
+  );
+  writeFileSync(join(created.destination, 'tracked.txt'), 'tracked');
+  const original = childProcess.spawn;
+  const sources: string[] = [];
+  childProcess.spawn = ((...args: Parameters<typeof original>) => {
+    if (Array.isArray(args[1]) && args[1].includes('status'))
+      sources.push(
+        args[1].find((a) => a.startsWith('--attr-source=')) ?? 'missing',
+      );
+    return original(...args);
+  }) as typeof original;
+  syncBuiltinESMExports();
+  try {
+    const report = await inspectWorktree(ref, f.policy, f.store);
+    expect(report).toMatchObject({
+      state: 'confirmed',
+      current: 'clean',
+      validationScope: {
+        schemaVersion: 1,
+        files: 'tracked',
+        untracked: 'excluded',
+        ignored: 'excluded',
+        attributes: 'commit',
+      },
+    });
+    expect(sources.length).toBeGreaterThan(0);
+    expect(sources.every((s) => s === `--attr-source=${f.commit}`)).toBe(true);
+  } finally {
+    childProcess.spawn = original;
+    syncBuiltinESMExports();
+  }
+}, 20000);
 it('B0303 reports HEAD drift observed by the final validation', async () => {
   const f = await workFixture();
   const ref = await prepareWorktree(

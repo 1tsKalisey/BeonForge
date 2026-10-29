@@ -250,6 +250,7 @@ async function layout(
   };
 }
 const commands = {
+  emptyTree: ['hash-object', '-t', 'tree', '--stdin'],
   root: ['rev-parse', '--show-toplevel'],
   git: ['rev-parse', '--absolute-git-dir'],
   common: ['rev-parse', '--path-format=absolute', '--git-common-dir'],
@@ -271,7 +272,14 @@ async function git(
     | readonly ['config' | 'tree' | 'blob' | 'commit' | 'index', string]
     | readonly ['add', string, string, string]
     | readonly ['attributes', string, readonly string[]],
+  attributeSource?: string,
 ): Promise<{ code: number; output: string; data: Buffer }> {
+  if (
+    command === 'status' &&
+    (!attributeSource ||
+      !/^(?:[a-f0-9]{40}|[a-f0-9]{64})$/.test(attributeSource))
+  )
+    throw new ProjectError('git_failure');
   const args =
     typeof command === 'string'
       ? commands[command]
@@ -360,6 +368,9 @@ async function git(
           [
             '--no-pager',
             '--no-optional-locks',
+            ...(command === 'status'
+              ? [`--attr-source=${attributeSource!}`]
+              : []),
             '-c',
             'core.fsmonitor=false',
             '-c',
@@ -460,16 +471,18 @@ async function inspect(
   }
   const head = await git(descriptor.root, 'head');
   const branch = await git(descriptor.root, 'branch');
-  const status = await git(descriptor.root, 'status');
+  const oid = head.code === 0 ? head.output.trim() : null;
+  if (oid !== null && !/^(?:[a-f0-9]{40}|[a-f0-9]{64})$/.test(oid))
+    throw new ProjectError('git_failure');
+  const attributeSource =
+    oid ?? (await git(descriptor.root, 'emptyTree')).output.trim();
+  const status = await git(descriptor.root, 'status', attributeSource);
   const modules = await git(descriptor.root, 'modules');
   if (
     JSON.stringify(await layout(descriptor.root, policy)) !==
     JSON.stringify(before)
   )
     throw new ProjectError('identity_changed');
-  const oid = head.code === 0 ? head.output.trim() : null;
-  if (oid !== null && !/^(?:[a-f0-9]{40}|[a-f0-9]{64})$/.test(oid))
-    throw new ProjectError('git_failure');
   const entries = status.output.split('\0').filter(Boolean);
   let trackedChanges = 0;
   for (let i = 0; i < entries.length; i++) {
@@ -539,8 +552,19 @@ interface WorktreeIntent {
   execution: Pin;
   reservation: Pin;
 }
+export const WORKTREE_VALIDATION_SCOPE = Object.freeze({
+  schemaVersion: 1 as const,
+  files: 'tracked' as const,
+  baseline: 'creation-commit' as const,
+  untracked: 'excluded' as const,
+  ignored: 'excluded' as const,
+  attributes: 'commit' as const,
+  atomicSnapshot: false as const,
+});
 export interface WorktreeReport {
+  /** clean covers tracked bytes/index at the creation commit, never untracked/ignored; not an execution permission or atomic snapshot. */
   readonly current?: 'clean' | 'modified' | 'drift' | 'invalid';
+  readonly validationScope?: typeof WORKTREE_VALIDATION_SCOPE;
   readonly state: 'prepared' | 'pending' | 'uncertain' | 'confirmed';
   readonly intent: ArtifactReference;
   readonly destination: string;
@@ -775,7 +799,11 @@ async function inspectWorktreeInternal(
     policy,
     store,
   );
-  const base = { intent: ref, destination };
+  const base = {
+    intent: ref,
+    destination,
+    validationScope: WORKTREE_VALIDATION_SCOPE,
+  };
   const dispatched = join(reservation.path, 'dispatch.json');
   if (!(await exists(dispatched)))
     return {
@@ -1047,7 +1075,12 @@ export async function createWorktree(
       throw new ProjectError('identity_changed');
     await git(destination, ['index', commit]);
   } catch {
-    return { intent: ref, destination, state: 'uncertain' };
+    return {
+      intent: ref,
+      destination,
+      state: 'uncertain',
+      validationScope: WORKTREE_VALIDATION_SCOPE,
+    };
   } finally {
     activeWorktrees.delete(d.commonDirectory);
   }
