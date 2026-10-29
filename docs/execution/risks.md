@@ -1,5 +1,11 @@
 # Registro de riesgos
 
+## Revisión focalizada B03-04 — aceptación con correcciones
+
+APPROVE_WITH_FOLLOWUPS independiente recibido. R-054/P2 confirmado con intercambio real de directorios: metadata/rutas observadas no vinculaban bytes al árbol Git. `18d71dd` conserva OIDs por path del commit autorizado y formato storage SHA-1/SHA-256, calcula hash de header Git+bytes y rechaza context_changed antes de put CAS. Dos rojas/dos verdes, sin quitar checks anteriores ni cambiar manifest v1; pendiente de revisión focalizada. Conversiones legítimas que cambien los bytes respecto del blob fallan cerrado. No es snapshot atómico, ni firma contra propietario del CAS.
+
+R-052 se endurece con exclusión de prefijos Anthropic/OpenAI/GitHub, asignaciones AWS/tokens y nombres credentials/secrets con extensiones, .htpasswd y sufijos .env. Sigue siendo heurística con falsos positivos/negativos, sin garantía DLP; lectura histórica aplica la política actual y puede rechazar paquetes antes admitidos. Pruebas usan exclusivamente cadenas sintéticas, sin valores en errores/logs/manifest. R-053/raíces privadas/ACL/huérfanos y demás seguimientos continúan; ningún permiso nuevo ni integración de agentes.
+
 ## B03-04 — actualización local pendiente de auditoría
 
 - R-047: corregido localmente en 9a0bddb/07f9cc4. Status requiere --attr-source=<OID> autorizado; unborn usa hash del árbol vacío sin escritura. Check-attr conserva --source/stdin y políticas info/global/system. Regresión de frontera con Git real y .gitattributes untracked hostil, sin atribuir ejecución de filtros a la versión previa en este Git. Confirmación independiente pendiente.

@@ -1,4 +1,22 @@
-# B03-04 — ContextPackage mínimo: revisión independiente pendiente
+# B03-04 — Revisión focalizada P2/privacidad (sin cierre operativo)
+
+Usuario aporta **APPROVE_WITH_FOLLOWUPS**, sin bypasses de autorización/privacidad explotables desde el repositorio; P2 de integridad reproducible exige corrección antes de agentes. Se trabaja exclusivamente B03-04. Base e740c89; `18d71dd` corrige P2, siguiente commit acota privacidad/tests. No cambios de main, publicación, dependencias ni contratos de Fase 01. No agentes invocados.
+
+Código definitivo: `18d71dd` + `8820f3a`; comparar git diff e740c89..8820f3a. **426/426 verdes**, sin skips/fallos finales: 62 contratos, 115 persistencia, 71 runtime, 171 workspace, 7 spike. Los 410 previos y 16 nuevos; workspace 442.03 s. Frozen/peers/formato/lint/typecheck/build/check completos sobre dist actual, Node 24.19.0/SQLite 3.53.3. Diez regresiones de privacidad verdes; demo productor/reinicio/lector verde. Repetición completa tras corregir fixture EPERM y orden final hash antes de privacidad. Diff/secretos/paths verificados, sólo marcador sintético de clave privada en test; main e14cfdd intacta. Revisar correcciones; **sin cierre operativo final** ni siguiente nodo.
+
+P2: dos rojas con repositorios Git temporales SHA-1/SHA-256. Mediante observaciones instrumentadas se intercambian **directorios reales**: validación ve el ancestro original clean, captura ve un ancestro alternativo estable. No se falsean bytes ni stats; antes se devolvían refs CAS válidas con bytes ajenos al commit. Tras corrección dos verdes (25.89 s): context_changed y cero puts, más captura válida/relectura en ambos formatos. Snapshot interno conserva paths/OIDs de ls-tree al commit autorizado; formato real consultado con rev-parse --show-object-format=storage bajo el mismo runner aislado. Hash Git de header blob+bytes, comparación antes de privacidad/publicación. Checks de rutas/identidad/timestamps/permisos/HEAD y manifest v1 conservados, sin snapshots/bloqueos nuevos ni HEAD posterior como referencia.
+
+P3: diez rojas de admisión antes del endurecimiento, con secretos sintéticos y nombres controlados. Se amplían prefijos sk-ant-api03-/sk-proj-/github_pat_, asignaciones AWS/tokens (incluido JSON), credentials/secrets con extensiones, .htpasswd y sufijos .env. Rechazo antes del primer put; lectura histórica también aplica privacidad actual. Positivo de documentación de prefijos incompletos/tokenizer/placeholders cortos para controlar falsos positivos. Sigue siendo heurística, no DLP; ninguna clave real/valor secreto en evidencias.
+
+Calidad: códigos exactos en selecciones inválidas, case, junction y manifest; workspace sin permisos -> context_denied, fuente inválida -> context_source_invalid. Pruebas de hardlink, symlink, manipulación consistentemente rehasheada hacia ruta privada y cero puts; se retira la aserción trivial de mera existencia del índice al final de la demo (se conservan comparaciones reales de índices/config/bytes).
+
+Limitación de prueba comprobada: primer gate completo falló únicamente al crear symlink nativo de archivo (Windows EPERM, sin SeCreateSymbolicLinkPrivilege). Hardlink/junction reales sí disponibles. Test ahora intenta symlink nativo y, sólo ante ese EPERM en Windows, prueba entrada symlink real 120000 del índice Git, con mismo rechazo; no se afirma cobertura nativa inexistente ni se elevan permisos. Host con soporte de symlinks pendiente para probar esa rama. Primera suite correctiva: 170/171 workspace verdes; gate repetido desde build actual tras corregir fixture y fijar prioridad del error de OID. Resultado definitivo en status; sin excepciones aceptadas a gates finales.
+
+Reproducir con Node 24.19.0 aprobado: pnpm.cmd install --frozen-lockfile; pnpm.cmd peers check; pnpm.cmd check. Focal P2: build primero, luego pnpm.cmd --filter @beonforge/workspace exec vitest run test/context.test.ts -t 'P2 rejects ancestor'. Demo previa de productor termina/lector CAS nuevo se conserva en suite. Verificar prioritariamente binding al árbol inmutable, cero puts ante discrepancia/privacidad, códigos y límites, sin ampliar permisos o scope. R-054 corregido localmente; sin cierre operativo final hasta verificación focalizada. Permanecen heurística de secretos, conversiones raw incompatibles, autenticidad no firmada del CAS, raíces privadas/ACL y falta de snapshot atómico/GC. No iniciar otro nodo.
+
+---
+
+# Histórico — B03-04: paquete inicial
 
 2026-10-29. CTX-MIN recibe identificador definitivo **B03-04** antes de implementar. **Abierto hasta auditoría aportada por el usuario**; no cerrar Fase 02 ni iniciar otro nodo. B03-01/02/03 y Fase 01 siguen aceptados. Sin agentes invocados, merges, publicación, cambios de main/dependencias/lockfile/knowledge/.claude.
 
