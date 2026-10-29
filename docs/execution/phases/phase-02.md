@@ -1,5 +1,9 @@
 # Fase 02 — Workspace y contexto
 
+## B03-04 — ContextPackage mínimo y verificable (CTX-MIN)
+
+Identificador definitivo registrado antes de implementar: **B03-04**, siguiente nodo B03 del plan, alias CTX-MIN. Autorizado por el usuario; abierto hasta auditoría. Se ejecuta la propuesta inferior con límites 16 archivos/16 KiB/32 KiB, bytes del working tree y estimación UTF-8 versionada. Primero R-047/R-050 y case exacto, luego captura/lectura CAS. Archivos previstos workspace/src (contexto y reutilización mínima de validación), tests/CLI/README/memoria; sin dependencias ni cambios Fase 01/kernel. Gates completos, regresiones y recuperación entre procesos. Rollback por revert conservando CAS/worktrees; sin retry/GC ni agentes. Alcance/criterios/exclusiones originales inferiores siguen aplicando; sólo este nodo se implementa.
+
 ## Estado vigente — cierre B03-03
 
 2026-10-29: usuario comunica auditoría independiente APPROVE_WITH_FOLLOWUPS, 373/373 verificados, sin P0–P2. **B03-03 aceptado y cerrado**, código 600dfb0/evidencias 9815731. Fase 02 sigue abierta. Cuatro P3 funcionales/de contrato pendientes R-047–050; P3-5/R-051 corregido documentalmente en coverage. No se repite auditoría ni se cambia código. Estados previos inferiores se conservan como trazabilidad y quedan sustituidos por este cierre.
