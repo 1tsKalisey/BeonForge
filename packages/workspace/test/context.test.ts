@@ -29,6 +29,8 @@ import {
   type ArtifactReference,
 } from '@beonforge/contracts';
 import {
+  buildContextEnvelope,
+  readContextEnvelope,
   buildContextPackage,
   readContextPackage,
   registerProject,
@@ -161,6 +163,190 @@ async function mutate(
 it('B0304 publishes the compiled minimal context API', () => {
   expect(workspace).toHaveProperty('buildContextPackage');
   expect(workspace).toHaveProperty('readContextPackage');
+});
+
+it('B0305 builds deterministic authorized envelopes and derives only the package map', async () => {
+  const f = await fixture();
+  const ref = await buildContextPackage(
+    f.intent,
+    ['src/app.ts', 'README.md'],
+    f.policy,
+    f.store,
+  );
+  const before = readFileSync(join(f.destination, 'src/app.ts'));
+  for (const input of [
+    '',
+    'Revisa únicamente estos archivos. 🛠️',
+    'é'.repeat(2048),
+  ]) {
+    const env = await buildContextEnvelope(ref, input, f.policy, f.store);
+    expect(
+      await buildContextEnvelope(ref, Buffer.from(input), f.policy, f.store),
+    ).toEqual(env);
+    const result = await readContextEnvelope(env, f.policy, f.store);
+    expect(result.operatorInstructions).toBe(input);
+    expect(result.map).toEqual(
+      result.context.manifest.files.map((x) => ({
+        path: x.path,
+        artifact: x.artifact,
+        byteLength: x.artifact.byteLength,
+      })),
+    );
+    expect(result.map.map((x) => x.path)).toEqual(['README.md', 'src/app.ts']);
+    expect(result.authority).toBe('historical-data-only');
+  }
+  expect(readFileSync(join(f.destination, 'src/app.ts'))).toEqual(before);
+});
+it('B0305 rejects invalid instructions and grants before any put', async () => {
+  const f = await fixture();
+  const ref = await buildContextPackage(
+    f.intent,
+    ['README.md'],
+    f.policy,
+    f.store,
+  );
+  const r = recorder(f.store);
+  for (const [input, code] of [
+    [new Uint8Array([255]), 'context_sensitive'],
+    ['\ud800', 'context_invalid'],
+    ['é'.repeat(2049), 'context_limit'],
+    ['DB_PASSWORD=fixture_private_value', 'context_sensitive'],
+  ] as const) {
+    await expect(
+      buildContextEnvelope(ref, input, f.policy, r.store),
+    ).rejects.toMatchObject({ code, message: code });
+  }
+  for (const denied of [
+    { canRead: false },
+    { allowedIntents: [] },
+    { allowedPaths: [] },
+  ]) {
+    await expect(
+      buildContextEnvelope(ref, 'Inspect', { ...f.policy, ...denied }, r.store),
+    ).rejects.toMatchObject({ code: 'context_denied' });
+  }
+  expect(r.writes).toHaveLength(0);
+});
+it('B0305 verifies envelope dependencies, tampering and current read grants', async () => {
+  const f = await fixture();
+  const pkg = await buildContextPackage(
+    f.intent,
+    ['README.md'],
+    f.policy,
+    f.store,
+  );
+  const ref = await buildContextEnvelope(pkg, 'Inspect', f.policy, f.store);
+  const envelope = (await readContextEnvelope(ref, f.policy, f.store)).manifest;
+  for (const denied of [
+    { canRead: false },
+    { allowedIntents: [] },
+    { allowedPaths: [] },
+  ])
+    await expect(
+      readContextEnvelope(ref, { ...f.policy, ...denied }, f.store),
+    ).rejects.toMatchObject({ code: 'context_denied' });
+  const absent = { sha256: '0'.repeat(64), byteLength: 1 };
+  for (const alteration of [
+    { ...envelope, schemaVersion: 2 },
+    { ...envelope, package: absent },
+    { ...envelope, operatorInstructions: absent },
+    { ...envelope, extra: true },
+  ]) {
+    const changed = await f.store.putArtifact(
+      Buffer.from(JSON.stringify(alteration)),
+    );
+    await expect(
+      readContextEnvelope(changed, f.policy, f.store),
+    ).rejects.toMatchObject({ code: 'context_integrity' });
+  }
+  const r = recorder(f.store);
+  await expect(
+    buildContextEnvelope(absent, 'Inspect', f.policy, r.store),
+  ).rejects.toMatchObject({ code: 'context_integrity' });
+  expect(r.writes).toHaveLength(0);
+  const invalidPackage = await mutate(f, pkg, (m) => ({
+    ...m,
+    schemaVersion: 2,
+  }));
+  await expect(
+    buildContextEnvelope(invalidPackage, 'Inspect', f.policy, r.store),
+  ).rejects.toMatchObject({ code: 'context_integrity' });
+  expect(r.writes).toHaveLength(0);
+  const corrupt: ArtifactStore = {
+    putArtifact: f.store.putArtifact.bind(f.store),
+    readArtifact: async (r) =>
+      r.sha256 === envelope.operatorInstructions.sha256
+        ? Buffer.alloc(r.byteLength)
+        : f.store.readArtifact(r),
+  };
+  await expect(
+    readContextEnvelope(ref, f.policy, corrupt),
+  ).rejects.toMatchObject({ code: 'context_integrity' });
+  const unsafe = await f.store.putArtifact(
+    Buffer.from('GITHUB_TOKEN=fixture_private_value'),
+  );
+  const altered = await f.store.putArtifact(
+    Buffer.from(JSON.stringify({ ...envelope, operatorInstructions: unsafe })),
+  );
+  await expect(
+    readContextEnvelope(altered, f.policy, f.store),
+  ).rejects.toMatchObject({
+    code: 'context_sensitive',
+    message: 'context_sensitive',
+  });
+  const invalidUtf8 = await f.store.putArtifact(new Uint8Array([255]));
+  const invalidEnvelope = await f.store.putArtifact(
+    Buffer.from(
+      JSON.stringify({ ...envelope, operatorInstructions: invalidUtf8 }),
+    ),
+  );
+  await expect(
+    readContextEnvelope(invalidEnvelope, f.policy, f.store),
+  ).rejects.toMatchObject({ code: 'context_sensitive' });
+});
+it('B0305 interruption retains dependencies without publishing a usable envelope', async () => {
+  const f = await fixture();
+  const pkg = await buildContextPackage(
+    f.intent,
+    ['README.md'],
+    f.policy,
+    f.store,
+  );
+  const writes: ArtifactReference[] = [];
+  const interrupted: ArtifactStore = {
+    readArtifact: f.store.readArtifact.bind(f.store),
+    putArtifact: async (bytes) => {
+      if (writes.length) throw Error('interrupted');
+      const ref = await f.store.putArtifact(bytes);
+      writes.push(ref);
+      return ref;
+    },
+  };
+  await expect(
+    buildContextEnvelope(pkg, 'Inspect', f.policy, interrupted),
+  ).rejects.toMatchObject({
+    code: 'context_integrity',
+    message: 'context_integrity',
+  });
+  expect(writes).toHaveLength(1);
+  await expect(
+    readContextEnvelope(writes[0]!, f.policy, f.store),
+  ).rejects.toMatchObject({ code: 'context_integrity' });
+  const policy = { ...f.policy };
+  let published = 0;
+  const revoke: ArtifactStore = {
+    readArtifact: f.store.readArtifact.bind(f.store),
+    putArtifact: async (bytes) => {
+      const ref = await f.store.putArtifact(bytes);
+      published++;
+      policy.canRead = false;
+      return ref;
+    },
+  };
+  await expect(
+    buildContextEnvelope(pkg, 'Inspect', policy, revoke),
+  ).rejects.toMatchObject({ code: 'context_denied' });
+  expect(published).toBe(1);
 });
 
 it.each([
@@ -962,7 +1148,7 @@ it('B0304 TypeScript demo persists explicit CAS package and verifies same bytes 
   const producerScript = join(f.root, 'capture.mjs');
   writeFileSync(
     producerScript,
-    `import {buildContextPackage} from ${JSON.stringify(workspaceUrl)};\nimport {openSqlitePersistence} from ${JSON.stringify(persistenceUrl)};\nconst store=await openSqlitePersistence(${JSON.stringify(join(f.storage, 'projects.sqlite'))});\ntry {console.log(JSON.stringify(await buildContextPackage(${JSON.stringify(f.intent)},${JSON.stringify(paths)},${JSON.stringify(f.policy)},store)));} finally {await store.close();}\n`,
+    `import {buildContextPackage,buildContextEnvelope} from ${JSON.stringify(workspaceUrl)};\nimport {openSqlitePersistence} from ${JSON.stringify(persistenceUrl)};\nconst store=await openSqlitePersistence(${JSON.stringify(join(f.storage, 'projects.sqlite'))});\ntry {const pkg=await buildContextPackage(${JSON.stringify(f.intent)},${JSON.stringify(paths)},${JSON.stringify(f.policy)},store);console.log(JSON.stringify(await buildContextEnvelope(pkg,'Inspect selected files',${JSON.stringify(f.policy)},store)));} finally {await store.close();}\n`,
   );
   const producer = spawnSync(process.execPath, [producerScript], {
     encoding: 'utf8',
@@ -974,7 +1160,7 @@ it('B0304 TypeScript demo persists explicit CAS package and verifies same bytes 
   const ref = parseArtifactReference(parsed);
   writeFileSync(
     script,
-    `import {readContextPackage} from ${JSON.stringify(workspaceUrl)};\nimport {openSqlitePersistence} from ${JSON.stringify(persistenceUrl)};\nimport {createHash} from 'node:crypto';\nconst store=await openSqlitePersistence(${JSON.stringify(join(f.storage, 'projects.sqlite'))});\ntry { const result=await readContextPackage(${JSON.stringify(ref)},${JSON.stringify({ canRead: true, allowedIntents: [f.intent], allowedPaths: paths })},store);console.log(JSON.stringify(result.files.map(x=>({path:x.path,sha256:createHash('sha256').update(x.bytes).digest('hex'),bytes:Buffer.from(x.bytes).toString('base64')})))); } finally {await store.close();}\n`,
+    `import {readContextEnvelope} from ${JSON.stringify(workspaceUrl)};\nimport {openSqlitePersistence} from ${JSON.stringify(persistenceUrl)};\nimport {createHash} from 'node:crypto';\nconst store=await openSqlitePersistence(${JSON.stringify(join(f.storage, 'projects.sqlite'))});\ntry { const result=await readContextEnvelope(${JSON.stringify(ref)},${JSON.stringify({ canRead: true, allowedIntents: [f.intent], allowedPaths: paths })},store);console.log(JSON.stringify({instructions:result.operatorInstructions,map:result.map.map(x=>x.path),files:result.context.files.map(x=>({path:x.path,sha256:createHash('sha256').update(x.bytes).digest('hex'),bytes:Buffer.from(x.bytes).toString('base64')}))})); } finally {await store.close();}\n`,
   );
   const child = spawnSync(process.execPath, [script], {
     encoding: 'utf8',
@@ -982,5 +1168,9 @@ it('B0304 TypeScript demo persists explicit CAS package and verifies same bytes 
     windowsHide: true,
   });
   expect(child.status, child.stderr).toBe(0);
-  expect(JSON.parse(child.stdout)).toEqual(expected);
+  expect(JSON.parse(child.stdout)).toEqual({
+    instructions: 'Inspect selected files',
+    map: [...paths].sort(),
+    files: expected,
+  });
 });

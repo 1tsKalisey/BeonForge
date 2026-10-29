@@ -84,6 +84,102 @@ export interface ContextPackage {
   /** Historical CAS data grants no authority over a live checkout. */
   readonly sourceValidation: 'historical-not-revalidated';
 }
+export interface ContextEnvelopeManifest {
+  readonly schemaVersion: 1;
+  readonly kind: 'context-envelope';
+  readonly package: ArtifactReference;
+  readonly operatorInstructions: ArtifactReference;
+}
+export interface ContextEnvelope {
+  readonly manifest: ContextEnvelopeManifest;
+  readonly operatorInstructions: string;
+  readonly context: ContextPackage;
+  readonly map: readonly Readonly<{
+    path: string;
+    artifact: ArtifactReference;
+    byteLength: number;
+  }>[];
+  readonly authority: 'historical-data-only';
+}
+function instructions(input: string | Uint8Array): Uint8Array {
+  if (input?.length > 4096) return fail('context_limit');
+  if (typeof input === 'string' && !input.isWellFormed())
+    return fail('context_invalid');
+  if (typeof input !== 'string' && !(input instanceof Uint8Array))
+    return fail('context_invalid');
+  const bytes =
+    typeof input === 'string' ? Buffer.from(input, 'utf8') : Buffer.from(input);
+  if (bytes.length > 4096) return fail('context_limit');
+  // No code-expression exemptions: instructions are explicit text, not source code.
+  text(bytes, 'operator-instructions.txt');
+  return bytes;
+}
+export async function buildContextEnvelope(
+  packageRef: ArtifactReference,
+  operatorInstructions: string | Uint8Array,
+  readPolicy: ContextReadPolicy,
+  store: ArtifactStore,
+): Promise<ArtifactReference> {
+  try {
+    const ref = reference(packageRef);
+    const bytes = instructions(operatorInstructions);
+    await readContextPackage(ref, readPolicy, store);
+    const instructionRef = await publish(store, bytes);
+    // Recheck caller grants after asynchronous publication. Orphans are safe to retain.
+    await readContextPackage(ref, readPolicy, store);
+    const manifest: ContextEnvelopeManifest = {
+      schemaVersion: 1,
+      kind: 'context-envelope',
+      package: ref,
+      operatorInstructions: instructionRef,
+    };
+    return await publish(store, Buffer.from(JSON.stringify(manifest)));
+  } catch (error) {
+    if (error instanceof ContextError) throw error;
+    return fail('context_integrity');
+  }
+}
+export async function readContextEnvelope(
+  envelopeRef: ArtifactReference,
+  readPolicy: ContextReadPolicy,
+  store: ArtifactStore,
+): Promise<ContextEnvelope> {
+  if (readPolicy.canRead !== true) return fail('context_denied');
+  const raw = object(
+    decode(await verified(store, reference(envelopeRef), 4096)),
+  );
+  const manifest: ContextEnvelopeManifest = {
+    schemaVersion: 1,
+    kind: 'context-envelope',
+    package: reference(raw.package),
+    operatorInstructions: reference(raw.operatorInstructions),
+  };
+  if (JSON.stringify(manifest) !== JSON.stringify(raw))
+    return fail('context_integrity');
+  const context = await readContextPackage(manifest.package, readPolicy, store);
+  const bytes = instructions(
+    await verified(store, manifest.operatorInstructions, 4096),
+  );
+  authorize(
+    context.manifest.source.intent,
+    context.manifest.files.map((f) => f.path),
+    readPolicy,
+  );
+  return {
+    manifest,
+    operatorInstructions: new TextDecoder('utf-8', {
+      fatal: true,
+      ignoreBOM: true,
+    }).decode(bytes),
+    context,
+    map: context.manifest.files.map((f) => ({
+      path: f.path,
+      artifact: f.artifact,
+      byteLength: f.artifact.byteLength,
+    })),
+    authority: 'historical-data-only',
+  };
+}
 function fail(code: ContextError['code']): never {
   throw new ContextError(code);
 }

@@ -15,6 +15,10 @@ export {
   type WorktreeReport,
 } from './workspace.js';
 export {
+  buildContextEnvelope,
+  readContextEnvelope,
+  type ContextEnvelope,
+  type ContextEnvelopeManifest,
   buildContextPackage,
   readContextPackage,
   ContextError,
