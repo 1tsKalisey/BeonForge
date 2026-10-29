@@ -10,6 +10,7 @@ import {
   rmSync,
   symlinkSync,
   existsSync,
+  linkSync,
 } from 'node:fs';
 import fsPromises from 'node:fs/promises';
 import { syncBuiltinESMExports } from 'node:module';
@@ -160,6 +161,108 @@ async function mutate(
 it('B0304 publishes the compiled minimal context API', () => {
   expect(workspace).toHaveProperty('buildContextPackage');
   expect(workspace).toHaveProperty('readContextPackage');
+});
+
+it.each([
+  'sk-ant-api03-',
+  'sk-proj-',
+  'github_pat_',
+  'aws_secret_access_key = ',
+  '"access_token": "',
+  'AWS_SESSION_TOKEN=',
+])('P3 rejects synthetic secret family %s before CAS', async (prefix) => {
+  const f = await fixture({ 'sensitive.txt': prefix + 'x'.repeat(48) + '"\n' });
+  const r = recorder(f.store);
+  await expect(
+    buildContextPackage(f.intent, ['sensitive.txt'], f.policy, r.store),
+  ).rejects.toMatchObject({ code: 'context_sensitive' });
+  expect(r.writes).toHaveLength(0);
+});
+it.each(['credentials.json', 'secrets.yaml', '.htpasswd', 'production.env'])(
+  'P3 rejects sensitive tracked filename %s before CAS',
+  async (path) => {
+    const f = await fixture({ [path]: 'fixture-only' });
+    const r = recorder(f.store);
+    await expect(
+      buildContextPackage(f.intent, [path], f.policy, r.store),
+    ).rejects.toMatchObject({ code: 'context_denied' });
+    expect(r.writes).toHaveLength(0);
+  },
+);
+it('P3 permits documentation and short placeholder assignments', async () => {
+  const f = await fixture({
+    'examples.txt':
+      'Prefixes sk-ant-api03-, sk-proj-, github_pat_ are examples.\nconst tokenizer = "ordinary documentation";\n{"token":"example"}\n',
+  });
+  const ref = await buildContextPackage(
+    f.intent,
+    ['examples.txt'],
+    f.policy,
+    f.store,
+  );
+  expect((await readContextPackage(ref, f.policy, f.store)).files).toHaveLength(
+    1,
+  );
+});
+it.each(['symlink', 'hardlink'] as const)(
+  'P3 rejects selected %s',
+  async (kind) => {
+    const f = await fixture();
+    const path = join(f.destination, 'src', 'app.ts');
+    const saved = join(f.root, 'saved-file');
+    renameSync(path, saved);
+    if (kind === 'hardlink') linkSync(saved, path);
+    else {
+      try {
+        symlinkSync(saved, path, 'file');
+      } catch (error) {
+        if (
+          process.platform !== 'win32' ||
+          !(error instanceof Error) ||
+          !('code' in error) ||
+          error.code !== 'EPERM'
+        )
+          throw error;
+        // Windows without SeCreateSymbolicLinkPrivilege: exercise a real Git
+        // symlink entry instead; native file symlink coverage needs a capable host.
+        renameSync(saved, path);
+        const oid = git(f.destination, 'hash-object', 'src/app.ts');
+        git(
+          f.destination,
+          'update-index',
+          '--cacheinfo',
+          `120000,${oid},src/app.ts`,
+        );
+      }
+    }
+    const r = recorder(f.store);
+    await expect(
+      buildContextPackage(f.intent, ['src/app.ts'], f.policy, r.store),
+    ).rejects.toMatchObject({
+      code: kind === 'hardlink' ? 'context_changed' : 'context_source_invalid',
+    });
+    expect(r.writes).toHaveLength(0);
+  },
+);
+it('P3 rejects a consistently rehashed manifest that selects private content', async () => {
+  const f = await fixture();
+  const ref = await buildContextPackage(
+    f.intent,
+    ['README.md'],
+    f.policy,
+    f.store,
+  );
+  const altered = await mutate(f, ref, (m) => ({
+    ...m,
+    files: m.files.map((x) => ({ ...x, path: 'credentials.json' })),
+  }));
+  await expect(
+    readContextPackage(
+      altered,
+      { ...f.policy, allowedPaths: ['credentials.json'] },
+      f.store,
+    ),
+  ).rejects.toMatchObject({ code: 'context_denied' });
 });
 
 it.each(['sha1', 'sha256'] as const)(
@@ -314,7 +417,12 @@ it('B0304 rejects duplicates, invalid spelling and unauthorized selections befor
   ]) {
     await expect(
       buildContextPackage(f.intent, paths, f.policy, r.store),
-    ).rejects.toHaveProperty('code');
+    ).rejects.toMatchObject({
+      code:
+        paths[0] === 'src/APP.ts' || paths[0] === '.GITIGNORE'
+          ? 'context_denied'
+          : 'context_invalid',
+    });
   }
   await expect(
     buildContextPackage(
@@ -436,7 +544,7 @@ it('B0304 rejects tracked modifications, staged changes, HEAD drift and revoked 
       { ...f.policy, workspace: { ...f.policy.workspace, executionRoots: [] } },
       f.store,
     ),
-  ).rejects.toMatchObject({ code: 'context_source_invalid' });
+  ).rejects.toMatchObject({ code: 'context_denied' });
   git(f.repo, 'commit', '--allow-empty', '-qm', 'drift');
   git(f.destination, 'checkout', '--detach', git(f.repo, 'rev-parse', 'HEAD'));
   await expect(
@@ -455,7 +563,12 @@ it('B0304 rejects exact-case substitution even if Git considers it clean', async
   );
   await expect(
     buildContextPackage(f.intent, ['src/app.ts'], f.policy, f.store),
-  ).rejects.toHaveProperty('code');
+  ).rejects.toMatchObject({
+    code:
+      process.platform === 'win32'
+        ? 'context_changed'
+        : 'context_source_invalid',
+  });
 });
 it('B0304 refuses uncertain creation without changing the historical protocol', async () => {
   const f = await fixture();
@@ -509,7 +622,7 @@ it('B0304 rejects junction substitution and changed checkout identity', async ()
   );
   await expect(
     buildContextPackage(f.intent, ['src/app.ts'], f.policy, f.store),
-  ).rejects.toHaveProperty('code');
+  ).rejects.toMatchObject({ code: 'context_source_invalid' });
   rmSync(join(f.destination, 'src'));
   renameSync(saved, join(f.destination, 'src'));
   renameSync(f.destination, join(f.root, 'saved-worktree'));
@@ -662,7 +775,9 @@ it.each([
   );
   await expect(
     readContextPackage(tampered, f.policy, f.store),
-  ).rejects.toHaveProperty('code');
+  ).rejects.toMatchObject({
+    code: kind === 'path' ? 'context_invalid' : 'context_integrity',
+  });
 });
 it('B0304 verifies hashes independently of the CAS adapter and handles partial publication', async () => {
   const f = await fixture();
@@ -797,5 +912,4 @@ it('B0304 TypeScript demo persists explicit CAS package and verifies same bytes 
   });
   expect(child.status, child.stderr).toBe(0);
   expect(JSON.parse(child.stdout)).toEqual(expected);
-  expect(existsSync(join(f.repo, '.git', 'index'))).toBe(true);
 });

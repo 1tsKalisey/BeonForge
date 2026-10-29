@@ -34,6 +34,10 @@ Conservar SHA-256 **y byteLength** del paquete y abrir el mismo storage privado 
 
 Manifest JSON v1 canónico, ordenado por ruta, sin rutas absolutas ni timestamps. `contentSource: working-tree-bytes`: SHA-256/byteLength describen **bytes exactos del working tree**, no el identificador del blob Git, sin conversión CRLF/LF ni redacción. Incluye lineage CAS intención/receipt/descriptor del worktree/commit, alcance, hash de grants v1, perfil de privacidad, referencias y totales. Es integridad content-addressed, no una firma/autenticación del propietario del CAS. El hash de grants registra la política de captura; nunca sustituye la autorización de lectura actual.
 
+Corrección P2: el snapshot autorizado conserva path/OID del árbol del commit de creación y consulta `--show-object-format=storage` mediante el runner Git aislado. Cada archivo capturado se vincula a ese OID calculando hash Git de `blob <longitud>\0` + bytes con SHA-1 o SHA-256 según el formato real. Discrepancia -> `context_changed` antes de cualquier put CAS. No se usa HEAD mutable para esta comparación; se conservan todos los checks de identidad/estado/permisos. Conversión legítima de bytes incompatible con el blob se rechaza, sin normalizar ni levantar restricciones de atributos. Manifest v1 permanece igual.
+
+Endurecimiento heurístico: prefijos sk-ant-api03-/sk-proj-/github_pat_, claves AWS y asignaciones reconocibles de tokens, incluidos campos JSON entrecomillados; nombres credentials/secrets con extensiones, .htpasswd y sufijos .env también se excluyen. No se registran valores, ni siquiera al rechazar. Se permiten documentación de prefijos incompletos y placeholders cortos; aún hay falsos positivos/negativos. La política actual se aplica al leer CAS histórico: un paquete antes admitido puede ser rechazado por privacidad. Permiso workspace revocado produce `context_denied`; fuente inválida conserva `context_source_invalid`.
+
 Máximo **16 archivos, 16 KiB por archivo, 32 KiB total**; manifest <=32 KiB y lineage acotado. Fallo sin truncar/omitir. Texto UTF-8 válido sin NUL. Perfil conservador `conservative-text-v1` rechaza `.git*` salvo `.gitignore` regular final, `.claude`, `knowledge`, `.env*`, directorios privados/credenciales, claves/certificados y ubicaciones comunes de credenciales, incluso tracked y explícitamente concedidos. Patrones acotados de secretos en memoria rechazan toda la selección antes de CAS; **no es DLP ni detector infalible**. Revisar datos antes de cualquier exportación futura. Diagnósticos fijos sin paths/contenidos/causas privadas.
 
 `tokenEstimate.algorithm: utf8-byte-units-v1`, `value = byteLength`, `approximate: true`, `provider: null`: estimación conservadora basada en bytes, no conteo exacto ni garantía universal de tokens/cuota. Un futuro adaptador debe recalcular con tokenizer oficial e incluir instrucciones/overhead. No SDK/modelo ni mecanismo de envío aquí.
@@ -45,6 +49,8 @@ Validar selección completa y límites en memoria antes del primer put. Publicar
 Leer verifica hash/longitud del manifest, versión, estructura canónica, rutas/límites/totales, receipt y referencias de intención/descriptor, y bytes/privacidad de cada blob. Requiere permisos nuevos. Devuelve `sourceValidation: historical-not-revalidated`: una edición posterior no invalida el snapshot; tampoco lo habilita para operar sobre un worktree con drift/modificado/incierto. Cualquier uso vivo futuro necesita revalidación independiente.
 
 ## Demostración reproducible
+
+Pruebas de enlaces: hardlinks y junctions reales; para symlink de archivo se intenta crear uno real. Windows sin el privilegio correspondiente devuelve EPERM: en ese caso se verifica una entrada symlink real 120000 del índice Git, sin afirmar cobertura del reparse point nativo. Esa rama requiere host con permiso de symlinks; no se eleva privilegio ni se altera configuración del usuario.
 
 Con Node 24.19.0 aprobado, ejecutar primero `pnpm.cmd build`, después:
 

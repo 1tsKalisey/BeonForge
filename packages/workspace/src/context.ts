@@ -12,6 +12,7 @@ import {
   contains,
   contextWorkspaceSnapshot,
   WORKTREE_VALIDATION_SCOPE,
+  ProjectError,
   type WorktreePolicy,
 } from './workspace.js';
 
@@ -126,7 +127,7 @@ function pathName(value: unknown): string {
     parts.some((p) => /^\.git/i.test(p) && p !== '.gitignore') ||
     parts.slice(0, -1).includes('.gitignore') ||
     parts.some((p) =>
-      /^(?:\.claude|knowledge|\.env.*|\.?private|secrets?|credentials?|\.aws|\.ssh|\.npmrc|\.netrc|\.pypirc|\.docker|\.kube|\.azure|\.gnupg|node_modules)$/i.test(
+      /^(?:\.claude|knowledge|\.env.*|.*\.env(?:[._-].*)?|\.?private|\.?secrets?(?:\..*)?|\.?credentials?(?:\..*)?|\.htpasswd(?:\..*)?|\.aws|\.ssh|\.npmrc|\.netrc|\.pypirc|\.docker|\.kube|\.azure|\.gnupg|node_modules)$/i.test(
         p,
       ),
     ) ||
@@ -165,7 +166,7 @@ function text(bytes: Uint8Array): void {
   }
   if (
     value.includes('\0') ||
-    /-----BEGIN [A-Z ]*PRIVATE KEY-----|\b(?:ghp_[A-Za-z0-9]{20,}|sk-[A-Za-z0-9]{20,})\b|\b(?:password|api[_-]?key|client[_-]?secret)\s*[:=]\s*["']?[^\s"';,}]{8,}/i.test(
+    /-----BEGIN [A-Z ]*PRIVATE KEY-----|\b(?:ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|sk-(?:(?:ant-api03-|proj-)[A-Za-z0-9_-]{20,}|[A-Za-z0-9]{20,})|(?:AKIA|ASIA)[A-Z0-9]{16})\b|\b(?:password|api[_-]?key|client[_-]?secret|(?:aws[_-])?(?:secret[_-]access[_-]key|access[_-]key[_-]id|session[_-]token)|(?:access[_-]|auth[_-]|refresh[_-])?token)["']?\s*[:=]\s*["']?[^\s"';,}]{8,}/i.test(
       value,
     )
   )
@@ -270,7 +271,6 @@ async function capture(root: string, path: string) {
     )
       return fail('context_changed');
     const bytes = data.subarray(0, count);
-    text(bytes);
     return { path, full, route, before, bytes };
   } finally {
     await handle.close();
@@ -319,6 +319,7 @@ export async function buildContextPackage(
         .digest('hex');
       if (oid !== source.files.find((f) => f.path === path)?.oid)
         return fail('context_changed');
+      text(file.bytes);
       total += file.bytes.length;
       if (total > LIMITS.maxTotalBytes) return fail('context_limit');
       captured.push(file);
@@ -379,6 +380,8 @@ export async function buildContextPackage(
     return await publish(store, bytes);
   } catch (error) {
     if (error instanceof ContextError) throw error;
+    if (error instanceof ProjectError && error.code === 'permission_denied')
+      return fail('context_denied');
     return fail('context_source_invalid');
   }
 }
