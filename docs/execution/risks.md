@@ -1,5 +1,11 @@
 # Registro de riesgos
 
+## Segunda auditoría B03-04 — seguimientos aceptados
+
+APPROVE_WITH_FOLLOWUPS recibido; P2/OID confirmado resuelto independientemente y no modificado en este correctivo. P3-1/P3-2 corregidos localmente con seis rojas previas: claves compuestas, propiedades JS/TS vs literales y política finita de placeholders. R-055/P3-3 — patrones/sintaxis residuales fuera de heurística siguen pendientes; sin pretender lista exhaustiva ni DLP/parser de todos los lenguajes. Los placeholders vacío/example/changeme son excepciones declaradas, no prueba de ausencia de una credencial real; revisión previa a exportación permanece necesaria, así como falsos positivos/negativos y rechazos conservadores.
+
+R-056/P3-4 — fragilidad de pruebas pendiente: instrumentación de observaciones/stack de funciones para carrera de ancestros depende del build y del runtime; fallback Windows índice Git no equivale a symlink nativo de archivo. Conservar pruebas reales y documentar límites; no refactorizar el sistema de tests ni afirmar cobertura nativa inexistente en este nodo. R-037/038/040/049 y riesgos CAS/ACL/huérfanos siguen vigentes. Correcciones presentes no introducen permisos, proveedores ni envío de contenido.
+
 ## Revisión focalizada B03-04 — aceptación con correcciones
 
 APPROVE_WITH_FOLLOWUPS independiente recibido. R-054/P2 confirmado con intercambio real de directorios: metadata/rutas observadas no vinculaban bytes al árbol Git. `18d71dd` conserva OIDs por path del commit autorizado y formato storage SHA-1/SHA-256, calcula hash de header Git+bytes y rechaza context_changed antes de put CAS. Dos rojas/dos verdes, sin quitar checks anteriores ni cambiar manifest v1; pendiente de revisión focalizada. Conversiones legítimas que cambien los bytes respecto del blob fallan cerrado. No es snapshot atómico, ni firma contra propietario del CAS.

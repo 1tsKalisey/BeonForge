@@ -1,4 +1,14 @@
-# B03-04 — Revisión focalizada P2/privacidad (sin cierre operativo)
+# B03-04 — Segunda aceptación y cierre con seguimientos
+
+Usuario comunica segunda auditoría independiente **APPROVE_WITH_FOLLOWUPS**, P2 de binding Git resuelto. Se conserva sin modificar. Correctivo final `a1f4c97`: únicamente claves compuestas/valores en heurística común build/read, falsos positivos TypeScript y política explícita de placeholders. Seis rojas contra dist previo (59.46 s), seis verdes contra build actual; **432/432**, sin skips/fallos: contratos 62, persistencia 115, runtime 71, workspace 177, spike 7. Los 426 previos y seis nuevos, workspace 484.91 s. Frozen/peers/formato/lint con tipos/typecheck/build/check/diff/secretos verdes en Node 24.19.0/SQLite 3.53.3. No fallos finales. Demo productor termina/reapertura/lector CAS conserva mismos bytes. No P2, schema, dependencias ni permisos modificados.
+
+Regresiones: GITHUB_TOKEN/DB_PASSWORD/POSTGRES_PASSWORD/OPENAI_API_KEY, JSON/YAML/dotenv/TS, referencias options.token/req.headers.authorization/process.env.DB_PASSWORD/response.data.token, literal hardcodeado en .test.ts rechazado sin puts; lectura de manifests consistentemente rehasheados rechaza claves con prefijos y valores cortos/dotenv con puntos, con diagnóstico fijo context_sensitive sin eco. Los formatos de credenciales conocidos y rutas privadas siguen cubiertos por suite anterior intacta. Placeholders explícitos vacío/example/changeme (case-insensitive), no excepción general para cualquier cadena corta o tests. Acceso a propiedades permitido sólo en declaración/asignación this JS/TS sin comillas; otras sintaxis conservadoras, no parser universal. No detector infalible ni prueba de que un placeholder no se use realmente como credencial.
+
+**B03-04 aceptado/cerrado conforme a condición del usuario tras gates**; no se afirma revisión independiente adicional de a1f4c97. P3-3/R-055 residual y P3-4/R-056 fragilidad aceptados pendientes; heurística/ACL/CAS huérfano/autenticidad/symlink nativo Windows y demás límites vigentes. Escaneo sólo identifica cabecera sintética de clave privada en test, sin valores reales; main e14cfdd intacta, sin agentes, merge, publicación ni siguiente nodo. Fase 02 sigue abierta. Para revisar el último cambio: git diff 48a9012..a1f4c97; pruebas vía pnpm.cmd check con runtime aprobado. Datos de auditorías anteriores inferiores son históricos.
+
+---
+
+# Histórico — Revisión focalizada P2/privacidad (antes del cierre)
 
 Usuario aporta **APPROVE_WITH_FOLLOWUPS**, sin bypasses de autorización/privacidad explotables desde el repositorio; P2 de integridad reproducible exige corrección antes de agentes. Se trabaja exclusivamente B03-04. Base e740c89; `18d71dd` corrige P2, siguiente commit acota privacidad/tests. No cambios de main, publicación, dependencias ni contratos de Fase 01. No agentes invocados.
 

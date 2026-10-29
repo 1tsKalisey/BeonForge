@@ -1,6 +1,8 @@
 # Proyectos Git locales y worktrees — B03-01/B03-02
 
-## B03-04 — ContextPackage mínimo (abierto)
+## B03-04 — ContextPackage mínimo (aceptado/cerrado)
+
+Segunda auditoría APPROVE_WITH_FOLLOWUPS, P2/OID resuelto e intacto; correctivo final de heurística a1f4c97, 432/432 tests y gates verdes. P3-3/P3-4 aceptados pendientes, sin siguiente nodo ni agentes. Estado histórico de implementación inferior sustituido por este cierre; contrato y límites actuales en CONTEXT.md.
 
 API `buildContextPackage` / `readContextPackage`, manifest determinista y referencias CAS, captura explícita tracked/UTF-8 y permisos separados. Contrato, privacidad, límites, lectura histórica y demo en [CONTEXT.md](CONTEXT.md). Atributos de status fijados al commit y `validationScope` público/máquina tracked-only implementados localmente; pendientes de auditoría B03-04. Las salvedades siguientes de B03-03 son el registro histórico anterior a estas correcciones; case-only global y otros riesgos siguen vigentes.
 

@@ -1,6 +1,6 @@
 # Matriz de cobertura de implementación
 
-Actualizado: 2026-10-29. Estados: `catalogada`, `diseñada`, `prototipo`, `verificada`, `producción`. Un documento de arquitectura del vault es diseño, no evidencia de implementación. B03-01/02/03 aceptados/cerrados; Fase 02 sigue abierta. B03-04 implementado y verificado localmente, pendiente de auditoría independiente; R-047/050 corregidos localmente, R-049 global/R-048 parcial conservados.
+Actualizado: 2026-10-29. Estados: `catalogada`, `diseñada`, `prototipo`, `verificada`, `producción`. Un documento de arquitectura del vault es diseño, no evidencia de implementación. B03-01/02/03 aceptados/cerrados; Fase 02 sigue abierta. B03-04 aceptado/cerrado tras segunda auditoría y gates finales; R-047/050 corregidos localmente, R-049 global/R-048 parcial conservados.
 
 | Capacidad | Estado del plan | Estado de implementación | Evidencia / próximo gate |
 |---|---|---|---|
@@ -24,7 +24,7 @@ Actualizado: 2026-10-29. Estados: `catalogada`, `diseñada`, `prototipo`, `verif
 | Registro e inspección Git local | diseñada | verificada | B03-01 aceptado/cerrado; P1 d73466b y R-039 79ba91e validados independientemente, B03-02/followups aceptados. R-037/038/040 siguen pendientes; no sandbox. |
 | Creación y verificación de worktrees aislados | diseñada | verificada | B03-02/followups aceptados; B03-03 también aceptado/cerrado, .gitignore regular soportado. Historia/receipt/grants conservados; compatibilidad general limitada. No marca toda Fase 02 como completada. |
 | Compatibilidad mínima de árboles Git | diseñada | verificada | B03-03 aceptado/cerrado APPROVE_WITH_FOLLOWUPS. B03-04 añade atributos desde commit y validationScope, pendientes de revisión independiente. Case exacto se exige para contexto, no se corrige clasificación global de renames case-only. Límites/Git privado conservados. |
-| Recopilación explícita de contexto | diseñada | prototipo | B03-04: APPROVE_WITH_FOLLOWUPS recibido; P2 18d71dd y privacidad/tests 8820f3a corregidos localmente. Bytes vinculados a OIDs del árbol autorizado SHA-1/SHA-256; dos rojas/dos verdes y cero puts ante discrepancia. Diez rojas de secretos/nombres corregidas. **426/426 verdes**, 410 previos + 16 nuevos, gates completos. Manifest v1 y demo productor/lector conservados. Sin cierre operativo hasta revisión focalizada, agentes/indexación/exportación. Hardlinks/junctions reales; Windows EPERM limita prueba de symlink de archivo nativo, fallback explícito a entrada Git 120000. |
+| Recopilación explícita de contexto | diseñada | verificada | B03-04 aceptado/cerrado tras segunda auditoría APPROVE_WITH_FOLLOWUPS y correctivo a1f4c97. P2/OID intacto; seis regresiones rojo/verde de privacidad/compatibilidad, 432/432 tests y gates completos. Build/read con misma heurística, permisos explícitos, CAS/reinicio conservados. P3-3/R-055 y P3-4/R-056 aceptados pendientes; límites de symlink Windows, privacidad y snapshot conservados. Sin agentes ni Fase 02 completa. |
 | Indexación/recuperación de contexto | diseñada | catalogada | Diferida; no incluida en ContextPackage mínimo. |
 | Model registry, provider adapters y probes | diseñada | catalogada | Fases 03, 05; evaluación previa a uso real. |
 | Routing y OmniRoute | diseñada | catalogada | Fase 06, shadow y política de datos. |
