@@ -1,5 +1,7 @@
 # Registro de decisiones
 
+- D-030 — B03-03 autorizado: sólo .gitignore regular exacto final, otros bloqueos/límites intactos. Current valida tracked contra commit de creación, sin enumerar extras untracked/ignored tras confirmación. Historia/receipt inmutables; CLI 0 sólo confirmed+clean, otros reportes 2/error 1. Sin grants nuevos, retry, limpieza o aprobación genérica; auditar antes de cerrar B03-03.
+
 - D-029 — 2026-10-29: usuario aporta APPROVE_WITH_FOLLOWUPS focalizado, confirma P3-1/P3-2 corregidos, sin bloqueantes para delimitar B03-03. Se registra sin nueva auditoría. Corrección menor autorizada: check-attr stdin NUL acotado y errores sanitizados. B03-03 no tenía definición ejecutable; sólo propuesta de compatibilidad .gitignore y validación actual, no implementación ni permisos nuevos.
 
 - D-028 — Cierre B03-02 autorizado por APPROVE_WITH_FOLLOWUPS independiente, sin P0–P2. Correcciones P3 locales eadc346/bf81d93: historia confirmada mediante marker exclusivo fsync y receipt original, validación actual separada; ausencia/corrupción no se reconfirma. Atributos efectivos incompatibles rechazados antes de reserva/despacho. No nuevos permisos, retry, limpieza o compatibilidad. Revisión focalizada pendiente, B03-03 diferido. Rechazo .gitignore/.git* prioritario antes de proyectos reales habituales.

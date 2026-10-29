@@ -5,10 +5,10 @@ Actualizado: 2026-10-29. Leer este archivo antes de cualquier tarea.
 ## Posición
 
 - Fase actual: 02 — Workspace y contexto. B03-02 y sus P3-1/P3-2 aceptados y verificados independientemente, APPROVE_WITH_FOLLOWUPS. Nuevo P3 stdin acotado corregido localmente. B03-01/Fase 01 siguen cerrados; no se repite auditoría.
-- Último trabajo funcional: stdin check-attr 204eca1, 352 tests. P3-1 eadc346 y P3-2 bf81d93 verificados independientemente APPROVE_WITH_FOLLOWUPS; R-039/baseline B03-02 ya aceptados. Fase 01/contratos/persistencia/F-5/runtime/dependencias/schema/lockfile intactos.
+- Último trabajo funcional: B03-03 600dfb0, .gitignore regular y validación tracked/CLI, 373 tests. Baseline B03-02/followups ya aceptados; B03-03 abierto hasta aceptación independiente. Fase 01/contratos/persistencia/F-5/runtime/dependencias/schema/lockfile intactos.
 - Rama de trabajo: `phase/02-project-inspection`, desde `485283c`. `main` permanece en `e14cfdd`, sin merge ni publicación.
-- Tarea activa: corrección stdin 204eca1 completada para revisión y propuesta B03-03 preparada. 352/352 y gates verdes; no se invocaron agentes ni se amplían permisos/compatibilidad. Detenerse, sin implementar B03-03.
-- Siguiente nodo único: B03-03 no estaba delimitado; propuesta ejecutable nueva en phase-02.md, sin implementación. Prioridad .gitignore y validación actual del worktree; revisión de la corrección stdin preparada, sin inventar bloqueantes a la aceptación focalizada recibida.
+- Tarea activa: B03-03 implementado y abierto para auditoría, 600dfb0: .gitignore regular exacto, current tracked y CLI 0 sólo confirmed+clean. Extras untracked/ignored excluidos sin escanear; historia/receipt/grants intactos. 373/373 verdes; sin agentes ni ampliación de límites.
+- Siguiente nodo único: revisión independiente B03-03 aportada por el usuario; no cerrar ni iniciar otra tarea. Alcance de phase-02.md autorizado explícitamente por el usuario.
 - Decisión del spike: adoptar `node:sqlite` sobre Node 24.19.0/SQLite 3.53.3 medidos, WAL/FULL y único escritor serializado en worker dedicado. La instalación global 24.13.0/3.50.4 no queda aprobada para persistencia durable.
 - Bloqueos de contexto: vault ausente en este checkout; lectura histórica PREP-001 conservada, sin nueva auditoría. El kernel antiguo está incompleto en otro ordenador y no es dependencia.
 - Decisiones pendientes: distribución/referencia del vault y framework HTTP posterior. Primera tarea Fase 02 acotada en phase-02.md; D-025 registra descriptor/identidades/almacenamiento y límites. Reconciliación manual, herramientas aisladas, permisos generales y proveedores no se adelantan.
@@ -16,6 +16,10 @@ Actualizado: 2026-10-29. Leer este archivo antes de cualquier tarea.
 - Revisión Claude: formal `APPROVE_WITH_FOLLOWUPS` completada; F-1 confirmado y corregido, F-2/F-3 registrados para Fase 01. M00.3 cerrado. Claude Code no se invoca desde aquí.
 
 ## Gates actuales
+
+- B03-03 600dfb0: **373/373**, sin skips/fallos: 62 contratos + 115 persistencia + 71 runtime + 118 workspace + 7 spike (352 previos + 21 nuevos). Frozen/peers/formato/lint/typecheck/build/dist actual/tests/diff/secretos verdes. Rojo inicial .gitignore y cuatro éxitos CLI falsos; fixtures .git/punto final afinadas porque Git las bloqueaba en índice. Primera suite 372 verde; test tardío rojo de HEAD observado al final clasificaba modified, corregido a drift y suite completa 373 verde. Demo TypeScript Git temporal bytes/OID/ignore/original intacto/reinicio; negativos de permisos/identidad/symlinks/aliases y pruebas hostiles anteriores conservadas. No CI remota nueva ni aceptación atribuida a gates locales. Mantener abierto y esperar auditoría B03-03.
+
+Histórico de tarea anterior:
 
 - 204eca1: **352/352 tests**, sin skips/fallos: 62 contratos + 115 persistencia + 71 runtime + 97 workspace + 7 spike. Incluye los 347 previos y 5 nuevos. Rojo: ENAMETOOLONG real Windows con 500 nombres largos, error síncrono sin sanear y error stdin omitido; cinco verdes después, incluyendo ejecutable inexistente y timeout. Frozen/peers/formato/lint/typecheck/build/dist actual/tests/diff/secretos verdes, sin nuevas dependencias o CI remota observada. Plan B03-03 sólo diseñado, no implementado; paquete focalizado de stdin actualizado.
 

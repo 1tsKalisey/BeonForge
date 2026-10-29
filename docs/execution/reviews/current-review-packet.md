@@ -1,4 +1,34 @@
-# B03-02 — Aceptación focalizada y corrección menor de stdin
+# B03-03 — Gitignore y validación actual: auditoría independiente
+
+2026-10-29. Implementado localmente, **abierto hasta aceptación independiente**. Base df064c8, phase/02-project-inspection. Código en workspace/src/index.ts, worktree-cli.ts y tests; commit/gates finales en status. Contratos/persistencia/runtime/lockfile/dependencias intactos. Main e14cfdd sin cambios, sin agentes, merge/publicación ni otra tarea iniciada.
+
+Código final 600dfb0, diff git diff df064c8..600dfb0; memoria documental posterior. Gates finales **373/373 verdes**, sin skips/fallos: contratos 62, persistencia 115, runtime 71, workspace 118, spike 7. Todos los 352 previos + 21 nuevos. Frozen/peers/formato/lint/typecheck/build, tests contra exports/CLI compilados actuales, diff/secretos/paths comprobados; sin nueva CI remota ni cambios funcionales fuera de workspace.
+
+## Fronteras
+
+- Única excepción: .gitignore exacto leaf regular, raíz/anidado. Otros .git*, directorios, enlaces/gitlinks, case/alias Windows/colisiones denegados. Sin ampliar ASCII/512 archivos/1 MiB por blob o salida/32 MiB/16 componentes. Raw, atributos stdin, hooks/filtros y grants conservados.
+- Historia/receipt inmutables; current clean valida tracked contra commit de creación/índice/HEAD detached/pins. Modified incluye edit/delete/stage. HEAD/identidad divergentes -> drift; ausencia, metadata/ruta insegura o verificación fallida -> invalid/error; sin marker válido -> uncertain. Historia no concede permisos. CLI 0 sólo confirmed+clean, otros reportes 2/error 1; create despachado sigue denegado.
+- Tras confirmar, no readdir del checkout ni lectura de extras untracked/ignored; Git status mantiene untracked-files=no/ignore-submodules=all. Creación sí exige inventario exacto. Clean no significa estéril ni autoriza usar extras. HEAD inicial sólo metadata; componentes tracked comprobados antes de leer/status para no seguir junctions. Drift observado al final también se comunica como drift. No snapshot atómico ni sandbox frente a dueño concurrente.
+
+## Evidencias
+
+Cinco rojos funcionales iniciales: .gitignore denegado y cuatro éxitos CLI falsos (modified/drift/invalid/prepared). Dos fallos adicionales eran de fixtures: Git bloquea .git/punto final en índice; afinados usando trees reales hash-object --literally/commit-tree sin materializarlos. Se prueban también .gitmodules/.gitattributes/case/alias 8.3/colisión/.gitignore directorio.
+
+20 nuevos verdes enfocados y suite inicial 372/372. Revisión propia detectó HEAD observado en validación final como modified: test adicional rojo delega Git real y cambia HEAD al iniciar la comprobación final; verde tras separar drift de cambios tracked. Gates finales sobre ese código se registran en status; no atribuir aceptación independiente a tests locales.
+
+Demo: proyecto TypeScript Git temporal con package.json, tsconfig, README, src/app.ts y gitignores raíz/anidado. Bytes/OID/reglas Git check-ignore y original intactos salvo metadata administrativa worktrees autorizada. .env/node_modules/dist/.private y untracked quedan fuera de current; tracked edit/reinicio conserva receipt con modified. CLI en otro proceso: clean/modified/drift/invalid/identidad sustituida/uncertain/prepared/permiso denegado, sin create repetido. Casos adicionales de borrado/staging y junction a temporal externo -> invalid. Ningún código del fixture ejecutado ni dependencia instalada.
+
+Tests anteriores de hooks/filtros/atributos hostiles, 500 nombres largos/stdin/fallos y SIGKILL conservados. Sólo recursos temporales; interceptación de spawn sólo para la carrera, con Git/store reales. No traza OS universal de lecturas ni power loss; junction demuestra rechazo y ausencia de contenido privado en reporte, no sandbox.
+
+## Reproducir y salida
+
+pnpm.cmd install --frozen-lockfile; pnpm.cmd peers check; pnpm.cmd check; git diff df064c8..HEAD --check. Demo tras build: pnpm.cmd --filter @beonforge/workspace exec vitest run -t B0303.
+
+Revisar allowlist leaf/mode/alias, privacidad de extras, tracked/index y drift temprano/tardío, historia/current/exit codes, permisos y no repetición. Límites R-037/038/040/041/044/046; no compatibilidad general ni contexto/agentes. Rollback por revert preservando worktrees/receipts/markers, sin limpieza/retry. Esperar auditoría B03-03, mantener abierto y detenerse.
+
+---
+
+# Histórico — B03-02: aceptación focalizada y stdin
 
 2026-10-29: usuario aporta APPROVE_WITH_FOLLOWUPS, confirma P3-1 eadc346 y P3-2 bf81d93 corregidos; no hay bloqueantes para B03-03. Aceptación registrada sin repetir auditoría ni invocar agentes. Histórico debajo. Este paquete revisa sólo el nuevo P3 check-attr/Windows.
 

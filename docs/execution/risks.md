@@ -1,14 +1,16 @@
 # Registro de riesgos
 
+- R-046 / B03-03: clean cubre tracked contra commit de creación, no extras untracked/ignored (sin enumerar ni leer privados). No implica directorio estéril o permiso de consumir extras/ejecutar herramientas. Historia persiste ante modified/drift/invalid; CLI 0 sólo current=clean, create despachado nunca se repite. Fallo cerrado ante permisos/rutas inseguras, sin override automático. Raíces privadas/actores privilegiados concurrentes R-041 siguen vigentes: no snapshot atómico ni sandbox. Auditoría pendiente.
+
 Aceptación focalizada 2026-10-29: R-042/P3-1 y R-043/P3-2 cerrados por verificación independiente APPROVE_WITH_FOLLOWUPS comunicada por el usuario. R-039 y baseline B03-02 ya validados. Las etiquetas de revisión pendiente inferiores son históricas y quedan sustituidas por esta aceptación; no se repite auditoría.
 
-- R-045 / P3 stdin Windows: reproducido ENAMETOOLONG con árbol válido de 500 nombres largos y fuga de spawnargs en error síncrono. Corrección local usa stdin NUL <=1 MiB, EOF explícito, salida <=1 MiB/5 s, captura de errores síncronos/eventos/stdin y terminación. Cinco casos verdes (árbol válido/hostil y cuatro fallos de proceso), sin reservas al rechazar. Revisión del cambio preparada, sin modificar garantías ni permitir actuar en drift/invalid/uncertain. Mantener R-044 prioritario: .gitignore aún no soportado, no listo para proyectos reales habituales.
+- R-045 / P3 stdin Windows: reproducido ENAMETOOLONG con árbol válido de 500 nombres largos y fuga de spawnargs en error síncrono. Corrección local usa stdin NUL <=1 MiB, EOF explícito, salida <=1 MiB/5 s, captura de errores síncronos/eventos/stdin y terminación. Cinco casos verdes (árbol válido/hostil y cuatro fallos de proceso), sin reservas al rechazar. Revisión del cambio preparada, sin modificar garantías ni permitir actuar en drift/invalid/uncertain. B03-03 añade .gitignore regular localmente; compatibilidad general R-044 aún limitada.
 
 Actualización correctiva B03-02: aceptación independiente APPROVE_WITH_FOLLOWUPS sin P0–P2, R-039 validado y cerrado. R-041 mantiene límites; nueva revisión focalizada sólo para correcciones siguientes. Histórico inferior conservado.
 
 - R-042 / P3-1: corregido localmente en eadc346, pendiente de revisión focalizada. Marker wx/fsync posterior al receipt conserva historia, current informa clean/modified/drift/invalid. Pérdida/corrupción/corte antes del marker queda uncertain aunque exista receipt CAS. Marker nunca concede permisos; dispatch sigue impidiendo repetición. Sin garantía eléctrica de directorios Windows ni autenticación contra dueño privilegiado.
 - R-043 / P3-2: preflight oficial de atributos efectivos, rechaza encoding/filter/text/eol/ident explícitos antes de reserva y despacho. Cinco rojos reproducidos; verdes enfocados. Sin filtros ni atributos globales/system; R-039 intacto. Revisión focalizada pendiente, no ampliar compatibilidad.
-- R-044 / compatibilidad prioritaria: .gitignore y todos los nombres .git* rechazados; límites ASCII, 512 archivos, 1 MiB por blob/salida, 32 MiB y 16 componentes. No corregidos en esta tarea. Resolver antes de considerar BeonForge preparado para proyectos reales habituales; no implica reabrir la aceptación independiente del alcance limitado.
+- R-044 / compatibilidad prioritaria: B03-03 cubre localmente .gitignore regular exacto, pendiente de auditoría. Demás .git* y límites ASCII/512 archivos/1 MiB por blob o salida/32 MiB/16 componentes intactos. No acreditar compatibilidad general con repositorios reales; sin conversiones o grants nuevos.
 
 Actualizado: 2026-10-28. Severidad estimada: alta, media o baja.
 
