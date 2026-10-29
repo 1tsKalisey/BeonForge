@@ -54,3 +54,5 @@ Cierre vigente B03-04: segunda auditoría APPROVE_WITH_FOLLOWUPS, P2 resuelto/in
 Estado vigente B03-05: nodo registrado d7121e8 y código 901290a, ContextEnvelope mínimo con mapa derivado e instrucciones CAS; 436/436 y gates verdes. Pendiente de revisión independiente. Fase 02 abierta, sin nuevo nodo ni proveedores/agentes; rechazo conservador no es redacción transformadora. B03-01–04 aceptados/cerrados y dependencias de fases conservadas.
 
 B03-05 correctivo 0c662fc: 439/439 dos corridas completas, gates con exit nativo 0, pendiente de revisión focalizada. Nodo y Fase 02 abiertos. D-036 es propuesta no aceptada: se mantiene sin cambios el criterio original de redacción hasta aprobación expresa del propietario. No otro nodo ni proveedor.
+
+Cierre vigente B03-05: segunda aceptación independiente APPROVE_WITH_FOLLOWUPS, defectos originales corregidos; P3 transversal local de96f51 y 442/442 con gates verdes. No se atribuye auditoría independiente adicional del correctivo. Fase 02 abierta, R-061 no reproducida/sin causa y demás seguimientos vigentes; D-036 no aceptada y criterio original de redacción intacto. Ningún otro nodo/proveedor/agente iniciado.

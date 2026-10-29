@@ -1,4 +1,16 @@
-# B03-05 — Revisión focalizada de autorización y canonicalización
+# B03-05 — Segunda aceptación y cierre; P3 de permisos propios
+
+Usuario aporta segunda auditoría **APPROVE_WITH_FOLLOWUPS** y confirma tres defectos originales corregidos (R-058/059/060); B03-05 aceptado/cerrado. P3 transversal local **de96f51**, comparar git diff 41633ec..de96f51. Sólo context.ts/test/context.test.ts: permisos/grants propios de datos, sin getters/herencia/Proxy; consultas repetidas sobre política viva, sin snapshot inicial. Misma separación read/publish en package/envelope, revocación entre puts/manifest. Schemas/contratos públicos/binding Git, privacidad y CAS intactos. No se afirma revisión independiente adicional de de96f51; evidencia local siguiente. Ningún proveedor/agente/otra fase/merge/publicación.
+
+Tres rojas contra build previo (34.23 s); tres verdes focales (34.37 s, 65 no seleccionados por filtro); prueba global ampliada a canRead/canPublish en suite definitiva. Herencia por cadena prototipo y Object.prototype, propiedades propias legítimas con prototipo null, accessors maliciosos que no se invocan (contador cero), errores sanitizados fijos, eliminación de flag propio y sustitución heredada tras primer put, denegación sin puts. Los tests restauran Object.prototype en finally. No relajar schemas ni copiar política inicialmente: se verifican descriptores propios en cada autorización; getters/Proxy inválidos rechazados sin ejecutar accessors, flag propio ausente/false -> context_denied.
+
+Gates **442/442**, sin skips/fallos: 62 contratos/115 persistencia/71 runtime/187 workspace/7 spike; 439 previos+tres nuevos, workspace 616.65 s. Node 24.19.0/SQLite 3.53.3, frozen/peers/check completos con exit nativo 0 (formato/lint con tipos/typecheck/build/tests); demo productor/reinicio/lector y paquetes previos conservados. Diff/secretos/paths verdes, sólo cabecera sintética de clave privada en test previo, main e14cfdd intacta. Logs completos en `%TEMP%/beonforge-own-policy-logs/`: red.out.log/red.err.log, focused.out.log/focused.err.log, install/peers/check out/err y *.exit.txt; hashes sha256.json. No excepciones finales ni timeouts modificados.
+
+R-061 sigue **intermitencia no reproducida, causa aún no identificada**, no resuelta; riesgos previos R-055/056/057 y demás vigentes. **Fase 02 permanece abierta**; D-036 sobre redacción es propuesta pendiente/no aceptada y no modifica el criterio original. Cierre de nodo autorizado por usuario tras gates y evidencia, sin avanzar a Fase 03 ni otras funciones. Guardar este paquete para contraste; detener trabajo al completar corrección.
+
+---
+
+# Histórico — Revisión focalizada anterior de autorización y canonicalización
 
 APPROVE_WITH_FOLLOWUPS recibido. Base 8f602f2; correctivo **0c662fc**, comparar git diff 8f602f2..0c662fc. Únicamente envelope/exports/tests: ContextPackage, binding Git/OID, schemas v1, kernel, dependencias y main e14cfdd intactos. Nodo abierto hasta revisión focalizada, Fase 02 abierta; sin proveedores/agentes/merge/publicación.
 

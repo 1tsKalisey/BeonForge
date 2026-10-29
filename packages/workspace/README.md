@@ -1,6 +1,8 @@
 # Proyectos Git locales y worktrees — B03-01/B03-02
 
-## B03-05 — ContextEnvelope (pendiente de revisión)
+## B03-05 — ContextEnvelope (aceptado/cerrado)
+
+Segunda auditoría APPROVE_WITH_FOLLOWUPS confirma defectos originales corregidos. P3 transversal de96f51 endurece flags propios sin herencia/accessors y revalida revocaciones; tres rojas/tres verdes, 442/442 y gates verdes. Fase 02 abierta; R-061 no reproducida/sin causa y D-036 no aceptada. Los estados pendientes y contadores inferiores son históricos.
 
 Correctivo 0c662fc: canPublish explícito para build, bytes canónicos originales y políticas tipadas. 439/439 en dos corridas; pnpm check nativo 0, logs completos. Intermitencia no reproducida, no resuelta. Nodo abierto para revisión focalizada, criterio de redacción original intacto (D-036 propuesta no aceptada). Registro anterior de 436 corresponde al primer envío.
 

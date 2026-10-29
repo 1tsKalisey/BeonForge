@@ -1,6 +1,10 @@
 # ContextPackage — B03-04 (CTX-MIN)
 
-## B03-05 — ContextEnvelope v1 (pendiente de revisión)
+## B03-05 — ContextEnvelope v1 (aceptado/cerrado)
+
+Segunda auditoría APPROVE_WITH_FOLLOWUPS confirma defectos originales corregidos. P3 transversal local de96f51, tres rojas/tres verdes y 442/442 con gates verdes; cierre autorizado tras evidencia. No se atribuye auditoría externa nueva al último correctivo. Fase 02 abierta; riesgos y R-061 no reproducida/sin causa continúan, D-036 no aceptada.
+
+Endurecimiento transversal posterior: flags canRead/canPublish sólo conceden permisos como propiedades propias booleanas de datos. La herencia (incluido Object.prototype) no autoriza; accessors/getters y Proxy se rechazan como context_invalid sin ejecutarlos. Permiso propio ausente/false -> context_denied. Grants requeridos propios de datos, revalidados por package/envelope; se consultan descriptores vivos y se repite antes de puts/manifest, sin snapshot inicial que oculte revocación. No modifica schemas v1, binding ni privacidad. El caller/control plane sigue siendo confiable: esto no es sandbox de JavaScript arbitrario.
 
 Corrección de auditoría: build exige **canPublish === true**, además de grants de lectura, antes del primer put y otra vez antes del sobre. ContextEnvelopePolicy conserva compatibilidad estructural de readPolicy (flag opcional en tipos para diagnosticar ausencia), pero ausencia/false se rechazan context_denied, sin puts iniciales. Read no requiere publicar. Política malformada/null -> context_invalid, sin TypeError/valores privados. Reader exige igualdad de bytes originales y JSON canónico producido: rechaza whitespace, orden distinto, extras o refs inválidas; manifest v1 sin cambios. Propuesta de sustituir redacción por rechazo no está aprobada y no altera el gate original de Fase 02.
 

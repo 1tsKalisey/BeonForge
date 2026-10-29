@@ -4,7 +4,7 @@ Actualizado: 2026-10-29. Estados: `catalogada`, `diseñada`, `prototipo`, `verif
 
 | Capacidad | Estado del plan | Estado de implementación | Evidencia / próximo gate |
 |---|---|---|---|
-| Instrucciones y mapa explícitos del contexto | diseñada | prototipo | B03-05 correctivo 0c662fc tras APPROVE_WITH_FOLLOWUPS: publicación con flag explícito/revocación, bytes canónicos y políticas malformadas tipadas. Tres rojas/tres verdes; dos suites 439/439 y gates verdes con exit nativo 0. Intermitencia no reproducida/no resuelta, logs completos conservados. Paquete v1/binding intactos; revisión focalizada pendiente, nodo/Fase 02 abiertos. Redacción requiere decisión del propietario, D-036 sólo propuesta. |
+| Instrucciones y mapa explícitos del contexto | diseñada | verificada | B03-05 aceptado/cerrado tras segunda auditoría APPROVE_WITH_FOLLOWUPS. Tres defectos anteriores corregidos independientemente; P3 transversal local de96f51: permisos propios/descriptores sin accessors/herencia y revalidación viva, tres rojas/tres verdes, 442/442 y gates completos exit nativo 0. No nueva auditoría externa atribuida al correctivo. R-061 no reproducida/sin causa, demás riesgos conservados; Fase 02 abierta y D-036 no aceptada. |
 | Repositorio y memoria operativa | diseñada | verificada | Foundation cerrada; B00-01 incorpora objetivo de producto y plan ejecutable de Fase 01. Gates actuales en `status.md`. |
 | pnpm workspace y TypeScript estricto | diseñada | verificada | `3fc9d52`, actualizado por `b4d56e4`; TypeScript 6.0.3, instalación frozen, typecheck y build pasan. |
 | lint, format y tests | diseñada | verificada | `b4d56e4`; ESLint, Prettier, Vitest 1/1 y gate integrado pasan; lint detectó `any` de prueba. |

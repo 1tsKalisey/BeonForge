@@ -1,5 +1,9 @@
 # Registro de riesgos
 
+## Segunda aceptación B03-05 y P3 transversal
+
+APPROVE_WITH_FOLLOWUPS independiente recibido, tres defectos anteriores confirmados corregidos. R-062/P3: flags heredados o contaminados desde Object.prototype no conceden autorización; se consultan descriptores propios de datos en cada punto (sin snapshot duradero), faltantes -> context_denied, accessors/políticas malformadas/Proxy -> context_invalid sanitizado. No invocar getters; grants de lectura y publicación siguen separados. Política/grants propios legítimos siguen admitidos, incluso con prototipo null. Revocación revalidada en paquetes/envelopes y antes de publicaciones sucesivas. Corrección local con regresiones; no se atribuye revisión independiente adicional del último código. R-061 permanece **intermitencia no reproducida, causa aún no identificada**, no resuelta. R-055/056/057 y límites previos se conservan. Fase 02 abierta y D-036 no aceptada, criterio original de redacción intacto.
+
 ## Correctivo focalizado B03-05
 
 R-058/P2: política de sólo lectura no debe publicar. Corregido localmente exigiendo canPublish===true inicialmente, tras validar paquete antes del primer put y antes de publicar sobre; lectura/grants/revocación conservados. R-059/P3: bytes originales de envelope deben coincidir con serialización canónica esperada, incluido whitespace/orden/extra fields/refs. R-060/P3: política null/malformada rechazada context_invalid sanitizado; falta/false de publicación válida -> context_denied. Tres rojas/tres verdes focales, gates verdes, pendiente de revisión independiente. R-061: intermitencia 180/181 reportada en primera auditoría, 181/181 en segunda. No se declara resuelta sin reproducción; conservar logs completos de nuevas ejecuciones. R-057 y anteriores vigentes. Propuesta D-036 sobre redacción no aceptada, gate original permanece.
