@@ -52,3 +52,5 @@ Antes de editar: leer `status.md`, verificar Git y baseline, confirmar alcance, 
 Cierre vigente B03-04: segunda auditoría APPROVE_WITH_FOLLOWUPS, P2 resuelto/intacto, a1f4c97 corrige P3-1/P3-2 con seis rojas/seis verdes y 432/432 + gates. Nodo aceptado/cerrado bajo condición del usuario; P3-3/R-055 y P3-4/R-056 aceptados pendientes. Sustituye el estado operativo pendiente anterior, sin atribuir revisión externa adicional del correctivo. Fase 02 abierta; no se define/inicia otro nodo en este cierre.
 
 Estado vigente B03-05: nodo registrado d7121e8 y código 901290a, ContextEnvelope mínimo con mapa derivado e instrucciones CAS; 436/436 y gates verdes. Pendiente de revisión independiente. Fase 02 abierta, sin nuevo nodo ni proveedores/agentes; rechazo conservador no es redacción transformadora. B03-01–04 aceptados/cerrados y dependencias de fases conservadas.
+
+B03-05 correctivo 0c662fc: 439/439 dos corridas completas, gates con exit nativo 0, pendiente de revisión focalizada. Nodo y Fase 02 abiertos. D-036 es propuesta no aceptada: se mantiene sin cambios el criterio original de redacción hasta aprobación expresa del propietario. No otro nodo ni proveedor.

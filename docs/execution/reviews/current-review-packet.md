@@ -1,4 +1,20 @@
-# B03-05 — ContextEnvelope v1: revisión independiente pendiente
+# B03-05 — Revisión focalizada de autorización y canonicalización
+
+APPROVE_WITH_FOLLOWUPS recibido. Base 8f602f2; correctivo **0c662fc**, comparar git diff 8f602f2..0c662fc. Únicamente envelope/exports/tests: ContextPackage, binding Git/OID, schemas v1, kernel, dependencias y main e14cfdd intactos. Nodo abierto hasta revisión focalizada, Fase 02 abierta; sin proveedores/agentes/merge/publicación.
+
+P2: canPublish===true explícito al inicio, tras leer paquete antes del primer put y antes del sobre. Mantiene lectura/grants/revocación; política sólo lectura sigue válida para read, no para build. ContextEnvelopePolicy añade flag opcional en tipos por compatibilidad estructural, pero ausencia/false se rechazan context_denied en runtime con cero puts iniciales. Flag revocado durante primera escritura -> un blob, ningún sobre devuelto. CAS no concede autoridad.
+
+P3: bytes originales verificados contra JSON canónico producido, no sólo JSON reconstruido; rechaza espacios, pretty-print, orden alterado, extras y referencias inválidas, sin versionar de nuevo. Políticas null/malformadas -> context_invalid sanitizado antes de uso, sin TypeError/valores sensibles. Campos válidos sin grants -> context_denied. Tres tests agregados: tres rojas previas 28.87 s, tres verdes focales 29.84 s (62 no seleccionados por filtro).
+
+Gates finales: **439/439**, dos corridas completas, sin skips/fallos de tests: contratos 62/persistencia 115/runtime 71/workspace 184/spike 7, 436 previos+tres nuevos. Workspace 567.21 s y 568.97 s. Demo productor/lector y gates previos conservados. Node 24.19.0/SQLite 3.53.3, frozen/peers/formato/lint/typecheck/build/diff/secretos verdes. pnpm check confirmado **exit nativo 0**. Primer check mostró todos los tests verdes pero la envoltura PowerShell devolvió 1 por NativeCommandError del banner stderr de pnpm: no se ocultó, se repitió completo con captura nativa. Primer filtro con pipes falló en shell (red.log); pruebas rojas reales están en red-tests.log.
+
+Logs íntegros sin sobrescribir en `%TEMP%/beonforge-b0305-review-logs/`: install.log, peers.log, red.log, red-tests.log, focused.log, check.log y confirmation.stdout.log/confirmation.stderr.log/confirmation.exit.txt; hashes en sha256.json. Datos de tests exclusivamente sintéticos/temporales. Escaneo sólo cabecera ficticia de clave, sin secretos reales. Intermitencia 180/181 reportada por primera auditoría **no reproducida**, segunda auditoría reportó 181/181; no se declara resuelta, R-061 seguimiento abierto y logs disponibles para contraste. No cambios de timeouts ni de tests para ocultarla.
+
+Revisar prioritariamente permisos antes de efectos y entre escrituras, bytes canónicos originales, diagnósticos tipados y compatibilidad read-only. R-057/058–061 y riesgos previos vigentes; correcciones locales pendientes de verificación independiente. **No cerrar B03-05 ni Fase 02**. D-036 es propuesta pendiente de aprobación expresa del propietario: no sustituye el criterio de redacción original del master-plan. Rechazo conservador no es redacción transformadora. Detenerse tras esta revisión preparada, sin otro nodo.
+
+---
+
+# Histórico — B03-05: paquete inicial
 
 Base aceptada 0e1ec36; nodo registrado antes de implementar en d7121e8. Código `901290a`, comparar git diff 0e1ec36..901290a. ContextPackage v1, binding Git/OID, kernel, dependencias y main e14cfdd intactos. API/exports buildContextEnvelope/readContextEnvelope y tipos en workspace; sin nuevos módulos/frameworks/agentes. B03-01–04 cerrados; B03-05 **abierto hasta auditoría**, Fase 02 no completada.
 

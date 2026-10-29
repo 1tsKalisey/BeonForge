@@ -2,6 +2,8 @@
 
 ## B03-05 — ContextEnvelope (pendiente de revisión)
 
+Correctivo 0c662fc: canPublish explícito para build, bytes canónicos originales y políticas tipadas. 439/439 en dos corridas; pnpm check nativo 0, logs completos. Intermitencia no reproducida, no resuelta. Nodo abierto para revisión focalizada, criterio de redacción original intacto (D-036 propuesta no aceptada). Registro anterior de 436 corresponde al primer envío.
+
 API build/read, instrucciones explícitas CAS y mapa derivado del paquete autorizado; contrato y demo en CONTEXT.md. 436/436 tests y gates verdes, sin envío/proveedores/agentes ni cierre de Fase 02.
 
 ## B03-04 — ContextPackage mínimo (aceptado/cerrado)

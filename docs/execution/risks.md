@@ -1,5 +1,9 @@
 # Registro de riesgos
 
+## Correctivo focalizado B03-05
+
+R-058/P2: política de sólo lectura no debe publicar. Corregido localmente exigiendo canPublish===true inicialmente, tras validar paquete antes del primer put y antes de publicar sobre; lectura/grants/revocación conservados. R-059/P3: bytes originales de envelope deben coincidir con serialización canónica esperada, incluido whitespace/orden/extra fields/refs. R-060/P3: política null/malformada rechazada context_invalid sanitizado; falta/false de publicación válida -> context_denied. Tres rojas/tres verdes focales, gates verdes, pendiente de revisión independiente. R-061: intermitencia 180/181 reportada en primera auditoría, 181/181 en segunda. No se declara resuelta sin reproducción; conservar logs completos de nuevas ejecuciones. R-057 y anteriores vigentes. Propuesta D-036 sobre redacción no aceptada, gate original permanece.
+
 ## B03-05 — ContextEnvelope
 
 R-057: instrucciones explícitas y contenido del repositorio se conservan separados, pero el sobre no autentica al propietario del CAS ni concede permisos de herramientas/envío. Caller/store/ACL privados siguen siendo confiables; lectura histórica requiere grants actuales y nunca habilita checkout vivo. Instrucciones no se ejecutan/interpolan ni se usan como política. Heurística de privacidad existente no es infalible, mantiene falsos positivos/negativos y placeholders documentados; rechazo conservador no es redacción transformadora. Corte o revocación tras publicar instrucciones puede dejar huérfanos, sin envelope devuelto, limpieza o retry. No transacción distribuida nueva, modelos o proveedores. R-055/056 y riesgos previos intactos, sin cierre de Fase 02.
