@@ -52,7 +52,10 @@ function git(root: string, ...args: string[]) {
     },
   }).trim();
 }
-async function fixture(extra: Record<string, string | Uint8Array> = {}) {
+async function fixture(
+  extra: Record<string, string | Uint8Array> = {},
+  format: 'sha1' | 'sha256' = 'sha1',
+) {
   const root = mkdtempSync(join(temp, 'beonforge-context-'));
   const repo = join(root, 'repo'),
     storage = join(root, 'storage'),
@@ -60,7 +63,7 @@ async function fixture(extra: Record<string, string | Uint8Array> = {}) {
   for (const p of [repo, storage, execution]) mkdirSync(p, { mode: 0o700 });
   const stores: DurableStore[] = [];
   fixtures.push({ root, stores });
-  git(repo, 'init', '-q');
+  git(repo, 'init', '-q', `--object-format=${format}`);
   git(repo, 'config', 'user.name', 'Fixture');
   git(repo, 'config', 'user.email', 'fixture@example.invalid');
   const content = {
@@ -158,6 +161,68 @@ it('B0304 publishes the compiled minimal context API', () => {
   expect(workspace).toHaveProperty('buildContextPackage');
   expect(workspace).toHaveProperty('readContextPackage');
 });
+
+it.each(['sha1', 'sha256'] as const)(
+  'P2 rejects ancestor exchange against the authorized %s blob before CAS',
+  async (format) => {
+    const f = await fixture({}, format);
+    const r = recorder(f.store);
+    const source = join(f.destination, 'src');
+    const saved = join(f.root, 'original-src');
+    const alternate = join(f.root, 'alternate-src');
+    mkdirSync(alternate);
+    writeFileSync(
+      join(alternate, 'app.ts'),
+      'export const greeting: string = "evil";\r\n',
+    );
+    const original = fsPromises.lstat;
+    let exchanged = false,
+      observed = false;
+    function switchView(wanted: boolean) {
+      if (wanted === exchanged) return;
+      if (wanted) {
+        renameSync(source, saved);
+        renameSync(alternate, source);
+        observed = true;
+      } else {
+        renameSync(source, alternate);
+        renameSync(saved, source);
+      }
+      exchanged = wanted;
+    }
+    // Real directory exchanges at observation boundaries: workspace sees clean,
+    // capture sees a stable alternative ancestor. No fake bytes or stat results.
+    fsPromises.lstat = ((...args: Parameters<typeof original>) => {
+      switchView(
+        /(?:exactPath|stamp|capture) \(/.test(new Error().stack ?? ''),
+      );
+      return original(...args);
+    }) as typeof original;
+    syncBuiltinESMExports();
+    try {
+      await expect(
+        buildContextPackage(f.intent, ['src/app.ts'], f.policy, r.store),
+      ).rejects.toMatchObject({ code: 'context_changed' });
+      expect(observed).toBe(true);
+      expect(r.writes).toHaveLength(0);
+    } finally {
+      fsPromises.lstat = original;
+      syncBuiltinESMExports();
+      switchView(false);
+    }
+    const ref = await buildContextPackage(
+      f.intent,
+      ['src/app.ts'],
+      f.policy,
+      f.store,
+    );
+    expect(
+      Buffer.from(
+        (await readContextPackage(ref, f.policy, f.store)).files[0]!.bytes,
+      ),
+    ).toEqual(readFileSync(join(source, 'app.ts')));
+  },
+);
 
 it('B0304 deterministic explicit selection contains exact working-tree bytes and no absolute paths', async () => {
   const f = await fixture();

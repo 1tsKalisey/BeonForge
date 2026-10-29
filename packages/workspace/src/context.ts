@@ -307,12 +307,18 @@ export async function buildContextPackage(
       policy.workspace,
       store,
     );
-    if (paths.some((p) => !source.paths.includes(p)))
+    if (paths.some((p) => !source.files.some((f) => f.path === p)))
       return fail('context_denied');
     const captured = [];
     let total = 0;
     for (const path of paths) {
       const file = await capture(source.destination, path);
+      const oid = createHash(source.objectFormat)
+        .update(Buffer.from(`blob ${file.bytes.byteLength}\0`, 'ascii'))
+        .update(file.bytes)
+        .digest('hex');
+      if (oid !== source.files.find((f) => f.path === path)?.oid)
+        return fail('context_changed');
       total += file.bytes.length;
       if (total > LIMITS.maxTotalBytes) return fail('context_limit');
       captured.push(file);

@@ -250,6 +250,7 @@ async function layout(
   };
 }
 const commands = {
+  objectFormat: ['rev-parse', '--show-object-format=storage'],
   emptyTree: ['hash-object', '-t', 'tree', '--stdin'],
   root: ['rev-parse', '--show-toplevel'],
   git: ['rev-parse', '--absolute-git-dir'],
@@ -1105,19 +1106,28 @@ export async function contextWorkspaceSnapshot(
   const receipt = (await json(store, report.receipt)) as { project?: unknown };
   const project = parseArtifactReference(receipt.project);
   const output = (await git(destination, ['tree', commit])).output;
+  const objectFormat = (await git(destination, 'objectFormat')).output.trim();
+  if (objectFormat !== 'sha1' && objectFormat !== 'sha256')
+    throw new ProjectError('git_failure');
   if (output && !output.endsWith('\0')) throw new ProjectError('git_failure');
-  const paths = (output ? output.slice(0, -1).split('\0') : []).map((entry) => {
+  const files = (output ? output.slice(0, -1).split('\0') : []).map((entry) => {
     const match =
-      /^(100644|100755) blob (?:[a-f0-9]{40}|[a-f0-9]{64})\t(.+)$/.exec(entry);
-    if (!match?.[2]) throw new ProjectError('invalid_project');
-    return match[2];
+      /^(100644|100755) blob ([a-f0-9]{40}|[a-f0-9]{64})\t(.+)$/.exec(entry);
+    if (
+      !match?.[2] ||
+      !match[3] ||
+      match[2].length !== (objectFormat === 'sha1' ? 40 : 64)
+    )
+      throw new ProjectError('invalid_project');
+    return { path: match[3], oid: match[2] };
   });
   return {
     destination,
     commit,
     project,
     receipt: report.receipt,
-    paths,
+    files,
+    objectFormat,
     validationScope: WORKTREE_VALIDATION_SCOPE,
   };
 }
