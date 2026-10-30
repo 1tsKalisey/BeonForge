@@ -4,6 +4,16 @@ Actualizado: 2026-10-30. Leer este archivo antes de cualquier tarea.
 
 ## Posición
 
+**B05-01 CERRADO — APPROVE_WITH_FOLLOWUPS independiente** aportado por el propietario. Claude confirma resuelto el P1 HTTP101 (`4e00fea`); R-064 resuelto, no bloqueante. Los **519/519 tests y gates locales anteriores** se verifican por logs/exit codes/hashes; **no se atribuye a Claude ejecución de la suite completa**. Este cierre documental comprobó 37 hashes sin discrepancias y exits frozen/peers/check/final-format/lint/typecheck/guard-final=0. Sin nuevas pruebas ni auditoría: no cambió código funcional. Evidencias originales en `%TEMP%/beonforge-b0501-p1-afad27ab2d074169850331efbcd70bf3/`.
+
+Seguimientos no bloqueantes conservados: clasificación RST, errores inesperados, CLI SIGINT/otros errores y R-061 (no reproducida, causa desconocida/no resuelta). R-063, privacidad/CAS/workspace/D-036 vigentes. **Node 24.19.0 debe instalarse en ubicación estable fuera de %TEMP% antes de implementar/gates de B05-02**; el runtime portátil anterior sólo sustenta evidencia histórica. No se cambia automáticamente versión/herramientas/PATH/instalación en esta tarea.
+
+**Siguiente nodo delimitado: B05-02 — Primera inferencia local sintética autorizada**, plan ejecutable en phase-03.md; preparado, **no implementado**. Preview puro con payload fijo público/hash -> grant propio vivo ligado a destino/modelo/payload -> modelo local instalado verificado -> POST /api/generate no streaming -> respuesta JSON validada. Límite/timeout/cancelación, transporte protegido B05-01, sin reintentos. Sin ContextPackage/código privado, SDK/routing/agentes, descargas o configuración automática. Modelo real/local-only y petición real requieren autorización expresa adicional; no se ha consultado Ollama instalado en este cierre.
+
+Fases 01/02 cerradas; Fase 03 permanece abierta. Detener tras commit documental; no iniciar B05-02/Fase 04, merge/publicación ni modificar main. Las posiciones siguientes son históricas y no reabren B05-01.
+
+## Histórico — P1 corregido antes de la aceptación independiente
+
 **B05-01 abierto: REQUEST_CHANGES independiente recibido; P1 corregido localmente en `4e00fea`, pendiente de revisión focalizada.** Dos rojas reproducen HTTP 101: promesa aún pendiente a 800 ms pese a timeout 200, CLI exit 13 en lugar de JSON/exit 1. Corrección privada de getJson: upgrade rechazado, close incompleto tipado, abort/deadline rechazan directamente sin depender de eventos del transporte, settlement único y destrucción de sockets; guardas de error hasta close para eventos tardíos. API/report v1/orígenes/agente/límites/redirects preservados.
 
 **519/519 verdes** = 508 anteriores + 11 nuevos (62 contratos, 115 persistencia, 71 runtime, 187 workspace, 77 Ollama, 7 spike). Node 24.19.0/SQLite 3.53.3; frozen/peers/check exit nativo 0, formato/lint/typecheck/build/tests/diff/secretos verdes. Workspace 631.39 s, probe 1.78 s. Compilación actual, CLI real contra mocks: HTTP 101 retorna JSON probe_invalid_response y exit 1, sin unsettled top-level await. Pruebas adicionales de timeout/cancel con destroy silencioso, close/reset, body truncado/parcial, 200 completos, errores tardíos/sockets liberados. Último refuerzo de auto-prueba del guard (sin cambios productivos) reejecutó 77/77 en 1.82 s más formato/lint/typecheck finales exit 0.
@@ -212,7 +222,7 @@ Desde la raíz real del checkout en PowerShell: `git rev-parse --show-toplevel`,
 
 ## Instrucciones exactas para continuar
 
-1. M01.3/Fase 01 cerrados con aceptación independiente y followups verificados. No repetir B02b-03/auditorías/spikes ni invocar agentes; esta tarea termina aquí.
-2. En la próxima continuación, acotar únicamente la primera tarea de Fase 02 según master-plan antes de programar; no hay plan phase-02.md aún. Mantener main intacta, sin merge ni publicación.
-3. Ejecutar herramientas con Node 24.19.0 (portátil verificado en el registro B02a si sigue disponible); el Node global 24.13.0 es rechazado. No cambiar globalmente el runtime ni ampliar su whitelist sin validación explícita. Mantener WAL/FULL y SQL en worker.
-4. Preservar la semántica pending/uncertain sin reejecución automática, la vinculación inmutable del plan y los contratos aceptados. No incorporar agentes/proveedores/UI ni activar/restaurar sobre datos reales sin aprobación. No modificar F-5 sin una prueba que demuestre regresión.
+1. Fases 01/02 y B05-01 aceptados/cerrados. No repetir auditorías/tests/spikes sin cambios funcionales que lo justifiquen ni invocar agentes; este cierre es exclusivamente documental.
+2. B05-02 delimitado en phase-03.md, no implementado. Esperar autorización de implementación; este plan no autoriza inferencia/prueba real, descargas o configuración del servicio. Mantener main intacta, sin merge ni publicación.
+3. Para continuar se requiere Node 24.19.0 instalado en ubicación estable fuera de %TEMP%, con ruta/versión efectiva comprobadas antes de implementación/gates. No cambiar versiones, PATH o herramientas automáticamente; no depender del portátil temporal histórico. Mantener WAL/FULL y SQL en worker.
+4. Preservar pending/uncertain sin reejecución automática y contratos aceptados. B05-02 limita el futuro payload al sintético público fijo y exige permisos propios explícitos de destino/modelo/payload, modelo local instalado/autorizado y consentimiento real separado. No agentes/contexto privado/UI ni modificaciones a F-5 sin regresión demostrada.

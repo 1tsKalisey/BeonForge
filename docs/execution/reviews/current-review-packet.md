@@ -1,4 +1,18 @@
-# B05-01 — Revisión focalizada del P1 HTTP101 (REQUEST_CHANGES)
+# B05-01 — APPROVE_WITH_FOLLOWUPS y cierre documental
+
+Veredicto independiente aportado por el propietario: **APPROVE_WITH_FOLLOWUPS**, Claude confirma resuelto P1 HTTP101 (`4e00fea`) y permite cerrar B05-01. **R-064 resuelto; B05-01 cerrado**, Fase 03 abierta. El paquete focalizado inferior es histórico, no una revisión pendiente ni trabajo a repetir.
+
+Los **519 tests/gates** corresponden a ejecución local previa, **verificada mediante logs y hashes**; no se afirma que Claude ejecutara la suite completa. En este cierre se contrastaron los 37 ficheros de sha256.json, sin discrepancias, y exits nativos frozen/peers/check/final-format/lint/typecheck/guard-final=0. Sin cambios funcionales, nueva suite, auditoría, peticiones a Ollama, descargas o inferencias. Evidencia: `%TEMP%/beonforge-b0501-p1-afad27ab2d074169850331efbcd70bf3/`.
+
+Seguimientos no bloqueantes: clasificación de RST, SIGINT CLI/otros errores, errores inesperados y R-061 (sin causa, no resuelta). R-063 y riesgos de privacidad/CAS/workspace/D-036 preservados. **Node24.19.0 instalado en ubicación estable fuera de %TEMP%** es precondición para continuar; no se instala/migra ni cambia herramientas automáticamente en este paso.
+
+Siguiente tarea delimitada, **no implementada**: [B05-02 — Primera inferencia local sintética autorizada](../phases/phase-03.md#b05-02--primera-inferencia-local-sintética-autorizada). Incluye objetivo/interfaces, grant propio vivo destino/modelo/hash del payload fijo, modelo instalado/autorizado, preflight, POST generate protegido, límites/timeout/cancelación, sin datos privados/logs crudos, tests mock y real opt-in. Demo: preview público -> consentimiento exacto -> único POST local -> JSON answer=4 verificado. Modelo/local-only/runtime estable y autorización real son dependencias expresas; no descargar ni ejecutar para desbloquearlas. No cierre de Fase 03/Fase04, agentes, routing o SDK genérico.
+
+Validación de este commit sólo documental: revisión de diff/alcance/enlaces locales y escaneo de secretos, sin repetir gates de ejecución. Detener tras commit, árbol limpio, main intacta; esperar autorización de implementación de B05-02.
+
+---
+
+# Histórico — revisión focalizada del P1 HTTP101 (REQUEST_CHANGES)
 
 **B05-01 abierto.** Auditoría independiente REQUEST_CHANGES recibida del usuario, único P1 bloqueante confirmado. Correctivo local **`4e00fea`**, comparar `git diff e6b32fe..4e00fea`; documentación/evidencias en commit posterior. No se afirma aprobación independiente del correctivo ni cierre del nodo/Fase 03. No invocar otros agentes; revisión Claude aportada por usuario.
 
