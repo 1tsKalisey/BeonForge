@@ -2,6 +2,28 @@
 
 Estado: abierta. Fases 01 y 02 aceptadas/cerradas; D-036 ACCEPTED permanece vigente.
 
+## Correctivo acotado B05-01 — auditoría REQUEST_CHANGES
+
+- Objetivo único: terminar cada petición HTTP incluso ante upgrade/close/abort sin eventos de transporte, conservando la API y restricciones de origen/agente/límites.
+- Archivos: src/index.ts, test/probe.test.ts y fixtures de prueba (barrera de sockets/subprocesos); README y evidencias de ejecución. Sin dependencias ni otros módulos funcionales.
+- Dependencias: P1 reproducido contra dist actual (dos rojas: promesa pendiente tras 200 ms; CLI exit 13). Sin consultar Ollama real.
+- Aceptación: upgrade rechazado, close prematuro y abort con settlement único, deadline efectivo, sockets/listeners liberados y 200 completo sin falsa caída; CLI JSON/exit válidos; tests negativos no pueden acceder al 11434 real aunque falle la validación.
+- Gates: Node 24.19.0, rojas/verdes, 508 anteriores más nuevas regresiones, frozen/peers/check/diff/secretos. P3 sólo parser estricto/prueba de proxy si mínimos; restantes seguimientos explícitos.
+- Exclusiones/seguridad: sin inferencia, descargas, prueba real, nuevos clientes/frameworks o cambios a CAS/contexto/kernel. B05-02 no iniciado.
+- Rollback: revert sólo correctivo, manteniendo datos y contratos anteriores; conservar P1 bloqueante si se revierte. Próximo gate: revisión independiente focalizada; B05-01 abierto hasta aceptación.
+
+### Evidencia correctiva — 4e00fea
+
+REQUEST_CHANGES independiente recibido. Dos regresiones **rojas** contra build anterior: HTTP101 sigue pending tras 800 ms pese a timeout 200; CLI termina exit13 sin JSON esperado. Logs red.out/err completos, exit1. Ahora tres casos HTTP101 (plazo predeterminado, 200 ms, CLI) verdes: invalid_response; CLI JSON exacto `{error:{code:"probe_invalid_response"}}`, exit1, sin unsettled top-level await. GET/loopback/agente privado/límites/redirects/API v1 intactos.
+
+**77/77 probe**, **519/519 total** (508 anteriores + 11): contratos 62, persistencia 115, runtime 71, workspace 187, Ollama 77, spike 7; sin skips/fallos en corrida completa. Node 24.19.0/SQLite 3.53.3. Frozen/peers/check exit nativo 0: formato/lint/typecheck/build/tests; diff/secretos verdes. Workspace 631.39 s, probe 1.78 s. Refuerzo final de auto-prueba del guard, sólo tests: 77/77 repetidos en 1.82 s, formato/lint/typecheck finales nativos 0. No código productivo cambiado tras build/check completo.
+
+Pruebas nuevas: HTTP101 API/CLI, abort con destroy sin eventos (timeout/cancel), close sin respuesta/error, reset/body truncado, tres 200 completos con close normal, cancelación durante body y auto-prueba del guard. Errores tardíos tras abort no escapan ni repiten destrucción; listeners retirados tras close, sockets del mock liberados. Guard test-only antes de DNS en runner/CLI, sólo mocks y veto absoluto 11434; entradas negativas sustituidas por puertos asignados, auto-prueba del puerto real sin socket. Sin probe real/inferencia/descargas.
+
+P3 proxy: sustituida prueba ineficaz por hijo con env activo desde startup, testigo del proxy global antes/después de borrar env y probe directo. P3 parser: false explícito, header hostil bajo --insecure-http-parser falla tipado. P3 clasificación inesperada y CLI SIGINT/otros errores siguen pendientes; no resueltos por este cambio. R-061 no reproducida/no resuelta.
+
+Logs/exit codes/hashes completos: `%TEMP%/beonforge-b0501-p1-afad27ab2d074169850331efbcd70bf3/` (red.*, green.*, guard-final.*, check.*, final-format/lint/typecheck.*); focused-final logs sin exit corresponden a interrupción, no evidencia de gate. Un lint de fixture (URL no importada) corregido antes de gates; no intermitencia inferida. Estado: **P1 corregido localmente, B05-01 abierto hasta revisión independiente focalizada**. No iniciar B05-02/Fase 04 ni cerrar Fase 03.
+
 ## B05-01 — Probe local autorizado de Ollama
 
 - Objetivo: comprobar disponibilidad, versión y nombres de modelos instalados mediante GET /api/version y GET /api/tags, sin inferencia.

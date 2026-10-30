@@ -1,4 +1,35 @@
-# B05-01 — Probe local autorizado Ollama: revisión independiente
+# B05-01 — Revisión focalizada del P1 HTTP101 (REQUEST_CHANGES)
+
+**B05-01 abierto.** Auditoría independiente REQUEST_CHANGES recibida del usuario, único P1 bloqueante confirmado. Correctivo local **`4e00fea`**, comparar `git diff e6b32fe..4e00fea`; documentación/evidencias en commit posterior. No se afirma aprobación independiente del correctivo ni cierre del nodo/Fase 03. No invocar otros agentes; revisión Claude aportada por usuario.
+
+## Reproducción y corrección
+
+Dos rojas antes del cambio sobre build actual anterior: getJson seguía pending a 800 ms con timeoutMs200; CLI devolvía exit13 en lugar de JSON/exit1. `red.out.log`, `red.err.log`, `red.exit.txt=1` íntegros. Ahora tres HTTP101 verdes: default/200/API y CLI compilada contra mock devuelve exactamente probe_invalid_response y exit1, sin unsettled top-level await.
+
+Único código productivo cambiado: packages/ollama/src/index.ts. getJson maneja upgrade destruyendo socket, close incompleto y abort directamente; guard único de settlement, limpieza de body/listener de abort, protección de errores hasta close, timer global finally conservado. Razones de abort privadas tipadas, sin depender de nuevos eventos de req.destroy. Mantiene API/report v1, autorización viva/orígenes/agente/límites/redirects. Parser explícito insecureHTTPParser:false. Sin cliente genérico, dependencias, SDK, nuevas operaciones o cambios de contratos/kernel/CAS/contexto/CLI.
+
+Seguridad de pruebas: negativos/CLI con puertos asignados de mocks; network-guard.mjs precargado en runner y CLI hijos intercepta Socket.connect antes de DNS, sólo acepta loopback a puertos mock y veta 11434 siempre. Auto-prueba del puerto real mediante función pura; socket de auto-prueba sólo apunta a mock. Si falla validación de destinos, la barrera impide conexión externa/real. Mock sockets rastreados/cerrados, incluidos upgrades. real-probe.mjs sigue fuera de suite y **no ejecutado**; nada de inferencias/model downloads.
+
+## Validación
+
+**519/519 verdes**: conserva 508, añade 11 (62 contratos + 115 persistencia + 71 runtime + 187 workspace + 77 Ollama + 7 spike), sin fallos/skips de corrida completa. Node24.19.0/SQLite3.53.3; frozen/peers/check exit nativo0, formato/lint con tipos/typecheck/build/tests/diff/secretos verdes. Workspace631.39s, probe1.78s. Tras último refuerzo exclusivo de auto-prueba del guard: 77/77 repetidos (1.82s), formato/lint/typecheck finales exit0; fuente productiva/build invariantes. Compilación actual, exports dist y CLI real contra mocks.
+
+Casos focales: HTTP101 default/200/CLI; transporte silencioso tras destroy con timeout/cancel; error/close tardíos sin segunda destrucción ni listeners residuales; close sin response/error; reset antes de headers; body truncado; cancelación durante body; tres reportes 200 completos sin falso fallo de close ni sockets; guard sin tráfico real. La ausencia de unhandled errors también se verifica al ejecutar el proceso CLI y Vitest.
+
+Logs completos nativos, exit codes y sha256.json: `%TEMP%/beonforge-b0501-p1-afad27ab2d074169850331efbcd70bf3/`. Reproducir focales con runtime aprobado: `pnpm.cmd --filter @beonforge/ollama build`, `pnpm.cmd --filter @beonforge/ollama test`; suite con `pnpm.cmd check`. No habilitar real-probe. Un lint de fixture URL corregido antes del gate; focused-final sin exit fue interrupción, no gate exitoso. R-061 no reproducida/sin causa, sigue abierta.
+
+## P3 y límites de revisión
+
+- Proxy: prueba corregida con hijo Node y NODE_USE_ENV_PROXY=1 desde arranque. Dos GET nativos demuestran proxy global mock antes/después de borrar env; dos GET del probe llegan directamente al mock destino. Sin proxy externo, agente productivo previo preservado.
+- Parser: flag false y regresión CLI arrancada con --insecure-http-parser y header inválido, rechazado en primer GET con JSON tipado.
+- Clasificación inesperada: seguimiento pendiente, no taxonomía nueva ni diagnóstico exhaustivo afirmado.
+- CLI SIGINT/otros errores: pendiente; HTTP101 verifica propagación concreta, no cubre SIGINT real/plataforma.
+
+Foco: terminación/settlement único y limpieza bajo upgrade/close/error/abort/deadline; conservación de confinamiento y tests incapaces de tocar servicio real. R-064 corregido localmente **pendiente de validación independiente**. R-063 y riesgos previos de privacidad/CAS/workspace/D-036 preservados; no permisos de inferencia/exportación. Próximo gate exclusivo: auditoría focalizada B05-01. No B05-02, Fase04, merge/publicación ni main.
+
+---
+
+# Histórico — B05-01: entrega inicial antes de REQUEST_CHANGES
 
 Estado: **implementado, pendiente de aceptación independiente**. Fases 01/02 cerradas y D-036 ACCEPTED vigentes; no inferencia, contexto, agentes o Fase 04. Nodo registrado `ca825ce`, implementación `7a37b10`; comparar `git diff 63f0500..7a37b10` para plan/código. Evidencias posteriores sólo documentales. No invocar Claude automáticamente; revisión suministrada por el usuario.
 

@@ -1,5 +1,20 @@
 # Registro de riesgos
 
+## B05-01 — R-064 / P1 HTTP101 y seguimientos de auditoría
+
+REQUEST_CHANGES independiente. P1 confirmado en rojo contra compilación anterior: pending a 800 ms/timeout 200; CLI exit 13. `4e00fea` corrige localmente upgrade/close/abort: rechazo directo independiente de eventos al destruir, guard de settlement único, destrucción de socket upgrade y listeners de error hasta close. Regresiones con transporte silencioso, errores tardíos, CLI JSON/exit 1, body truncado/reset/200 y sockets cerrados; 77/77 y 519/519/gates. **Pendiente de verificación independiente, sigue bloqueando cierre B05-01**; no se acepta el defecto como riesgo residual.
+
+Riesgo de tests negativos: orígenes/CLI ahora usan puertos de mocks, barrera previa a DNS en runner e hijos sólo permite puertos mock loopback y siempre veta 11434. Auto-prueba del puerto real es pura, sin socket; auto-prueba de intercepción usa puerto mock. Sin llamadas a servicio instalado, inferencias o descargas. Barrera es fixture de tests, no un sandbox productivo.
+
+| P3 de auditoría | Estado y evidencia |
+|---|---|
+| NODE_USE_ENV_PROXY configurado después de arrancar | Evidencia corregida localmente: fixture arranca Node con env activo, observa dos llamadas nativas vía proxy mock antes/después de borrar variables y dos GET directos del probe. Agente privado previo conservado; pendiente de revisión, sin proxy externo. |
+| Parser HTTP relajable por entorno | Corregido localmente con insecureHTTPParser:false y CLI arrancada con --insecure-http-parser: header inválido rechazado en primer GET, error tipado sin cuerpo. Pendiente de revisión independiente. |
+| Clasificación de errores inesperados | Pendiente. Se conservan códigos públicos y clasificación de transporte/parsing requerida por P1; catch de errores inesperados no se presenta como diagnóstico exhaustivo. No se amplía taxonomía en este correctivo. |
+| CLI SIGINT y errores propagados | Pendiente de ampliar cobertura SIGINT/otros errores, especialmente plataforma Windows. HTTP101 ya verifica proceso compilado, JSON/exit1 y ausencia de unsettled top-level await; no equivale a probar SIGINT real. |
+
+R-061 no reproducida, sin causa identificada/no resuelta. R-063, D-036 y riesgos de privacidad/CAS/workspaces previos conservados. No cierre de Fase 03 ni autorización de prueba real/proveedores adicionales.
+
 ## B05-01 — R-063: alcance y confianza del probe local
 
 Pendiente de revisión independiente. Loopback literal y permiso propio explícito limitan los GET a un origen/puerto autorizado; no autentican al proceso que escucha, ni evitan interceptación del SO, ni garantizan que un servicio compatible sea Ollama. Reporte/model names son metadatos no confiables, no capacidades/autoridad de ejecución. Sin descubrimiento, credenciales, contextos, archivos, CAS, inferencia ni reintentos. Un nuevo consumo de datos requiere política/clasificación/evals y autorización específica; D-036 no concede esa autorización.
