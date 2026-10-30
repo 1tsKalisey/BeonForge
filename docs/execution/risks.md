@@ -1,5 +1,13 @@
 # Registro de riesgos
 
+## B05-01 — R-063: alcance y confianza del probe local
+
+Pendiente de revisión independiente. Loopback literal y permiso propio explícito limitan los GET a un origen/puerto autorizado; no autentican al proceso que escucha, ni evitan interceptación del SO, ni garantizan que un servicio compatible sea Ollama. Reporte/model names son metadatos no confiables, no capacidades/autoridad de ejecución. Sin descubrimiento, credenciales, contextos, archivos, CAS, inferencia ni reintentos. Un nuevo consumo de datos requiere política/clasificación/evals y autorización específica; D-036 no concede esa autorización.
+
+Proxies configurados se rechazan conservadoramente incluso si NO_PROXY permitiría loopback; agente privado vacío adicionalmente evita proxy global. Sólo 127.0.0.1 y ::1 literales, HTTP/puerto explícito, sin variantes/DNS/HTTPS; máximo 256 KiB/respuesta, 8 KiB headers, 1024 modelos, nombres 256 caracteres, versión 128, plazo total 1–30000 ms. Instalaciones grandes o formatos no compatibles fallan sin reporte parcial; no se afirma compatibilidad exhaustiva. Cancelación/desconexión no es estado incierto de inferencia porque no hay inferencia ni efectos mutantes del proveedor.
+
+Ollama 0.40.13 instalado por petición expresa adicional (WinGet/hash oficial); socket observado sólo en 127.0.0.1:11434. No probe real ni modelos descargados por BeonForge. La instalación no es prueba de autenticidad permanente ni dependencia del gate; smoke real separado requiere autorización expresa. R-061 no reproducida, causa sin identificar/abierta. R-049/055/056/057, ACL, huérfanos, power loss y worktree sin sandbox conservados; ninguna de estas limitaciones se corrige aquí.
+
 ## D-036 ACCEPTED — aceptación residual del propietario para Fase 02/MVP
 
 Autorización expresa del propietario en esta sesión. Aceptar el riesgo permite evaluar el cierre acotado de Fase 02; **no** lo resuelve ni autoriza procesar/transmitir secretos. Las referencias históricas inferiores a D-036 pendiente quedan sustituidas por su aceptación actual, sin reescribir los hechos anteriores.

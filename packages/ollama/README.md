@@ -1,5 +1,7 @@
 # Ollama: authorized local metadata probe
 
+Use the approved Node.js 24.19.0 runtime and the repository pnpm gates.
+
 `probeOllama({ endpoint, allowLocalProbe: true, timeoutMs?, signal? })` performs
 only two sequential, bodyless GETs: `/api/version` and `/api/tags`. The permission
 must be an explicit own data property and is checked before each request and

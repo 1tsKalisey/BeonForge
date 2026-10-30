@@ -1,4 +1,22 @@
-# Fase 02 — D-036 ACCEPTED y cierre documental verificado
+# B05-01 — Probe local autorizado Ollama: revisión independiente
+
+Estado: **implementado, pendiente de aceptación independiente**. Fases 01/02 cerradas y D-036 ACCEPTED vigentes; no inferencia, contexto, agentes o Fase 04. Nodo registrado `ca825ce`, implementación `7a37b10`; comparar `git diff 63f0500..7a37b10` para plan/código. Evidencias posteriores sólo documentales. No invocar Claude automáticamente; revisión suministrada por el usuario.
+
+Alcance: packages/ollama/src/index.ts (probe/report v1/errores), src/cli.ts, tests contra exports dist, configs mínimas y README. Sin SDK/dependencias ni modificaciones a contratos/kernel/workspaces/CAS; frozen no cambió lockfile. Interfaz `probeOllama({endpoint,allowLocalProbe:true,timeoutMs?,signal?})`; CLI `probe --endpoint ORIGIN --allow-local-probe [--timeout-ms N]`. Permiso propio de datos, revocado/revalidado antes de segundo GET y salida. Únicamente dos GET sin payload a origen literal 127.0.0.1 o ::1 con puerto explícito; no DNS, redirects ni proxy; agente HTTP privado con proxyEnv vacío y entorno proxy rechazado.
+
+**508/508 verdes** (442 anteriores + 66 nuevos): 62 contratos, 115 persistencia, 71 runtime, 187 workspace, 66 Ollama, 7 spike, sin skips/fallos. Node 24.19.0/SQLite 3.53.3, frozen/peers/check con exit nativo 0. Formato/lint con tipos/typecheck/build/tests/diff/secretos verificados. Workspace 701.79 s; probe 1.06 s. Logs/exit codes/hashes en `%TEMP%/beonforge-b0501-6b9b8c55699744bf901bbbee49fc9d78/`. Fallos iniciales de autoría (it.each CLI y dos lint) corregidos antes del gate; conservados en transcript/notas, no R-061 reproducido. R-061 sigue sin causa/no resuelto.
+
+Evidencia por criterio y reproducción: [phase-03.md](../phases/phase-03.md), [README](../../../packages/ollama/README.md), test/probe.test.ts. Demo CLI compilada en proceso separado, con servidor HTTP temporal real simulado: versión fixture 0.5.1, modelo tiny:latest; exactamente /api/version y /api/tags, GET y body vacío, sin cookies/Authorization, extras descartados. Casos disponibles/sin modelos/detenido, IPv4/IPv6, permisos/hostiles, 16 orígenes rechazados, seis variables proxy/NO_PROXY/global env, redirects a receptor sin tráfico, HTTP/JSON/schema/UTF-8/encoding inválidos, headers/body y cardinalidad/nombres excesivos, timeout headers/body/segundo GET, cancelación antes/durante, desconexión y CLI inválida. Errores comparan código/mensaje exactos sanitizados; no bodies/endpoints/causas/reasons privados.
+
+Orden adicional del usuario: instalar Ollama. WinGet instaló **0.40.13**, hash del instalador oficial GitHub validado, exit 0; versión instalada y socket 127.0.0.1:11434 observados sin peticiones HTTP. Sin descargar modelos ni ejecutar smoke real. `test/real-probe.mjs` es opt-in separado, fuera de suite; exige `--authorize-real-probe` y endpoint. Se espera autorización expresa para usarlo; la instalación no prueba por sí sola respuesta API ni autenticidad.
+
+Foco de revisión: confinamiento de destinos/proxies/redirects, permiso vivo, límites/deadline/limpieza de sockets, parsers y ausencia de datos/contexto/inferencia. R-063: proceso local no autenticado, interceptación SO fuera de control, metadatos no fiables, tamaños/formats limitados y rechazo conservador de proxy. Riesgos previos conservados; worktree no sandbox, D-036 sin redacción transformadora/autorización de envío. Disponibilidad no acredita capacidad o autorización de inferencia. Registry, clasificación/política/evals e inferencia pertenecen a nodos posteriores autorizados, no defectos de este alcance.
+
+Siguiente acción: **revisión independiente B05-01**. Fase 03 sigue abierta; B05-02/Fase 04 sin iniciar, no merges/publicación/main. No cerrar el nodo por tener tests verdes.
+
+---
+
+# Histórico — Fase 02: D-036 ACCEPTED y cierre documental verificado
 
 Autorización **EXPRESA** del propietario: alternativa B para MVP. D-036 ACCEPTED, gate afectado del master-plan sustituido exactamente por worktree/contexto/instrucciones/mapa/exclusión y rechazo antes de persistencia, sin redacción transformadora ni autorización implícita de envío. Ningún otro objetivo de fase, arquitectura, contrato, código funcional o test modificado. B03-01–05 aceptados/cerrados previamente. Este cierre no atribuye auditoría externa nueva: reutiliza aceptaciones independientes y cumple condición del propietario con nueva verificación técnica.
 

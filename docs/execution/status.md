@@ -1,8 +1,18 @@
 # Estado persistente
 
-Actualizado: 2026-10-29. Leer este archivo antes de cualquier tarea.
+Actualizado: 2026-10-30. Leer este archivo antes de cualquier tarea.
 
 ## Posición
+
+**Fase 03 abierta; B05-01 implementado y pendiente de revisión independiente.** Registro `ca825ce`, implementación `7a37b10`. Probe local autorizado de Ollama: sólo GET /api/version y /api/tags, origen literal loopback con puerto explícito, sin DNS/redirects/proxies, permiso propio vivo, límites/timeout/cancelación/JSON y errores sanitizados. Report v1 con versión y nombres, disponible/sin modelos. CLI compilada y demo con servidor HTTP local simulado: exactamente dos GET sin payload/credenciales. Sin inferencia, contexto, archivos, CAS, descargas de modelos, SDK o dependencias nuevas; contratos aceptados intactos.
+
+**508/508 verdes**: conserva los 442 anteriores y añade 66 (contratos 62 + persistencia 115 + runtime 71 + workspace 187 + Ollama 66 + spike 7). Node 24.19.0/SQLite 3.53.3, frozen/peers/check exit nativo 0; formato/lint con tipos/typecheck/build/tests, diff y secretos verdes. Workspace 701.79 s, probe 1.06 s. Fallos iniciales de autoría corregidos antes del gate: parametrización CLI it.each y dos diagnósticos lint; no intermitencia R-061 reproducida, sigue abierta/sin causa. Logs completos nativos y hashes: `%TEMP%/beonforge-b0501-6b9b8c55699744bf901bbbee49fc9d78/`.
+
+Instrucción adicional del usuario: Ollama instalado en cuenta local con WinGet, versión **0.40.13**, instalador GitHub oficial/hash verificado, exit 0. Registro de instalación y socket local 127.0.0.1:11434 comprobados sin consultar API. Sin descargar modelos ni invocar prueba real: smoke opcional exige autorización expresa independiente. La instalación no es una dependencia de los tests automáticos.
+
+Fases 01/02 permanecen aceptadas/cerradas; D-036 ACCEPTED y riesgos R-049/055/056/057/061 vigentes. R-063 delimita confianza/compatibilidad del probe. Main e14cfdd intacta, sin merge/publicación. Siguiente acción: revisión independiente B05-01 suministrada por usuario; B05-02 no iniciado/definido. No inferencia hasta política/clasificación, autorización payload/destino y evals. Fase 04 no iniciada.
+
+## Histórico — cierre de Fase 02 (sustituye referencias anteriores a abierta)
 
 **Fase 02 — Workspace y contexto: CERRADA**, conforme a aprobación expresa del propietario de **D-036 ACCEPTED (alternativa B)** y verificación de los diez criterios en phase-02.md. B03-01–05 aceptados/cerrados. Gate actualizado sólo en exclusión/rechazo previo a persistencia de contexto; **redacción transformadora NO implementada**, diferida a frontera de exportación/proveedor. Ningún permiso implícito de envío/procesamiento de secretos, ejecución o herramientas. Aceptación residual no equivale a resolución de riesgos ni a autorización de consumo por modelos.
 

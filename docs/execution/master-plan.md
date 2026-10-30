@@ -35,6 +35,8 @@ BeonForge será un plano de control local-first, vendor-neutral, con contratos d
 
 ## Dependencias y límites transversales
 
+Estado vigente 2026-10-30: Fase 03 iniciada exclusivamente mediante B05-01 autorizado y registrado en phase-03.md, implementación `7a37b10`, 508/508 y gates verdes, pendiente de revisión independiente. Fases 01/02 siguen cerradas; menciones históricas inferiores a Fase 03 no iniciada quedan sustituidas. Probe de dos GET locales sin inferencia/contexto; no completa registry/evaluación ni gate de salida Fase 03. No B05-02/Fase 04 iniciados.
+
 Los bloques del objetivo son hitos de producto, no sustituyen las dependencias de fase: B00 corresponde a esta reconciliación; B01/B02 al kernel de Fase 01; B03 a Fase 02; B04 a Fase 05; B05 a Fase 03; B06 a la API y Fase 09; B07 a Fase 06; B08 a la coordinación de Fases 01/07; B09 es transversal; B10 agrupa evolución posterior. No se adelantan proveedores ni UI por el orden numérico de los bloques. Entrenamiento, OmniRoute y plugins permanecen diferidos fuera del MVP.
 
 Fase 01/B03-01/B03-02/B03-03 aceptados y cerrados. **Fase 02 sigue abierta**: B03-04 recibe APPROVE_WITH_FOLLOWUPS; P2 de integridad y privacidad corregidos localmente en 18d71dd/8820f3a, **426/426** y gates verdes, sin cierre operativo hasta revisión focalizada. R-047/050 ya revisados en el nodo; case exacto exigido para selección, R-049 global/R-048 parcial siguen abiertos. R-037/038/040/041, privacidad/snapshot R-052/053 y R-054 conservan sus límites. Siguiente gate: revisión focalizada B03-04 aportada por usuario, sin otro nodo iniciado. Sin merge/publicación ni cambios de main.
