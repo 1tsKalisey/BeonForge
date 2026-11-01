@@ -1,14 +1,21 @@
 # Registro de riesgos
 
-## B05-02 — R-065: inferencia local sintética acotada, revisión pendiente
+## B05-02 — R-065: residual vigente tras APPROVE_WITH_FOLLOWUPS
 
-Implementación `ebbd223`, evidencia local 595/595 y gates verdes, no aceptación independiente ni prueba de un modelo real. Sólo prompt público fijo, grants propios de inferencia/metadata vinculados a destino/modelo/payload, sin permisos por preview/hash/respuesta/CAS. Transporte privado compartido y 77 regresiones probe intactas; 76 casos nuevos con mocks protegidos/CLI. Sin código/contexto privado ni respuesta cruda/thinking en logs/report; sin SDK/routing/descargas/reintentos.
+**B05-02 cerrado APPROVE_WITH_FOLLOWUPS independiente**, sin P0/P1/P2; ebbd223/593cf8f. Revisión153/153 focalizados/20 reproducciones y binding permiso/destino/modelo/hash/POST verificado. Los595 completos/gates Node24.19/pnpm12.15 son evidencia local contrastada por logs, no suite completa atribuida a Claude. Cierre cotejó13 hashes sin discrepancias, sin pruebas/inferencia real. **R-065 no resuelto**: sigue limitado al sintético fijo/grants propios/mocks; sin autoridad por preview/hash/respuesta/CAS ni permisos reales implícitos. Sin datos privados/thinking crudos en logs/report, SDK/routing/descargas/reintentos.
+
+| P3 B05-02 | Estado/tratamiento no bloqueante |
+|---|---|
+| 1. answer duplicadas | Abierto: JSON.parse conserva el último valor y acepta duplicados. No afirmar validación libre de duplicados. Corregir antes de generalizar a respuestas no sintéticas; sin tocar parser/tests en cierre. |
+| 2. Hash sin endpoint | Vigente: SHA-256 sólo cubre body; mostrar/validar destino, modelo y hash separadamente en consentimiento. Binding efectivo comprobado, no inventar hash que incluya URL. |
+| 3. Grants reutilizables/sin caducidad | Vigente: no son autorizaciones técnicas de un solo uso ni con expiración. Una invocación real se limita administrativamente; código no consume el grant. |
+| 4. Script real30s/SIGINT | Abierto: timeout default30s y sin SIGINT específico. No usar automáticamente; procedimiento phase-03.md exige plazo frío explícito y única invocación mediante CLI existente. Sin cambio de API/script ni prueba de SIGINT del SO. |
 
 R-063 permanece: loopback no autentica al proceso ni prueba que un alias sea un modelo local. Preflight comprueba nombre instalado exacto, no pesos/digest ni snapshot atómico; operador debe asegurar servicio local-only confiable/modelo autorizado y ausencia de retag concurrente antes de cualquier prueba real. El flag de script --local-only-confirmed es declaración del operador, no comprobación automatizada. No se reconfiguró ni consultó el servicio instalado.
 
 requestDispatched significa entregado al transporte/posibilidad de envío; no prueba recepción/computación. Tras POST, timeout/cancel/RST/HTTPerror sin done/model válidos dejan outcome unknown, sin retries/fallback. done/model coincidentes confirman finalización observada, incluso si JSON interior inválido o permiso revocado impiden devolver respuesta. Cancelar socket no acredita que servidor detuvo cómputo. Estado sólo en memoria, sin EventStore/intent durable/reanudación ni exactamente-una-vez; no introducirlos fuera del plan. Token cap depende del servicio; bytes/tiempo acotados por cliente. No se garantiza determinismo del modelo, sólo evaluación del resultado sintético.
 
-Node24.19.0 estable C:/Program Files/nodejs/node.exe y pnpm12.15.0 estable AppData/Roaming/npm/node_modules/pnpm/pnpm.exe comprobados, desbloquean el requisito de entorno sin cambiar herramientas. R-061 no reproducida/sin causa/no resuelta; clasificación RST/errores inesperados y SIGINT real Windows siguen seguimientos. CLI B05-02 valida salida de éxito/error confirmado/unknown contra mocks, no acredita SIGINT del SO. B05-01/R-064 aceptados e intactos, privacidad/CAS/workspace/D-036 vigentes; Fase03 abierta, no B05-03.
+Node24.19.0/pnpm12.15.0 estables comprobados en implementación; no entorno cambiado en cierre. R-061 sin causa/no resuelta, RST/errores inesperados/SIGINT real Windows siguen pendientes. CLI validada contra mocks no acredita SIGINT del SO. R-064 resuelto/B05-01 intactos, privacidad/CAS/workspace/D-036 vigentes. Fase03 abierta, no modelo real evaluado ni gate global completo. Procedimiento preparado no autoriza consultas/configuración/descargas/inferencias; esperar consentimiento exacto separado del cierre.
 
 ## B05-01 — R-064 / P1 HTTP101 y seguimientos de auditoría
 

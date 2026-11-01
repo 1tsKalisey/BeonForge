@@ -1,4 +1,18 @@
-# B05-02 — Primera inferencia sintética autorizada: revisión independiente
+# B05-02 — CERRADO: APPROVE_WITH_FOLLOWUPS independiente
+
+Revisión aportada por propietario: **APPROVE_WITH_FOLLOWUPS, sin P0/P1/P2**, código ebbd223/evidencias593cf8f. **153/153 focalizados y20 reproducciones independientes**, correspondencia permiso propio/destino/modelo/SHA-256/POST efectivo verificada. Demo íntegra mock, sin contactar Ollama real ni inferencias. **595/595 completos/gates locales** con Node24.19.0/pnpm12.15.0 contrastados por evidencias/logs; **no se atribuye a Claude la ejecución completa de los595**.
+
+Cierre sólo documental: 13 hashes cotejados sin discrepancias y exits frozen/peers/check=0 en `%TEMP%/beonforge-b0502-aa8972a871874846bc64fef4f8882e7f/`. Sin repetir suites/auditoría, tocar código/entorno o llamar al servicio. Checks nuevos de diff/alcance/enlaces locales/secretos del commit documental.
+
+Cuatro P3 no bloqueantes abiertos: answer duplicadas aceptadas por JSON.parse (tratar antes de respuestas no sintéticas); hash excluye endpoint (mostrar/validar destino/modelo/hash separados); grants reutilizables/no caducan (no prometer un solo uso técnico); script real30s/sin SIGINT específico (procedimiento de plazo explícito/única ejecución). R-065/R-061/R-063/RST/SIGINT/errores inesperados conservados; R-064 resuelto intacto.
+
+[Procedimiento real](../phases/phase-03.md#primera-prueba-real--procedimiento-preparado-no-autorizado-ni-ejecutado) preparado, **no autorizado ni ejecutado**: local-only del servicio activo, endpoint literal exacto, modelo local/tag/digest autorizado, payload/hash exactos, timeout frío explícito, una invocación administrativa mediante CLI existente (sin fallback al script30s), registro saneado y cero retry ante unknown. No se presume consentimiento por cierre/grants/preview. Sin cambio de API, descarga/configuración/consulta real ni nodos posteriores.
+
+**Fase03 abierta**: mock no acredita candidato real evaluado/registry/evals globales. Detener tras commit documental, árbol limpio y main intacta, sin merge/publicación. Paquete inferior histórico, no revisión pendiente a repetir.
+
+---
+
+# Histórico — B05-02: entrega anterior a aceptación
 
 **Implementado, abierto hasta revisión independiente** suministrada por propietario. Código **`ebbd223`**, comparar `git diff ad4c08b..ebbd223` para implementación (docs de ejecución en commit posterior). B05-01/Fases01–02 aceptados/cerrados, R-064 resuelto sin reapertura; Fase03 abierta. No invocar Claude/otros agentes ni iniciar otro nodo.
 

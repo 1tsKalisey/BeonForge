@@ -140,6 +140,11 @@ success is 0. Probe command behavior is preserved.
 All automatic tests use protected mocks (11434 always denied). A separate real
 smoke script, **never run by the suite**, requires express operator authorization:
 `node test/real-inference.mjs --authorize-real-inference --local-only-confirmed ORIGIN INSTALLED_MODEL PREVIEW_HASH`.
+This script currently defaults to 30 seconds and has no specific SIGINT handler.
+Do not automatically use it for the first real trial: follow the documented
+[authorization procedure](../../docs/execution/phases/phase-03.md#primera-prueba-real--procedimiento-preparado-no-autorizado-ni-ejecutado)
+using the existing CLI with an explicitly approved cold-load timeout and exactly
+one administratively authorized invocation. This closure authorizes no real call.
 The operator must verify local-only server configuration, trusted local model and
 no concurrent alias/retag changes first. No installed model or loopback endpoint
 proves service authenticity/local execution; aliases cannot be pinned atomically
@@ -148,7 +153,11 @@ No model downloads/configuration changes, cloud calls or real smoke are included
 in B05-02 implementation/gates. Deterministic output bytes are not promised; the
 synthetic result is evaluated against the fixed contract.
 
-Phase 03 remains open pending independent review. D-036 does not implement
-transforming redaction or authorize export; prior workspace/CAS limits and
-RST/unexpected-error/OS SIGINT/R-061 follow-ups remain. No private context,
-agents, routing, dashboard or another node is implemented here.
+B05-02 is accepted/closed with APPROVE_WITH_FOLLOWUPS; Phase 03 remains open.
+Open P3 limits: JSON.parse accepts duplicate answer keys (resolve before
+nonsynthetic responses); the payload hash excludes endpoint (display and validate
+destination, model and hash separately); grants are reusable and do not expire,
+not single-use tokens; the real script timeout/SIGINT limitations above remain.
+D-036 does not implement transforming redaction or authorize export; prior
+workspace/CAS limits and RST/unexpected-error/OS SIGINT/R-061 follow-ups remain.
+No private context, agents, routing, dashboard or another node is implemented here.

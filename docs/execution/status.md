@@ -4,6 +4,16 @@ Actualizado: 2026-11-01. Leer este archivo antes de cualquier tarea.
 
 ## Posición
 
+**B05-02 CERRADO — APPROVE_WITH_FOLLOWUPS independiente** aportado por propietario, sin P0/P1/P2. Código `ebbd223`, evidencias `593cf8f`. Revisión: **153/153 focalizados y20 reproducciones independientes**, correspondencia permiso/destino/modelo/SHA-256/POST efectivo verificada. **595/595 completos y gates locales contrastados por logs/evidencias**, no ejecución completa atribuida a Claude. Node24.19.0/pnpm12.15.0, frozen/peers/check exit0; este cierre sólo cotejó13 hashes sin discrepancias y exits, sin repetir pruebas/auditorías ni tocar código funcional. Demo íntegra mock; sin consultar Ollama real, descargas, configuración o inferencias.
+
+P3 no bloqueantes: answer duplicadas aceptadas por JSON.parse (corregir antes de generalizar a respuestas no sintéticas); hash sólo de body, mostrar/validar destino/modelo/hash separados; grants reutilizables/sin caducidad, no de un solo uso; script real default30s/sin SIGINT específico, procedimiento previo obligatorio. R-065 residual vigente, R-061 sin causa/no resuelta, RST/SIGINT/errores inesperados/R-063 y anteriores conservados.
+
+**Fase03 abierta**: mock aprobado no acredita gate global de candidato real evaluado/registry/evals. Procedimiento previo en phase-03.md: endpoint exacto, modelo local/tag/digest autorizado, payload/hash exactos, local-only del servicio activo comprobado, timeout frío explícito <=120000ms, única invocación administrativa y sin retry ante unknown. Usar CLI existente con plazo explícito, no cambiar script/API. **No hay consentimiento real derivado del cierre**; esperar instrucción expresa, sin nuevos nodos/fases. Main e14cfdd intacta, sin merge/publicación.
+
+Evidencia original intacta en `%TEMP%/beonforge-b0502-aa8972a871874846bc64fef4f8882e7f/`. Runtime estable ya comprobado; no herramientas/entorno cambiados. Sólo commit documental y checks de diff/alcance/secretos. Estados abiertos inferiores son históricos.
+
+## Histórico — implementación anterior a aceptación B05-02
+
 **B05-02 implementado en `ebbd223`, abierto hasta revisión independiente.** prepareSyntheticInference puro con preview canónico público fijo/hash SHA-256/límites v1; runSyntheticInference exige grant propio vivo de inferencia+metadata, destino/modelo/hash coincidentes, preflight de modelo instalado y un solo POST generate sin streaming. JSON answer=4 validado, nunca respuesta cruda/thinking en salida. Transporte privado compartido con probe (tres rutas fijas), guards HTTP101/close/abort/proxy/loopback/parser/límites conservados. Sin contexto privado, SDK, routing, descargas, CAS o integración de agentes.
 
 **Entorno desbloqueado y comprobado:** Node v24.19.0 real en C:/Program Files/nodejs/node.exe; pnpm12.15.0 shim AppData/Roaming/npm/pnpm.cmd y ejecutable real AppData/Roaming/npm/node_modules/pnpm/pnpm.exe, fuera de %TEMP%. No se modificaron herramientas ni PATH. **595/595 verdes** = 519 anteriores + 76 nuevos: contratos62 + persistencia115 + runtime71 + workspace187 + Ollama153 (77 probe + 76 inferencia) + spike7. Node/SQLite3.53.3 confirmados por spike; frozen/peers/check con exit nativo0, formato/lint/typecheck/build/tests/diff/secretos verdes. Workspace637.68s, Ollama2.55s. Typecheck/lint iniciales de autoría corregidos antes del gate; R-061 no reproducida, causa sin identificar/no resuelta.
@@ -234,7 +244,7 @@ Desde la raíz real del checkout en PowerShell: `git rev-parse --show-toplevel`,
 
 ## Instrucciones exactas para continuar
 
-1. Fases01/02 y B05-01 aceptados/cerrados. B05-02 implementado, abierto hasta revisión independiente suministrada por propietario. No invocar agentes ni repetir auditorías/spikes sin necesidad.
-2. Esperar revisión B05-02, no iniciar B05-03/Fase04. Implementación/gates sólo mocks; no prueba real/inferencia/descargas o configuración del servicio sin autorización expresa adicional. Mantener main intacta, sin merge/publicación.
+1. Fases01/02, B05-01 y B05-02 aceptados/cerrados; B05-02 APPROVE_WITH_FOLLOWUPS sin P0–P2. No invocar agentes ni repetir auditorías/suites sin cambios que lo justifiquen. Fase03 abierta.
+2. Esperar instrucción expresa; no iniciar nodos/fases posteriores. Primera prueba real sólo conforme a autorización concreta/procedimiento phase-03.md, todavía no concedida; no inferencia/consultas reales/descargas/configuración del servicio por el cierre. Mantener main intacta, sin merge/publicación.
 3. Node24.19.0/pnpm12.15.0 estables ya comprobados; revalidar versión/ruta al continuar, nunca volver a depender de %TEMP% para runtime. No cambiar versiones/PATH/herramientas automáticamente; mantener WAL/FULL y SQL en worker.
-4. Preservar pending/uncertain y contratos. B05-02 sólo admite payload sintético fijo/grant propio destino/modelo/hash; datos de preview no otorgan permisos. No retries ante unknown, agentes/contexto privado/UI ni modificaciones a F-5 sin regresión demostrada.
+4. Preservar pending/uncertain y contratos. Sólo payload sintético/grant propio destino/modelo/hash; hash no incluye endpoint, grant reutilizable/sin caducidad. Preview no autoriza nada, una invocación se limita administrativamente. No retries ante unknown ni generalización a respuestas no sintéticas sin tratar claves duplicadas. Sin agentes/contexto privado/UI o modificaciones a F-5 sin regresión demostrada.
