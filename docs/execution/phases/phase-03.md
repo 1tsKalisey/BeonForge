@@ -36,7 +36,20 @@ Se conserva literalmente el gate del master-plan: **«Registry, probes y Ollama 
 
 Fuera de esta matriz: Fase04 introduce vertical bugfix sobre fixture (reproducir, rojo, cambio, gates/revisión/rollback); Fase05 introduce harness oficiales Codex/OpenCode, herramientas/permisos/aislamiento y contract tests. No son faltas de Fase03 ni se adelantan. Los P3 de duplicados JSON, endpoint fuera del hash, grants reutilizables, script real30s/SIGINT y R-061/R-065 siguen abiertos; no se convierten en bloqueantes sin ampliar escenario.
 
-## Siguiente mínimo identificado — B05-03 (propuesto, NO iniciado)
+## B05-03 — Registry mínimo y evaluación del candidato local
+
+Implementación autorizada expresamente por propietario; sin discrepancias con el gate Registry de master-plan. Sustituye la propuesta inferior, sin redefinir criterios globales ni autorizar cierre de fase.
+
+- Objetivo verificable: registrar/consultar candidatos Ollama explícitos y su evidencia limitada, conservados tras reinicio por referencia CAS.
+- Diseño mínimo: snapshots inmutables canónicos v1 en ArtifactStore existente; caller conserva referencia raíz actual, no catálogo mutable/tabla SQL/eventos de bloques ficticios. Permisos propios vivos de lectura/registro/evaluación con allowlist de identidades exactas. Registro/evaluación no autorizan metadata HTTP ni inferencia.
+- Archivos: packages/ollama/src/registry.ts y exports, tests/fixture de evidencia saneada/demostración de proceso, README; dependencias sólo workspace contracts/persistence ya presentes (tipos, referencias y pruebas reales de CAS). Documentos de ejecución/cobertura/riesgos/revisión.
+- Incluido: identidad proveedor/endpoint/modelo/digest declarado, alta/listado/evaluación, duplicación compatible idempotente/incompatible rechazada, evidencia parcial/contradictoria, recuperación/integridad/permisos. Límites de tamaño/cantidad; snapshot explícito no monitoriza modelos ni autentica al propietario del CAS.
+- Aceptación/tests: CAS temporal real con worker/reapertura y segundo proceso, esquemas y datos inválidos/duplicados, evidencia gemma declarada y capacidades derivadas sin puntuaciones, permisos/propiedades propias/revocación, referencias corruptas y separación de grants B05-01/02. Guard de red en tests: cero llamadas a Ollama/inferencias/descargas.
+- Gates: Node24.19.0/pnpm12.15.0 estables, frozen/peers/formato/lint/typecheck/build/595 anteriores+tests nuevos/diff/secretos. Sin deps externas nuevas ni cambios a contratos aceptados.
+- Exclusiones/rollback: no SDK/routing/scheduler/model downloads/UI/harness/nueva evaluación real. Revert acotado de B05-03 preservando blobs/raíces anteriores; no borrar/restaurar datos automáticamente. Snapshot nuevo no sustituye head concurrente implícitamente: caller gestiona referencias/ramas, sin transacciones distribuidas.
+- Salida: revisión independiente B05-03; actualizar matriz según evidencia, mantener Fase03 abierta hasta decisión expresa. No Fases04/05.
+
+### Propuesta anterior conservada como trazabilidad
 
 **Registro mínimo del candidato local y su evaluación.** No había un nodo posterior definido; B05-03 es propuesta de nomenclatura siguiente dentro del bloque B05/Fase03, no autorización de implementación. Completar el único requisito funcional pendiente de registry: registrar y recuperar un descriptor versionado de un candidato Ollama explícito (destino, modelo/identidad observada, clasificación permitida, capacidades realmente probadas y referencia a la evaluación sintética existente). Datos no conceden permisos de inferencia; distinguir observaciones en mocks/real y límites de identidad. Reutilizar módulo/persistencia existentes, sin servicio/catalogo genérico, routing ni nuevo subsistema. Aceptación mínima futura: registro/lectura verificables, descriptor inválido rechazado, procedencia/evaluación y permisos no implícitos probados con mocks; ninguna inferencia adicional necesaria para reutilizar esta evidencia. Detallar/aprobar ese alcance antes de implementarlo. No promover el dato documental de esta ejecución a registry funcional ni crear B05-03 en código ahora.
 

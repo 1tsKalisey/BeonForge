@@ -1,0 +1,47 @@
+{
+  "candidate": {
+    "schemaVersion": 1,
+    "candidateId": "gemma3-hf-1b",
+    "provider": "ollama",
+    "endpoint": "http://127.0.0.1:11434",
+    "model": "gemma3-hf:1b",
+    "modelDigest": "3e052a1cbbfbb06fafb524a72c5e316c2810b73c61bc4cf28569339df99f0694",
+    "classification": "synthetic-public-v1"
+  },
+  "evaluation": {
+    "schemaVersion": 1,
+    "subject": {
+      "schemaVersion": 1,
+      "candidateId": "gemma3-hf-1b",
+      "provider": "ollama",
+      "endpoint": "http://127.0.0.1:11434",
+      "model": "gemma3-hf:1b",
+      "modelDigest": "3e052a1cbbfbb06fafb524a72c5e316c2810b73c61bc4cf28569339df99f0694",
+      "classification": "synthetic-public-v1"
+    },
+    "provenance": {
+      "kind": "operator-declared",
+      "implementationCommit": "ebbd223",
+      "evidenceCommit": "8a20bf3",
+      "fixture": "B05-02-synthetic-public-v1"
+    },
+    "availability": {
+      "state": "available",
+      "versionStatus": 200,
+      "tagsStatus": 200
+    },
+    "inference": {
+      "payloadSha256": "4358bf83c545b0ab2dac053722f342c126280a727db1cfa21f3a06aeb6ef6758",
+      "outcome": "confirmed",
+      "answer": 4,
+      "exitCode": 0,
+      "stderrEmpty": true,
+      "elapsedMs": 74310,
+      "timeoutMs": 120000,
+      "httpStatus": 200,
+      "observedPostCount": 1,
+      "retries": 0,
+      "correlation": "server-log-window-only"
+    }
+  }
+}

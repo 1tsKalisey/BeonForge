@@ -14,5 +14,9 @@
     "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.test.json",
     "test": "vitest run",
     "cli": "node dist/cli.js"
+  },
+  "dependencies": {
+    "@beonforge/contracts": "workspace:*",
+    "@beonforge/persistence": "workspace:*"
   }
 }

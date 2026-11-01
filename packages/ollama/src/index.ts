@@ -1,4 +1,15 @@
 export {
+  registerLocalCandidate,
+  readLocalCandidates,
+  recordCandidateEvaluation,
+  RegistryError,
+  type RegistryErrorCode,
+  type LocalCandidateV1,
+  type LocalRegistryPolicy,
+  type CandidateEvaluationV1,
+  type LocalCandidateView,
+} from './registry.js';
+export {
   probeOllama,
   OllamaProbeError,
   type OllamaProbeErrorCode,

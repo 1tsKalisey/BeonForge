@@ -190,6 +190,15 @@ importers:
 
   packages/contracts: {}
 
+  packages/ollama:
+    dependencies:
+      '@beonforge/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@beonforge/persistence':
+        specifier: workspace:*
+        version: link:../persistence
+
   packages/persistence:
     dependencies:
       '@beonforge/contracts':

@@ -1,5 +1,56 @@
 # Ollama: authorized local metadata probe
 
+## Explicit local candidate registry (B05-03)
+
+The compiled exports `registerLocalCandidate(registryRef | null, candidate, policy,
+store)`, `readLocalCandidates(registryRef, policy, store)` and
+`recordCandidateEvaluation(registryRef, candidateId, evidence, policy, store)` use
+the existing `ArtifactStore`. They perform **no network requests**, inference,
+model downloads or installed-model discovery. The versioned fixture in
+`examples/gemma3-hf-1b-evaluation.json` records sanitized, operator-declared
+historical observations; loading it never rechecks the provider.
+Its concrete model digest is fixture data, not corroborated by the synthetic
+report or by this task; it must not be presented as verified active weights.
+
+A candidate explicitly identifies provider `ollama`, literal HTTP loopback endpoint
+with port, local model name, declared SHA-256 model digest and classification
+`synthetic-public-v1`. The digest is not a live pin or proof of installed weights.
+Registration is distinct from availability, evaluation and authorization to infer.
+No registry object grants B05-01/B05-02 permissions or authorizes programming,
+tools, private context or transmission.
+
+Policies require own data properties: `canRead: true`, plus `canRegister: true`
+or `canEvaluate: true` for the corresponding mutation, and `allowedCandidates`
+containing every exact candidate identity in the snapshot. Inherited flags,
+getters and proxies cannot authorize. Permissions are checked again after CAS
+operations; callers retain control of live revocation. A reference is not authority.
+The existing inference and probe grants remain separate and unchanged.
+
+Each mutation returns an immutable, canonical v1 CAS root (maximum 16 candidates,
+64 KiB). **The caller must retain the returned ArtifactReference** and private
+storage location to read it after restarting. `null` explicitly starts a new
+registry branch. There is no mutable head, global discovery, catalog or automatic
+merge: callers must serialize updates to their chosen root. Stale roots remain
+historical snapshots. Identical registration/evaluation returns the same reference;
+conflicting ID or endpoint/model identities fail. Partial evidence may only be
+completed without replacing prior observations/provenance.
+
+Reads verify SHA-256, length, schema, canonical bytes and internal consistency;
+these checks do not authenticate the operator or reproduce historical observations.
+The view labels observations `operator-declared-not-reproduced`, reports live model
+validation `not_performed` and distinguishes incomplete evidence from declared
+synthetic confirmation. The sample demonstrates only structured answer4 at
+74.31 seconds, not programming quality, a benchmark, current availability or
+exactly-once execution. Server-log-window correlation has no request ID or packet
+capture. No raw prompts, arbitrary responses, secrets or private logs are accepted
+by this narrow schema.
+
+A write interrupted after CAS publication may leave an orphan; no new root is
+returned after observed revocation or failed acknowledgement/readback. There is no
+automatic retry, deletion or distributed transaction. Existing private CAS/ACL and
+power-loss limitations apply. Recovery is demonstrated by `registry.test.ts` using
+real temporary SQLite/CAS storage and a separate process with network denied.
+
 Use the approved Node.js 24.19.0 runtime and the repository pnpm gates.
 
 `probeOllama({ endpoint, allowLocalProbe: true, timeoutMs?, signal? })` performs
