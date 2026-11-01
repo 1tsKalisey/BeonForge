@@ -1,6 +1,6 @@
 # Fase 03 — Primer proveedor local
 
-Estado: abierta. Fases 01 y 02 aceptadas/cerradas; D-036 ACCEPTED permanece vigente.
+Estado: abierta. B05-03 implementado en1520799, pendiente de revisión independiente y decisión de cierre global. Fases 01 y 02 aceptadas/cerradas; D-036 ACCEPTED permanece vigente.
 
 ## Primera demostración real autorizada — evidencia registrada
 
@@ -31,8 +31,8 @@ Se conserva literalmente el gate del master-plan: **«Registry, probes y Ollama 
 | Ollama candidato con salida estructurada (gate03) | gemma3-hf:1b real: respuesta validada answer4/confirmed/exit0; límites y log pasivo consignados arriba. | cumplido | Evaluación del fixture mínimo, no prueba de utilidad en programación ni de otros modelos. |
 | Evals (dependencia03), alcance mínimo aprobado | Caso sintético público versionado en prepareSyntheticInference, predicado answer4 y tests de fallo; un resultado real contrastable contra ese predicado. | cumplido | Una muestra no acredita rendimiento/calidad general; el plan no fija dataset múltiple/SLA que obligue a otro ensayo aquí. |
 | Cancelación/timeout y tratamiento incierto (gate03) | API/señal y deadline absoluto, abort/HTTP101/close/unknown sin retry, tests mock de B05-01/02 y auditorías aceptadas. Ejecución real terminó normal antes del plazo. | cumplido | Capacidad cliente cubierta por contrato/mocks; cancelación real/OS SIGINT/parada remota no acreditadas y siguen limitaciones/P3, no requisitos nuevos. |
-| Registry de proveedor/modelo (gate03) | Probe lista nombres de tags; metadata/resultado real ahora documentados. No registro funcional de candidatos en packages/ollama ni contratos de proveedor; Map de runtime/runner.ts:256 registra BlockHandler, no modelos/proveedores. | pendiente | **Sí: falta registro mínimo funcional de candidato y vínculo de evaluación**, no sustituible por tabla documental/inventario de Ollama. |
-| Salida global de Fase03 | Demo real y gates previos existentes; registry pendiente. | parcialmente cumplido | No preparada todavía para decisión de cierre; no cerrar automáticamente. |
+| Registry de proveedor/modelo (gate03) | B05-03/1520799: alta/listado/evaluación en CAS v1; 48 tests de permisos/integridad/duplicación/evidencia, reapertura y segundo proceso; fixture saneada gemma declara procedencia/answer4/74,31s, sin verificación activa de digest/proveedor. | cumplido localmente, pendiente revisión | Aceptación independiente de B05-03 pendiente. Registro no concede permisos operativos. |
+| Salida global de Fase03 | Criterios funcionales mínimos cubiertos localmente; demo real anterior y nueva suite643/643/gates, sin repetir inferencia. | parcialmente cumplido | Revisar B05-03 y decidir cierre explícito; no cierre automático ni nuevo desarrollo mínimo identificado dentro del gate. |
 
 Fuera de esta matriz: Fase04 introduce vertical bugfix sobre fixture (reproducir, rojo, cambio, gates/revisión/rollback); Fase05 introduce harness oficiales Codex/OpenCode, herramientas/permisos/aislamiento y contract tests. No son faltas de Fase03 ni se adelantan. Los P3 de duplicados JSON, endpoint fuera del hash, grants reutilizables, script real30s/SIGINT y R-061/R-065 siguen abiertos; no se convierten en bloqueantes sin ampliar escenario.
 
@@ -48,6 +48,22 @@ Implementación autorizada expresamente por propietario; sin discrepancias con e
 - Gates: Node24.19.0/pnpm12.15.0 estables, frozen/peers/formato/lint/typecheck/build/595 anteriores+tests nuevos/diff/secretos. Sin deps externas nuevas ni cambios a contratos aceptados.
 - Exclusiones/rollback: no SDK/routing/scheduler/model downloads/UI/harness/nueva evaluación real. Revert acotado de B05-03 preservando blobs/raíces anteriores; no borrar/restaurar datos automáticamente. Snapshot nuevo no sustituye head concurrente implícitamente: caller gestiona referencias/ramas, sin transacciones distribuidas.
 - Salida: revisión independiente B05-03; actualizar matriz según evidencia, mantener Fase03 abierta hasta decisión expresa. No Fases04/05.
+
+### Evidencias B05-03 — implementado, pendiente de revisión
+
+Código **1520799**, comparación `git diff 8a20bf3..1520799`. Interfaces públicas compiladas `registerLocalCandidate(ref|null, candidate, policy, store)`, `readLocalCandidates(ref, policy, store)`, `recordCandidateEvaluation(ref, candidateId, evidence, policy, store)`. Reutiliza ArtifactReference/ArtifactStore y worker, sin nuevos contratos de dominio/tablas ni dependencias externas: dos enlaces workspace, lockfile actualizado offline antes de frozen final. Alta explícita distinta de tags, disponibilidad, evaluación y permiso de inferencia; no ampliar B05-01/02.
+
+| Criterio | Evidencia concreta |
+|---|---|
+| Registro durable | registry.test.ts resuelve dist; alta/consulta/idempotencia/conflictos y orden canónico; CAS real temporal con SQLite/worker, cierre/reapertura, referencia raíz recuperada por proceso independiente. Caller retiene referencia: sin catálogo/head mutable. |
+| Frontera autorizada | Endpoint literal HTTP loopback/modelo local/digest/clasificación exactos; registros inválidos/campos extra/cloud/remotos rechazados sin puts. Permisos propios separados canRead/canRegister/canEvaluate y allowlist de todas las identidades; null/getter/Proxy/herencia/Object.prototype rechazados, errores estáticos. |
+| Revocación/no inferencia | Revocación durante reads/puts detectada; denegación inicial cero puts, posible huérfano tras put sin devolver raíz. Registro/vista/evidencia/policy no sirven como grants probe/inferencia: códigos exactos y cero despacho. Spy HTTP y guard en padre/hijo sin consultas reales/inferencia/descargas. |
+| Evaluación limitada | Fixture examples/gemma3-hf-1b-evaluation.json: operator-declared, implementación ebbd223/evidencia8a20bf3, answer4/confirmed/exit0/74,31s, timeout120s, ventana HTTP limitada. Datos parciales quedan incomplete; contradicciones y reemplazos incompatibles rechazados. Sólo integridad/esquema/consistencia se verifican automáticamente; no scores, capacidades de programación/herramientas/contexto privado. Digest concreto es dato de fixture no corroborado, nunca pesos activos acreditados. |
+| CAS/recuperación | SHA-256/longitud/canonicalización/esquema y límites16/64KiB; corrupción, datos ausentes, JSON no canónico/campos extras/versión inválida y sustitución consistente no autorizada rechazados. Históricos permanecen legibles; no retry/GC/merge automático. |
+
+**643/643 tests locales** = contratos62 + persistencia115 + runtime71 + workspace187 + Ollama201 (153 previos+48 registry) + spike7; conserva595 anteriores, cero fallos/skips. Node24.19.0 estable fuera TEMP/pnpm12.15.0; frozen/peers/check nativos0, formato/lint con tipos/typecheck/build/tests/diff/escaneo heurístico verdes. Check676,02s, workspace623,64s, Ollama2,67s; no benchmark nuevo. Primer frozen al agregar enlaces falló por importer ausente, lockfile-only offline actualizó sólo9 líneas y frozen final pasó; errores de autoría de casts/require-await corregidos antes del gate. R-061 no reproducida/sin causa/no resuelta; logs completos conservados.
+
+Logs stdout/stderr, exits/entorno/hashes: `%TEMP%/beonforge-b0503-d55cc5e5073f40118c4d25beaf382902/`. Demo automatizada: candidato explícito → evaluación saneada → CAS temporal real → cierre → segundo proceso con red denegada → misma vista/74310ms y referencias verificadas. No siembra de registry de producción ni validación actual de pesos/servicio. Árbol original/main preservados, sin proveedores reales ni Fases04/05. Siguiente acción exclusiva: revisión independiente B05-03 suministrada por propietario, paquete preparado; Fase03 sigue abierta. R-066/D-041 y todos los riesgos/P3 anteriores conservados.
 
 ### Propuesta anterior conservada como trazabilidad
 

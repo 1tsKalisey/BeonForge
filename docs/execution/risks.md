@@ -1,12 +1,20 @@
 # Registro de riesgos
 
+## B05-03 — R-066: registro explícito, no autoridad operativa
+
+Registro/evaluación v1 conservan datos declarados, no conceden autorización HTTP o de inferencia. Propiedades propias de lectura/registro/evaluación y allowlist exacta se revalidan alrededor de CAS; leer una referencia no permite usar un modelo ni el checkout. Esquema/SHA-256/canonicalización/consistencia verificables no autentican al dueño del CAS ni reproducen observaciones del operador.
+
+Digest del candidato declarado, no pin del alias/pesos activos ni prueba de instalación actual. El digest concreto del ejemplo es dato de fixture, no corroborado por el reporte sintético ni comprobado contra Ollama en este nodo. Evidencia histórica answer4/74,31s y ventana de log sin request ID/captura no equivalen a benchmark, capacidad de programación, garantía de conteo global o habilitación de contexto privado/herramientas.
+
+Caller conserva referencia raíz y ubicación privada del store: snapshots históricos no tienen head mutable/global ni detección de actualizaciones concurrentes. Dos escrituras desde raíz antigua producen ramas; serializar explícitamente, sin auto-merge/retry. Límite16 candidatos/64KiB; completar evidencia parcial sin reemplazar hechos anteriores. Corte o revocación después de put puede dejar huérfano, sin raíz retornada, limpieza ni transacción distribuida. ACL/CAS/Windows/power-loss anteriores siguen vigentes. Riesgo residual documentado para revisión, no marcado resuelto. R-065/R-061 y cuatro P3/RST/SIGINT/errores inesperados conservados; ninguna nueva inferencia autorizada.
+
 ## Primera demo real — observación y límites, sin nuevos experimentos
 
 Registro documental de la única ejecución expresamente autorizada ya completada: gemma3-hf:1b, endpoint local aprobado, hash payload `4358bf83c545b0ab2dac053722f342c126280a727db1cfa21f3a06aeb6ef6758`, answer4/confirmed/exit0, stderr vacío; 74,31s frente120s. **Medición inicial de un solo caso**, total del proceso y sin aislar carga/generación, no SLA ni causa automática de bloqueo. No impone benchmark/performance tuning o cambio de modelo. Autorización usada para ese intento, no permiso para repetir aunque grants sean reutilizables.
 
 Conteo respaldado por ventana añadida del log servidor: dos GET y un POST200, no exit0 por sí solo. Sin request ID correlacionado ni packet capture; puede haber otros clientes no auditados y no se prueba at-most-once global/ausencia exhaustiva de efectos del SO. No ampliar garantías ni copiar logs sensibles. La muestra no prueba determinismo general, robustez de respuestas no sintéticas o detención remota al cancelar; cancelación/unknown cliente sigue cubierta por mocks, sin reabrir P3/SIGINT como bloqueante aquí.
 
-R-065/R-063 siguen vigentes en el uso real: servidor/modelo/alias local confiable según preparación del operador, no autenticación/pin atómico; hash excluye endpoint y grant no expira/se consume. R-061 sin causa/no resuelta, cuatro P3/RST/errores inesperados/SIGINT conservados. El cierre global03 se bloquea por registry funcional pendiente, no por74,31s, P3 aceptados o falta de bugfix/harness04/05. Este turno no contacta Ollama ni ejecuta inferencias/descargas/código.
+R-065/R-063 siguen vigentes en el uso real: servidor/modelo/alias local confiable según preparación del operador, no autenticación/pin atómico; hash excluye endpoint y grant no expira/se consume. R-061 sin causa/no resuelta, cuatro P3/RST/errores inesperados/SIGINT conservados. El registry funcional pendiente en este registro histórico se implementa en B05-03/1520799; falta aceptación independiente y decisión de cierre global, no74,31s, P3 aceptados o bugfix/harness04/05. No se ha contactado Ollama ni ejecutado nuevas inferencias/descargas en B05-03.
 
 ## B05-02 — R-065: residual vigente tras APPROVE_WITH_FOLLOWUPS
 
@@ -23,7 +31,7 @@ R-063 permanece: loopback no autentica al proceso ni prueba que un alias sea un 
 
 requestDispatched significa entregado al transporte/posibilidad de envío; no prueba recepción/computación. Tras POST, timeout/cancel/RST/HTTPerror sin done/model válidos dejan outcome unknown, sin retries/fallback. done/model coincidentes confirman finalización observada, incluso si JSON interior inválido o permiso revocado impiden devolver respuesta. Cancelar socket no acredita que servidor detuvo cómputo. Estado sólo en memoria, sin EventStore/intent durable/reanudación ni exactamente-una-vez; no introducirlos fuera del plan. Token cap depende del servicio; bytes/tiempo acotados por cliente. No se garantiza determinismo del modelo, sólo evaluación del resultado sintético.
 
-Node24.19.0/pnpm12.15.0 estables comprobados en implementación; no entorno cambiado en este registro. R-061 sin causa/no resuelta, RST/errores inesperados/SIGINT real Windows siguen pendientes. CLI validada contra mocks no acredita SIGINT del SO; ejecución real normal tampoco. R-064/B05-01 y privacidad/CAS/workspace/D-036 intactos. Candidato real evaluado sólo en fixture arriba; Fase03 abierta por registry pendiente. Autorización anterior utilizada no concede consultas/configuración/descargas u otra inferencia; esperar nueva instrucción exacta.
+Node24.19.0/pnpm12.15.0 estables comprobados en implementación; no entorno cambiado en este registro. R-061 sin causa/no resuelta, RST/errores inesperados/SIGINT real Windows siguen pendientes. CLI validada contra mocks no acredita SIGINT del SO; ejecución real normal tampoco. R-064/B05-01 y privacidad/CAS/workspace/D-036 intactos. Candidato real evaluado sólo en fixture arriba; Fase03 abierta; el registry antes pendiente se implementa en1520799 y espera aceptación independiente/decisión global. Autorización anterior utilizada no concede consultas/configuración/descargas u otra inferencia; esperar nueva instrucción exacta.
 
 ## B05-01 — R-064 / P1 HTTP101 y seguimientos de auditoría
 

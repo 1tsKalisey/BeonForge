@@ -2,6 +2,18 @@
 
 Actualizado: 2026-11-01. Leer este archivo antes de cualquier tarea.
 
+## Posición vigente — B05-03 implementado, abierto para revisión
+
+Código **1520799**: registry mínimo de candidatos Ollama explícitos, snapshots canónicos v1 en ArtifactStore y evaluación sintética declarada. APIs `registerLocalCandidate`, `readLocalCandidates`, `recordCandidateEvaluation`; caller conserva referencia raíz/ubicación privada para recuperar tras reinicio. Sin catálogo mutable, red, descargas, inferencias nuevas ni cambios a contratos/kernel/HTTP aceptados. Fixture gemma3-hf:1b conserva answer4/74,31s/procedencia histórica; digest del ejemplo es dato de fixture no corroborado, no pin activo. Comprobaciones automáticas sólo de integridad, esquema y consistencia, no reproducción del proveedor/autenticidad del operador.
+
+**643/643 tests verdes** = 595 anteriores +48 registry: contratos62, persistencia115, runtime71, workspace187, Ollama201 (77 probe+76 inferencia+48 registry), spike7. Export compilado y CAS real temporal/reapertura/segundo proceso verificados; duplicación, evidencia incompleta/contradictoria, permisos propios/allowlist/revocación y grants operativos separados. Node24.19.0 estable `C:\Program Files\nodejs\node.exe`, pnpm12.15.0 estable; frozen/peers/check exit nativo0. Formato/lint/typecheck/build/tests/diff/escaneo heurístico de secretos verdes; check676,02s, workspace623,64s, Ollama2,67s. Fallos de autoría iniciales (casts/require-await y lockfile importer al añadir enlaces workspace) corregidos; ninguna intermitencia R-061 reproducida, sigue sin causa/no resuelta.
+
+Logs completos stdout/stderr, exits, entorno y hashes: `%TEMP%/beonforge-b0503-d55cc5e5073f40118c4d25beaf382902/`. Sin llamadas a Ollama real: guard pre-DNS/11434 vetado en pruebas y lector hijo, operaciones registry sin transporte. Demo: alta explícita → evidencia saneada → raíz CAS → cierre → segundo proceso → misma vista verificada sin autoridad de inferencia.
+
+**B05-03 ABIERTO**, pendiente revisión independiente suministrada por propietario; paquete actual preparado. Fase03 **ABIERTA**, criterio registry implementado/verificado localmente, pendiente aceptación y decisión de cierre global. No se redefine el gate ni se exige benchmark/cancelación real/P3 como requisitos nuevos. R-066/D-041 registran límites de snapshots/declaraciones; R-065/R-061 y P3 anteriores conservados. Próxima acción exclusiva: revisión B05-03, sin iniciar otro nodo/Fases04–05 o ejecutar otra inferencia. Main e14cfdd intacta, sin merge/publicación. Vault complementario sigue ausente.
+
+## Histórico — registro de primera inferencia real anterior a B05-03
+
 ## Posición
 
 **Primera inferencia real autorizada registrada; confirmed, answer4, exit0.** POST http://127.0.0.1:11434/api/generate, modelo gemma3-hf:1b, payload SHA-256 `4358bf83c545b0ab2dac053722f342c126280a727db1cfa21f3a06aeb6ef6758`; 183 bytes públicos sin salto final. Duración total observada **74,31s /120s aprobados**, stderr vacío, sin timeout/unknown. Una invocación y cero reintentos; dos GET preflight y un POST200 observados en ventana de log del servidor, no deducidos de exit0. No request ID correlacionado/captura de paquetes: no afirmar garantía global de conteo/exactly-once o auditoría del SO. Árbol limpio al terminar el intento. Autorización usada administrativamente, no reutilizable para otra ejecución por este registro.

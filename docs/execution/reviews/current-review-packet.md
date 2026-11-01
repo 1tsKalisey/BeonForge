@@ -1,3 +1,41 @@
+# B05-03 — Registry mínimo y evaluación del candidato local
+
+**Implementado, ABIERTO para revisión independiente** suministrada por propietario. Código **1520799**, comparar `git diff 8a20bf3..1520799`; docs/evidencias en commit posterior. Fase03 ABIERTA, no cerrar automáticamente ni iniciar Fases04/05. B05-01/02 y Fases01/02 aceptados/cerrados; sin reabrir sus implementaciones. No invocar Claude/otros agentes.
+
+## Alcance e interfaces
+
+`registerLocalCandidate(ref|null, candidate, policy, store)`, `readLocalCandidates(ref, policy, store)`, `recordCandidateEvaluation(ref, candidateId, evidence, policy, store)`. Snapshot CAS inmutable v1, máximo16 entradas/64KiB, raíz explícita conservada por caller; sin catálogo mutable/discovery, tablas nuevas ni eventos ficticios. Reutiliza ArtifactReference y ArtifactStore/worker existentes; package.json/lockfile sólo enlaces workspace contracts/persistence. Proveedor ollama, destino literal loopback canónico/modelo local/digest declarado y clasificación synthetic-public-v1.
+
+Permisos canRead/canRegister/canEvaluate propios/descriptores sin getters/proxies/herencia; allowlist exacta de todas las identidades. Revalidaciones vivas alrededor de CAS, sin autoridad derivada de referencia/registro/vista/evaluación. Duplicados compatibles idempotentes, incompatibles rechazados; evidencia parcial sólo se completa preservando hechos/procedencia anteriores. Snapshots ordenados/canónicos, SHA-256/tamaño/esquema/consistencia comprobados en write/read, readback antes de devolver raíz. Errores tipados estáticos sin causas privadas.
+
+## Evaluación: declarado frente a verificado
+
+Fixture `examples/gemma3-hf-1b-evaluation.json` reúne modelo/tag y observaciones históricas aportadas: caso público B05-02, commits ebbd223/8a20bf3, answer4/confirmed/exit0, stderr vacío,74310ms/120000ms, un POST observado en ventana de log sin request ID/packet capture y cero retries. **Digest concreto del ejemplo es dato de fixture no corroborado**, no prueba de pesos activos ni pin del alias. No se siembra registry de producción ni se comprueba servicio/modelo en esta tarea.
+
+View distingue registered/not_observed/declared_available o unavailable, not_evaluated/incomplete/declared_synthetic_confirmed. `automaticChecks` sólo cas-sha256/schema-v1/internal-consistency, `observationTrust: operator-declared-not-reproduced`, `liveModelValidation: not_performed`, `inferenceAuthorization: separate-grant-required`, programación no evaluada y herramientas/contexto privado no autorizados. No scores ni benchmark; schema coherente no autentica datos/operador.
+
+## Pruebas y gates verificados localmente
+
+- **643/643** = contratos62 + persistencia115 + runtime71 + workspace187 + Ollama201 (77 probe+76 inference+48 registry) + spike7. Preserva595 anteriores, sin fallos/skips. No atribuir su ejecución a una auditoría independiente aún no recibida.
+- Node24.19.0 estable en Program Files, pnpm12.15.0 estable. Frozen/peers/check exit nativo0; formato/lint/typecheck/build/tests/diff/escaneo heurístico de secretos verdes. Check676,02s; workspace623,64s; Ollama2,67s. Logs completos stdout/stderr/exits/entorno y hashes en `%TEMP%/beonforge-b0503-d55cc5e5073f40118c4d25beaf382902/`.
+- Primer frozen tras enlaces workspace detectó importer ausente; actualización lockfile-only offline de9 líneas, frozen final verde. Casts y require-await iniciales de tests corregidos antes del gate. No fallo intermitente reproducido; R-061 sigue sin causa/no resuelto.
+- `registry.test.ts` importa exports dist. CAS SQLite/worker temporal real, reapertura y lector segundo proceso; misma vista/evidencia. MemoryCas sólo para inyección de fallos/revocación. No afirmación de durabilidad basada únicamente en mocks.
+- Invalid/duplicate/model/destino, evidence válida/parcial/contradictoria, monotonicidad, own/inherited/null/Proxy/getters/Object.prototype, read-only, revocación antes/después de CAS, errores/canonicalización/corrupción/ausentes/límites y separación de grants. Denegación inicial cero puts; posible orphan tras put no devuelve raíz, sin retries.
+- Cero llamadas del registry a proveedor: spy HTTP + guard pre-DNS y11434 vetado en runner/lector hijo. Ninguna inferencia/consulta real/descarga, herramientas ni datos privados. Demo alta→evidencia saneada→CAS real→cierre→otro proceso→misma vista verificada.
+
+## Revisión focalizada solicitada
+
+1. Canonicalización v1, conflictos de identidad (id y endpoint/model), referencias y recuperación por raíz explícita.
+2. Permisos propios/allowlist y revocación en todos los caminos, incluidos retornos idempotentes; registry nunca equivale a grant B05-01/02.
+3. Integridad/esquema/consistencia frente a autenticidad/observaciones declaradas; evaluación incompleta/contradictoria no inventa capacidades.
+4. Conservación de B05-01/02 y aislamiento de pruebas sin contacto con Ollama real.
+
+R-066 residual: caller retiene raíz/ubicación y serializa actualizaciones; ramas desde raíz antigua sin head/global lock/merge automático. Interrupción/revocación post-put puede dejar huérfano. CAS no autentica propietario, ACL privadas/power-loss/Windows previos conservados. R-065/R-061 y cuatro P3/RST/SIGINT/errores inesperados siguen abiertos. No programming eval/ContextPackage/exportación/agentes/routing/harness; no se convierten en faltas artificiales de este nodo. Siguiente acción: revisión B05-03 y luego decisión explícita sobre cierre03, sin implementar nodo posterior.
+
+---
+
+# Histórico — paquete B05-02 y revisiones anteriores
+
 # B05-02 — CERRADO: APPROVE_WITH_FOLLOWUPS independiente
 
 Revisión aportada por propietario: **APPROVE_WITH_FOLLOWUPS, sin P0/P1/P2**, código ebbd223/evidencias593cf8f. **153/153 focalizados y20 reproducciones independientes**, correspondencia permiso propio/destino/modelo/SHA-256/POST efectivo verificada. Demo íntegra mock, sin contactar Ollama real ni inferencias. **595/595 completos/gates locales** con Node24.19.0/pnpm12.15.0 contrastados por evidencias/logs; **no se atribuye a Claude la ejecución completa de los595**.
