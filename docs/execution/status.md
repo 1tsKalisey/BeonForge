@@ -4,6 +4,8 @@ Actualizado: 2026-11-01. Leer este archivo antes de cualquier tarea.
 
 ## Posición vigente — Fase03 CERRADA / ACEPTADA; Fase04 preparada
 
+**D-043 obligatoria desde ahora:** Fase04/05 y demos posteriores exclusivamente sobre un repositorio Git nuevo/local/descartable con código, datos y bugs sintéticos creados para BeonForge. No usar/copiar/clonar/inspeccionar otros proyectos, descubrir repositorios, usar credenciales reales/producción/servicios externos/remotos ni evaluar agentes contra el propio BeonForge. Plan de estructura/aislamiento en phase-04.md; **repo aún no creado**, Fase04 NO INICIADA. Worktree no es sandbox; uso real exige nueva decisión expresa, evaluación de seguridad y autorización específica, sin transición automática tras éxito sintético. Regla persistida en AGENTS.md; no amplía permisos de ejecución o proveedor.
+
 **B05-03 CERRADO — APPROVE_WITH_FOLLOWUPS** independiente, sin P0/P1/P2, código1520799/evidenciasbae2ecd. Propietario aprueba expresamente cierre global03 y aceptación de riesgos residuales del MVP, no su resolución (D-042). Auditoría48/48 registry,201/201 Ollama y36 reproducciones independientes sin HTTP;643 globales previos acreditados por logs,18 hashes contrastados sin discrepancias. **No se atribuye a Claude ejecución completa de643 tests**.
 
 **Fase03 CERRADA / ACEPTADA (CLOSED / ACCEPTED)**: matriz de phase-03.md satisfecha sin cambiar el gate. Fases01–02 y B05-01/02 siguen cerrados. Se conserva única inferencia real previa gemma3-hf:1b/answer4/confirmed/exit0,74,31s/120s,2GET+1POST200 observados, sin retries ni correlación request ID/packet capture; medición inicial, no benchmark. Este cierre no consulta Ollama, infiere, descarga ni integra agentes.

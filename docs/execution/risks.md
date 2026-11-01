@@ -1,5 +1,9 @@
 # Registro de riesgos
 
+## D-043 — Límite obligatorio de entornos sintéticos
+
+Fases04/05 y demos posteriores sólo pueden utilizar un nuevo repo local/descartable dedicado, sin código/datos/bugs tomados de otros proyectos, credenciales reales, bases de producción, servicios externos o remotos. No auto-descubrimiento ni uso de BeonForge como objetivo de un agente. Esta restricción reduce exposición, **no resuelve sandbox, ACL, concurrencia o egress**: worktree no confina procesos. Si una ejecución requiere confinamiento no demostrable, detenerla; no cambiar a otro proyecto o ampliar permisos. Los planes de harness de05 no autorizan sus credenciales/conexiones reales, aunque el repo sea sintético; su eventual habilitación requiere una decisión explícita compatible con D-043. Entornos reales requieren decisión del propietario, evaluación de seguridad y autorización específica de proyecto/operaciones. Ningún éxito sintético elimina esta dependencia. Estado actual: sólo plan; no entorno creado ni ejecución autorizada por este documento.
+
 ## Aceptación de residuales de Fase03 — D-042
 
 Propietario acepta expresamente estos límites como seguimientos del MVP al aprobar B05-03 y cierre03; **no son defectos resueltos ni nuevas autorizaciones**. APPROVE_WITH_FOLLOWUPS sin P0–P2,48/48 registry,201/201 Ollama y36 reproducciones independientes sin HTTP;643 globales por logs, no ejecución completa atribuida a Claude. Se conserva evidencia y clasificación previa; este cierre no cambia código ni corrige los seguimientos.

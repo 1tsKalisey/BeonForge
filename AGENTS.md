@@ -9,6 +9,15 @@ These instructions apply to the repository. The user's current request takes pre
 - Work on one bounded task at a time. Record objective, files, exclusions, acceptance, gates, rollback and next node. Update status, coverage, decisions and risks after acceptance.
 - Codex is the only writer in initial phases. Do not invoke Claude Code or other agents. The user supplies independent reviews.
 
+## Synthetic-only test environments (owner mandate, D-043)
+
+- Phase04, Phase05 and subsequent demonstrations must target only a new, local, disposable Git repository dedicated to BeonForge, containing synthetic code/data/bugs authored for testing. Never use, copy, clone, inspect, modify or run tests against other existing personal/professional projects. Never discover repositories automatically.
+- BeonForge source may be maintained only for the approved product task and its quality gates; it must never be the target project of an agent under evaluation. Fixture templates are authored synthetic files, not copies of another project.
+- Keep target repositories, worktrees, commands and derived artifacts inside explicitly authorized test locations. Verify canonical paths, physical identities and Git metadata/common directories; reject symlinks/junctions, escapes and executable/external Git configuration. Do not expand grants automatically.
+- Do not use real credentials, production databases, external services or remote repositories in demonstrations. Synthetic success does not authorize any transition to real environments, provider calls or credential use.
+- Worktrees are not process sandboxes. Apply the execution restrictions required by the approved node, document confinement limits, and stop when required confinement cannot be demonstrated. Do not run untrusted code on the assumption that a worktree confines it.
+- Real-environment use requires a later express owner decision, security assessment and project/operation-specific authorization. Until then, keep this restriction active across phases; integration plans alone grant no exception.
+
 ## Architecture
 
 - Keep the control plane a modular monolith in strict TypeScript. Domain contracts must not import provider SDKs. Use versioned schemas at boundaries, explicit effects, evidence and recoverable state.

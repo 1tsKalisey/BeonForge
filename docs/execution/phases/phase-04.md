@@ -6,6 +6,35 @@ Estado: **PREPARADA / NO INICIADA**. Sólo planificación documental autorizada;
 
 **M04.1 — Vertical bugfix determinista sobre fixture autorizado.** El plan no asignaba un identificador de tarea a04; se reutiliza el patrón de milestone M01.1/M01.2/M01.3 como nodo mínimo, sin inventar un bloque de producto ni reasignar B04 (harness, Fase05). Preparado para implementación posterior expresamente solicitada, no iniciado por este documento.
 
+### D-043 — Repositorio sintético necesario, todavía no creado
+
+**Sí es necesario crear un nuevo repositorio de pruebas** para demostrar Git/worktrees y un cambio real sin usar proyectos existentes. Se creará sólo cuando se autorice implementar/ejecutar M04.1. Los archivos bajo examples serán plantillas sintéticas propias; no se clona, copia, inspecciona o reutiliza ningún otro proyecto y no se convierte BeonForge en objetivo del agente. Los gates del producto siguen siendo mantenimiento de BeonForge, separados de la evaluación del proyecto objetivo.
+
+Estructura mínima prevista, toda dentro de una raíz privada de pruebas explícitamente autorizada (marcador documental, no ruta creada ni autorización automática de todo TEMP):
+
+```text
+<AUTHORIZED_TEST_ROOT>/<run-id>/
+  project/                 # git init local nuevo, sin remotos
+    .git/                  # metadata común autorizada separadamente
+    .gitignore
+    package.json           # fixture mínimo, sin dependencias ni scripts arbitrarios
+    src/add.ts             # suma con bug sintético conocido
+    test/add.test.mjs       # regresión sintética conocida
+  worktrees/fix/           # nuevo, nunca un checkout existente
+  storage/                 # SQLite y CAS privados, fuera del worktree
+  evidence/                # reportes/diff saneados
+  process/                 # HOME/TEMP de procesos de prueba cuando corresponda
+```
+
+Criterios de aislamiento para la futura demo:
+
+- Autorizar y registrar rutas canónicas exactas/identidades de raíz, project, .git/common-dir, destino, storage/evidence y ubicaciones auxiliares. Comprobar parentesco físico antes de crear/escribir/ejecutar, revalidar en cada operación sensible; rechazar symlinks, junctions, aliases Windows ambiguos, sustituciones y escapes por rutas/configuración Git. Fallar cerrado sin tocar ubicaciones ajenas.
+- Sólo git init local y commits del fixture sintético; sin clone/fetch/push, remotos, submódulos, hooks, includes/filtros ejecutables, gestores de paquetes o descubrimiento de proyectos. Sin acceso a otros checkouts ni código/datos copiados. Mantener separado el repo original del fixture de su worktree de ejecución.
+- Procesos fijos confiables, argv sin shell, entorno mínimo sin credenciales ni variables de inyección, cwd/HOME/TEMP autorizados, límites de tiempo/salida y ausencia de peticiones de red/servicios externos. Ninguna base real, token, cuenta de proveedor o repositorio remoto. Cualquier excepción posterior exige decisión expresa, no se deriva de un plan de integración.
+- La raíz y el entorno de proceso **no son un sandbox del SO**: Node puede acceder a recursos del usuario si se ejecuta código arbitrario. Por eso04 se limita al fixture y handler propios conocidos; no ejecutar agentes/código no confiable si no se puede demostrar el confinamiento requerido. Documentar el límite como dependencia, nunca garantizar aislamiento por worktree/cwd/HOME.
+- Tests de aceptación futuros: sentinelas sintéticos fuera de cada subraíz concedida, denegaciones de escapes/enlaces/identidad/configuración, cero acceso/efecto fuera de la raíz permitida y cero solicitudes externas para las operaciones ensayadas. No usar otro proyecto para demostrar esas denegaciones. Estas pruebas observan casos concretos; no prueban sandbox universal.
+- Éxito no habilita proyectos reales automáticamente. Antes de cualquier entorno real: nueva decisión expresa del propietario, evaluación de seguridad y autorización concreta de proyecto/operaciones. D-043 se mantiene en05 y demos posteriores; no crear una plataforma de gestión de entornos.
+
 ### Objetivo y demostración
 
 Una tarea pública concreta corrige una suma defectuosa en un fixture TypeScript mínimo. Flujo observable: tarea → proyecto Git temporal registrado → worktree detached confirmado → selección tracked explícita/ContextPackage e instrucciones/ContextEnvelope → test rojo inequívoco → cambio determinista autorizado → test verde → diff/evidencias CAS → revisión humana → rollback inverso autorizado y verificado en el fixture.
