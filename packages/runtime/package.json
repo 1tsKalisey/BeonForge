@@ -17,10 +17,14 @@
     "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.test.json",
     "test": "vitest run",
     "cli": "node dist/cli.js",
-    "demo": "vitest run test/recovery.test.ts --silent=false"
+    "demo": "vitest run test/recovery.test.ts --silent=false",
+    "demo:bugfix": "node examples/bugfix/cli.mjs"
   },
   "dependencies": {
     "@beonforge/contracts": "workspace:*",
     "@beonforge/persistence": "workspace:*"
+  },
+  "devDependencies": {
+    "@beonforge/workspace": "workspace:*"
   }
 }

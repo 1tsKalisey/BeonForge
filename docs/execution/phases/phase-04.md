@@ -2,6 +2,8 @@
 
 Estado: **PREPARADA / NO INICIADA**. Sólo planificación documental autorizada; ninguna ejecución de esta vertical. Dependencia Fases01–03 satisfecha por cierres aceptados, incluido D-042/643 tests y gates finales de03. Fuente normativa: master-plan, fila04, **«Workflow sobre fixture: reproducir, test rojo, cambio, gates, revisión y rollback»**. No se altera ese criterio ni se adelanta la fila05.
 
+Actualización operativa: propietario autoriza implementar exclusivamente M04.1. Archivos: examples/bugfix y tests/README/package scripts/tsconfig.test de runtime, enlace workspace de desarrollo y documentos de ejecución. Ningún cambio al kernel/contratos aceptados. Demo TypeScript ejecutada con Node24 aprobado y typechecked junto a tests; CLI fija sin módulos/comandos arbitrarios. Preparación sobre padre privado vacío explícito; revisión pendiente por defecto, approve/discard sólo con decisión y grants propios ligados a raíz/hash de evidencia. Gates completos/643 anteriores y nuevas integraciones; rollback acotado de commits de demo conservando evidencias, sin borrar datos reales. No05 ni cierre automático04; siguiente gate revisión independiente. El texto de preparación inferior es el plan aprobado, no evidencia de ejecución.
+
 ## Primer y único nodo propuesto — M04.1
 
 **M04.1 — Vertical bugfix determinista sobre fixture autorizado.** El plan no asignaba un identificador de tarea a04; se reutiliza el patrón de milestone M01.1/M01.2/M01.3 como nodo mínimo, sin inventar un bloque de producto ni reasignar B04 (harness, Fase05). Preparado para implementación posterior expresamente solicitada, no iniciado por este documento.

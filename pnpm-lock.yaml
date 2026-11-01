@@ -213,6 +213,10 @@ importers:
       '@beonforge/persistence':
         specifier: workspace:*
         version: link:../persistence
+    devDependencies:
+      '@beonforge/workspace':
+        specifier: workspace:*
+        version: link:../workspace
 
   packages/workspace:
     dependencies:
