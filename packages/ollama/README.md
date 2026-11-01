@@ -6,7 +6,7 @@ Use the approved Node.js 24.19.0 runtime and the repository pnpm gates.
 only two sequential, bodyless GETs: `/api/version` and `/api/tags`. The permission
 must be an explicit own data property and is checked before each request and
 before returning. No endpoint discovery, retries, inference, model lifecycle,
-filesystem, CAS, credentials or context integration exists in this module.
+filesystem, CAS, credentials or context integration exists in this probe.
 
 Official contracts: [list models](https://docs.ollama.com/api/tags) and
 [version](https://github.com/ollama/ollama/blob/main/docs/api.md#version).
@@ -83,7 +83,72 @@ node test/real-probe.mjs --authorize-real-probe http://127.0.0.1:11434
 It is deliberately outside the automatic suite, requires that explicit switch
 and endpoint, and performs metadata GETs only. Not executed for B05-01.
 
-Phase 03 remains open. Before any model consumption: authorize/classify payload
-and destination, define policy/evals/limits and cancellation. D-036 does not
-implement transforming redaction or authorize export; prior workspace/CAS privacy
-and authenticity limits remain. B05-02 and agents are not implemented here.
+## B05-02: one authorized synthetic inference
+
+Use stable Node 24.19.0 and pnpm 12.15.0 installations, outside `%TEMP%`.
+`prepareSyntheticInference({endpoint, model})` is pure and returns an immutable
+v1 preview: fixed public prompt for `2+2`, canonical payload string, SHA-256 of
+its actual UTF-8 bytes, classification `synthetic-public-v1` and byte limits.
+It rejects arbitrary prompt/context fields, nonlocal origins, ambiguous/cloud
+model identifiers and manipulated previews, even if their hashes are recomputed.
+Preview/hash are data and do not authorize network access or inference.
+
+`runSyntheticInference(preview, grant, {timeoutMs?, signal?})` requires live own
+data properties `canInfer:true`, `allowLocalProbe:true`, `endpoint`, `model` and
+`payloadSha256` matching the preview. Missing/false/inherited/mismatched grants
+deny initial traffic. Accessors/Proxy/malformed policies fail typed without
+invoking getters. Permissions stay separate: metadata access never implies
+inference permission. Grants are revalidated before POST and before returning.
+Revocation during dispatch can prevent reporting, not undo computation.
+
+The existing protected probe checks the exact installed name. No selection,
+fallback or download is performed. One POST `/api/generate` sends **only** the
+authorized bytes: fixed prompt, `stream:false`, `format:"json"`, temperature 0,
+num_predict 64, num_ctx 1024. Limits are 1 KiB prompt, 4 KiB request body, 8 KiB
+headers, 64 KiB response body, 4 KiB generated text; a global deadline includes
+preflight and generation (default 30000 ms, range 1–120000). Same private native
+agent, no proxies/DNS/redirects, strict HTTP/UTF-8 and HTTP101/close/abort handling.
+The token setting is not a substitute for client limits. No retries occur.
+
+Response requires `done:true`, exact model and a parsed inner JSON object with
+only numeric `answer:4`. Extra outer Ollama metadata/thinking are bounded but
+discarded. Success returns only typed metadata, hash, classification and answer;
+no raw response/thinking is logged, persisted or returned. Invalid output stays
+an error, never an instruction or authority. No CAS or filesystem is used.
+
+`SyntheticInferenceError` has a static code (inference validation/authorization,
+model_not_installed, invalid output, timeout/cancel or the existing probe transport
+code), `requestDispatched` and `outcome`. Handed-to-transport means **possibly**
+dispatched, not receipt by the server. Before POST: not_dispatched; sent without
+a matching done response: unknown; matching done response: confirmed even if
+output is invalid or permissions were subsequently revoked. These are in-memory
+call observations, not durable checkpoints or exactly-once guarantees. Cancellation,
+timeout or RST after dispatch cannot establish that server computation stopped.
+
+CLI (only after authorization; examples are not automatically executed):
+
+```text
+node dist/cli.js infer preview --endpoint http://127.0.0.1:PORT --model INSTALLED_MODEL
+node dist/cli.js infer run --endpoint http://127.0.0.1:PORT --model INSTALLED_MODEL --payload-sha256 PREVIEW_HASH --allow-local-probe --allow-inference --timeout-ms 30000
+```
+
+Preview deliberately displays the public fixed payload, without network. Run
+prints only a validated report. Error JSON includes code/dispatched/outcome;
+exit 2 for unknown outcomes, otherwise 130 for cancellation or 1 for failure;
+success is 0. Probe command behavior is preserved.
+
+All automatic tests use protected mocks (11434 always denied). A separate real
+smoke script, **never run by the suite**, requires express operator authorization:
+`node test/real-inference.mjs --authorize-real-inference --local-only-confirmed ORIGIN INSTALLED_MODEL PREVIEW_HASH`.
+The operator must verify local-only server configuration, trusted local model and
+no concurrent alias/retag changes first. No installed model or loopback endpoint
+proves service authenticity/local execution; aliases cannot be pinned atomically
+by this API. The local-only flag attests operator checks, not automated proof.
+No model downloads/configuration changes, cloud calls or real smoke are included
+in B05-02 implementation/gates. Deterministic output bytes are not promised; the
+synthetic result is evaluated against the fixed contract.
+
+Phase 03 remains open pending independent review. D-036 does not implement
+transforming redaction or authorize export; prior workspace/CAS limits and
+RST/unexpected-error/OS SIGINT/R-061 follow-ups remain. No private context,
+agents, routing, dashboard or another node is implemented here.
