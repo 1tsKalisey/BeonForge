@@ -2,6 +2,46 @@
 
 Estado: abierta. Fases 01 y 02 aceptadas/cerradas; D-036 ACCEPTED permanece vigente.
 
+## Primera demostración real autorizada — evidencia registrada
+
+Fuente: autorización expresa de UNA ejecución del propietario y captura del proceso informada en la conversación; este registro no la reproduce ni consulta el servicio. B05-01/B05-02 permanecen cerrados APPROVE_WITH_FOLLOWUPS (`ebbd223`/`593cf8f`, cierre documental `84da472`).
+
+| Dato observado | Resultado |
+|---|---|
+| Destino/modelo | POST http://127.0.0.1:11434/api/generate; gemma3-hf:1b |
+| Payload autorizado | synthetic-public-v1, fixture público fijo de B05-02 (183 bytes UTF-8 sin salto final), SHA-256 `4358bf83c545b0ab2dac053722f342c126280a727db1cfa21f3a06aeb6ef6758` |
+| Salida CLI | schemaVersion1, classification synthetic-public-v1, modelo y hash coincidentes, answer4, requestDispatched:true, outcome:confirmed |
+| Resultado/exit/stderr | `{"answer":4}` validado según contrato B05-02; confirmed; exit0; stderr vacío |
+| Tiempo observado | 74,31 s totales del proceso; timeout autorizado120 s; sin timeout/unknown. Medición inicial de UNA muestra, no SLA, defecto bloqueante ni aislamiento de tiempo de carga/generación. |
+| Evidencia HTTP pasiva | Tramo nuevo del log del servidor: dos GET (/api/version, /api/tags) y un POST /api/generate, todos200. No se deriva el contador de exit0. |
+| Ejecuciones/efectos | Un lanzamiento del comando aprobado, cero reintentos; árbol Git limpio al terminar. Sin descargas, modificación de modelos/configuración, contexto privado u otros comandos de inferencia efectuados por el agente. |
+
+Límites: la CLI no expone contador de POST. Se observó **uno** en la ventana del log, sin ID de petición correlacionado a ese proceso ni captura de paquetes; no afirmar at-most-once global/exactly-once, ausencia de otros clientes o auditoría exhaustiva del SO. La autorización concreta quedó utilizada administrativamente: no autoriza otra inferencia, aunque el grant de software sea reutilizable. No se copian logs completos, prompt repetido ni respuesta cruda. Real-inference.mjs no se utilizó; se empleó la CLI con timeout explícito120000ms conforme al procedimiento.
+
+## Matriz vigente — criterios globales Fase 03
+
+Se conserva literalmente el gate del master-plan: **«Registry, probes y Ollama candidato evaluado con salida estructurada y cancelación»**, dependencias **«02, clasificación de datos, política, evals»**. No se exige ahora un framework general ni un benchmark nuevo; se evalúa el alcance local sintético aprobado. Esta matriz no redefine el criterio ni convierte una demo en salida completa de fase.
+
+| Criterio / fuente vigente | Evidencia existente | Estado | Bloqueo real |
+|---|---|---|---|
+| Dependencia Fase02 | Cierre propietario D-036, B03-01–05 cerrados, contratos/worktrees/contexto preservados. | cumplido | Ninguno para escenario sintético; datos privados continúan sin autorización. |
+| Probes (master-plan03) / B05-01 | Nodo aceptado, metadata GET con permisos/loopback/límites; preflight real dos GET200. 77 regresiones de probe, P1 HTTP101 resuelto. | cumplido | No requiere ampliar endpoints/proveedores. |
+| Contrato de ejecución sintética / B05-02 | Nodo aceptado, preview/SHA/grant propio destino-modelo-body, preflight/autorización separados, un POST y verificación de respuesta; auditoría153/153 focalizados/20 reproducciones, 595 completos por evidencias/logs. | cumplido | P3 no bloqueantes para este caso, no se reabre nodo. |
+| Clasificación de datos y política (dependencias03) | synthetic-public-v1 fijo, sin contexto privado; permiso exacto explícito del propietario, servicio local-only comprobado en preparación, timeout120s y sin retries; binding auditado. | cumplido | Sólo clase/destino/modelo autorizados; no exige motor de clasificación general en este cierre. |
+| Ollama candidato con salida estructurada (gate03) | gemma3-hf:1b real: respuesta validada answer4/confirmed/exit0; límites y log pasivo consignados arriba. | cumplido | Evaluación del fixture mínimo, no prueba de utilidad en programación ni de otros modelos. |
+| Evals (dependencia03), alcance mínimo aprobado | Caso sintético público versionado en prepareSyntheticInference, predicado answer4 y tests de fallo; un resultado real contrastable contra ese predicado. | cumplido | Una muestra no acredita rendimiento/calidad general; el plan no fija dataset múltiple/SLA que obligue a otro ensayo aquí. |
+| Cancelación/timeout y tratamiento incierto (gate03) | API/señal y deadline absoluto, abort/HTTP101/close/unknown sin retry, tests mock de B05-01/02 y auditorías aceptadas. Ejecución real terminó normal antes del plazo. | cumplido | Capacidad cliente cubierta por contrato/mocks; cancelación real/OS SIGINT/parada remota no acreditadas y siguen limitaciones/P3, no requisitos nuevos. |
+| Registry de proveedor/modelo (gate03) | Probe lista nombres de tags; metadata/resultado real ahora documentados. No registro funcional de candidatos en packages/ollama ni contratos de proveedor; Map de runtime/runner.ts:256 registra BlockHandler, no modelos/proveedores. | pendiente | **Sí: falta registro mínimo funcional de candidato y vínculo de evaluación**, no sustituible por tabla documental/inventario de Ollama. |
+| Salida global de Fase03 | Demo real y gates previos existentes; registry pendiente. | parcialmente cumplido | No preparada todavía para decisión de cierre; no cerrar automáticamente. |
+
+Fuera de esta matriz: Fase04 introduce vertical bugfix sobre fixture (reproducir, rojo, cambio, gates/revisión/rollback); Fase05 introduce harness oficiales Codex/OpenCode, herramientas/permisos/aislamiento y contract tests. No son faltas de Fase03 ni se adelantan. Los P3 de duplicados JSON, endpoint fuera del hash, grants reutilizables, script real30s/SIGINT y R-061/R-065 siguen abiertos; no se convierten en bloqueantes sin ampliar escenario.
+
+## Siguiente mínimo identificado — B05-03 (propuesto, NO iniciado)
+
+**Registro mínimo del candidato local y su evaluación.** No había un nodo posterior definido; B05-03 es propuesta de nomenclatura siguiente dentro del bloque B05/Fase03, no autorización de implementación. Completar el único requisito funcional pendiente de registry: registrar y recuperar un descriptor versionado de un candidato Ollama explícito (destino, modelo/identidad observada, clasificación permitida, capacidades realmente probadas y referencia a la evaluación sintética existente). Datos no conceden permisos de inferencia; distinguir observaciones en mocks/real y límites de identidad. Reutilizar módulo/persistencia existentes, sin servicio/catalogo genérico, routing ni nuevo subsistema. Aceptación mínima futura: registro/lectura verificables, descriptor inválido rechazado, procedencia/evaluación y permisos no implícitos probados con mocks; ninguna inferencia adicional necesaria para reutilizar esta evidencia. Detallar/aprobar ese alcance antes de implementarlo. No promover el dato documental de esta ejecución a registry funcional ni crear B05-03 en código ahora.
+
+Conclusión actual: **Fase03 abierta por registry pendiente**. Recomendar aprobar/acotar esa única tarea, conservando la demo real existente y sin nueva inferencia ni endurecimientos P3 especulativos. Estado de B05-01/02 no cambia. Este turno sólo documenta/evalúa; no contacto con Ollama, gates repetidos o fases posteriores.
+
 ## Cierre vigente B05-02 — APPROVE_WITH_FOLLOWUPS
 
 **B05-02 CERRADO** por aprobación independiente aportada por el propietario, sin P0/P1/P2. Código `ebbd223`, evidencias `593cf8f`. Revisión: **153/153 focalizados y 20 reproducciones independientes**; correspondencia permiso propio/destino/modelo/SHA-256/POST efectivo verificada. **595/595 completos y gates locales** contrastados mediante evidencias/logs, **no ejecutados íntegramente por Claude según este registro**. Node24.19.0/pnpm12.15.0 estables; frozen/peers/check exit0. Este cierre sólo cotejó 13 hashes históricos sin discrepancias y exits, sin repetir suites/auditorías. Demo íntegra con mocks; ninguna conexión a Ollama real/inferencia/descarga/configuración en el cierre.
@@ -10,7 +50,11 @@ Cuatro P3 no bloqueantes: JSON.parse acepta claves answer duplicadas (resolver a
 
 Fase03 **abierta**: cierre de B05-02 sólo acredita flujo sintético mock, no el gate global de candidato Ollama real evaluado ni registry/evals generales. No nuevo nodo/fase ni autorización implícita de prueba real.
 
-## Primera prueba real — procedimiento preparado, NO autorizado ni ejecutado
+<a id="primera-prueba-real--procedimiento-preparado-no-autorizado-ni-ejecutado"></a>
+
+## Procedimiento de prueba real — autorización previa por intento
+
+Actualización: procedimiento utilizado UNA vez conforme a autorización exacta del propietario, con resultado en el registro anterior. El ancla antigua se conserva para enlaces históricos; ya no significa que la primera prueba esté pendiente. No hay permiso para repetir: cualquier futuro intento requiere otra autorización expresa.
 
 Este procedimiento no amplía las APIs. Usar la CLI existente con timeout explícito; **no usar automáticamente test/real-inference.mjs**: su plazo fijo predeterminado30s y falta de tratamiento específico de SIGINT siguen siendo P3. No se ha cambiado ese script. Todos los pasos de servicio se posponen hasta consentimiento expreso; este cierre no autoriza ni consultas de metadatos reales.
 
@@ -21,7 +65,7 @@ Este procedimiento no amplía las APIs. Usar la CLI existente con timeout explí
 5. **Sólo tras esa autorización**, un único lanzamiento manual, desde raíz, sin bucles, tareas automáticas o políticas de retry. Plantilla documental no ejecutada (sustituir cada marcador por los valores aprobados; no constituye consentimiento): `node packages/ollama/dist/cli.js infer run --endpoint ENDPOINT_APROBADO --model MODELO_APROBADO --payload-sha256 HASH_APROBADO --allow-local-probe --allow-inference --timeout-ms PLAZO_APROBADO`. La CLI valida instalación/consentimiento y realiza el único POST; no usar el script real de 30s como fallback. Cancelación: usar manejo existente de CLI si se necesita, registrar interrupción y límites de SIGINT Windows; no prometer que Ctrl+C detiene el servidor ni que el script real maneja la señal como la CLI.
 6. **Registrar sólo resultado saneado en evidencia privada del operador**: autorización/revisión de código, versiones, endpoint/modelo/digest/hash/plazo aprobados, hora de intento, exitcode, reporte validado o error tipado, requestDispatched/outcome. No prompt/respuesta cruda/thinking, credenciales ni logs completos del servicio con datos ajenos; el payload público aprobado puede constar en el acta de consentimiento, no en logs generales. Éxito exige answer4, modelo/hash coincidentes y outcome confirmed; salida0. Unknown/exit2, timeout, RST, cancelación o corte sin reporte final: no repetir ni inferir que el servidor paró; dejar intento incierto y esperar decisión expresa/reconciliación externa. Not_dispatched no autoriza retry automático; cualquier nueva ejecución necesita nueva aprobación administrativa.
 
-Estado de preparación: no se conocen aquí valores aprobados de endpoint/modelo/digest/hash/plazo para un intento real; **no hay autorización real vigente derivada del cierre**. Sin comandos de servicio ni inferencias ejecutados. Siguiente acción: esperar instrucción expresa del propietario, sin asignar/iniciar nodos posteriores.
+Estado: valores autorizados/resultados de la primera ejecución consignados arriba; consentimiento administrativo utilizado sólo para ese intento, no un permiso vigente para repetir. Este registro no consulta el servicio ni ejecuta de nuevo el comando. Próximo mínimo propuesto B05-03/registry pendiente de acotar/aprobar, sin iniciarlo ni adelantar Fases04/05.
 
 ## Estado vigente — aceptación independiente B05-01
 
