@@ -1,4 +1,36 @@
-# B05-01 — APPROVE_WITH_FOLLOWUPS y cierre documental
+# B05-02 — Primera inferencia sintética autorizada: revisión independiente
+
+**Implementado, abierto hasta revisión independiente** suministrada por propietario. Código **`ebbd223`**, comparar `git diff ad4c08b..ebbd223` para implementación (docs de ejecución en commit posterior). B05-01/Fases01–02 aceptados/cerrados, R-064 resuelto sin reapertura; Fase03 abierta. No invocar Claude/otros agentes ni iniciar otro nodo.
+
+## Alcance y contrato
+
+Paquete ollama únicamente: http.ts extrae transporte privado B05-01 y añade POST fijo /api/generate/body cap64KiB, probe.ts preserva public probe y expone preflight interno con grant vivo/señal común. inference.ts añade prepareSyntheticInference/runSyntheticInference/preview+grant+report v1/errores, index barrel exports, CLI infer preview/run. Tests desde dist y README; sin dependencias nuevas/lockfile/contratos de dominio, CAS, kernel, routing o agentes.
+
+Preview **puro**, payload público fijo para answer4/2+2, UTF8 canónico/hashSHA256 y límites inmutables; acepta sólo endpoint/modelo, no prompts libres/contexto. validatePreview rechaza cambios incluso rehash consistente de contenido privado. Grant propio vivo canInfer+allowLocalProbe true, endpoint/model/hash exactos, sin herencia/Proxy/getters; comprobado inicialmente, antes de POST y antes de report. Preflight instala/autorización diferenciados: modelo debe estar listado y explícitamente autorizado; no fallback ni pull.
+
+Un POST de inferencia, stream:false/format:json, temperature0/num_predict64/num_ctx1024; bytes enviados exactos a preview. Request4KiB/prompt1KiB, headers8KiB, body64KiB, generated4KiB; plazo absoluto único default30s/max120s incluye GETs, POST y lectura. Agent privado sin proxies/redirects/DNS ambiguo; strict parser y settlement/close/upgrade/abort del P1 preservados. Body requiere done:true/model exacto y response JSON interior con única clave numérica answer4; metadata/thinking extra no devueltos. Report sólo metadatos tipados/hash/clasificación/answer, no salida libre.
+
+Errores incluyen requestDispatched y outcome not_dispatched/unknown/confirmed. Despacho es entrega al transporte, no prueba de recepción. Desde POST una caída/timeout/cancel puede dejar resultado desconocido; jamás retry. done/model válidos son finalización observada, incluso si output inválido/revocación impiden entregar resultado. Sin observabilidad durable ni exactly-once; no autorizar nuevas operaciones por el reporte. CLI unknown=exit2, otra cancelación130, fallo1, éxito0; stdout sin respuesta cruda/thinking.
+
+## Evidencias y reproducción local
+
+**595/595 verdes**, sin skips/fallos: 62 contratos +115 persistencia +71 runtime +187 workspace +153 Ollama (77 anteriores +76 nuevos) +7 spike. Referencia519 preservada +76. Node24.19.0 real C:/Program Files/nodejs/node.exe; pnpm12.15.0 shim/exe AppData/Roaming/npm (no TEMP), sin cambios de herramientas/PATH. SQLite3.53.3 confirmado por spike. Frozen/peers/check exit nativo0 (formato/lint con tipos/typecheck/build/tests); diff/secretos revisados. Workspace637.68s/Ollama2.55s; focal153/153 previa2.34s. Errores iniciales de autoría typecheck/lint corregidos antes del gate, no excepción de validación. R-061 no reproducida/sin causa/no resuelta.
+
+Demo **mock**, proceso CLI compilado: preview sin red -> hash/consentimiento exactos -> dos GET metadata -> un POST con payload exacto -> report answer4 confirmado. Logs/exit/hash completos en `%TEMP%/beonforge-b0502-aa8972a871874846bc64fef4f8882e7f/`. Comandos con runtime estable: `pnpm.cmd install --frozen-lockfile`, `pnpm.cmd peers check`, `pnpm.cmd check`; focal tras build `pnpm.cmd --filter @beonforge/ollama test`. No atribución de suite nueva a revisor independiente.
+
+Casos independientes: hash calculado sobre bytes reales; autorización propia/false/heredada/prototipo contaminado/null/getters/Proxy; modelo/hash/origen no coincidentes; payload privado rehasheado y cambio durante preflight; revocación en tags y en resultado; modelos ausentes/cloud/ambiguos/nombres256/257; JSON exterior/interior malformados, modelo/done incorrectos, UTF8, body64KiB exacto/excesivo y generated4096/4097; deadline que no se reinicia tras preflight, POST silencioso tras destroy, cancelación antes/durante body, 101/302/500/cierre prematuro y sin reintentos; CLI falta de flags/hash/decimal, éxito/unknown/error confirmado. 77 pruebas B05-01 (incluidas guards P1/proxy/parser) se conservan sin modificar.
+
+## Frontera de seguridad y pendientes
+
+Todo HTTP de desarrollo/gates va a mocks temporales protegidos: guard Socket.connect previo a DNS y 11434 siempre vetado, también CLI hijos. **No se ha contactado Ollama instalado, descargado modelos ni realizado inferencias reales.** test/real-inference.mjs es opt-in separado, fuera de suite; exige --authorize-real-inference, --local-only-confirmed, endpoint/modelo/hash, y NO se ejecutó. Implementación/consentimiento de este nodo no autoriza probarlo realmente.
+
+R-065: loopback/model listado no autentican al proceso ni prueban backend local; local-only/modelo autorizado y ausencia de retag concurrente deben verificarse por operador antes de un real opt-in. Flag del script es declaración, no prueba. Sin snapshots atómicos de modelos, sandbox de proceso/red, garantías de parada del servidor al cancelar o recuperación durable. Sólo fixture sintético público, sin promesas de determinismo de modelo ni calidad de programación. D-036/privacidad/CAS/workspace y R-063 vigentes; RST/errores inesperados/SIGINT del SO/R-061 siguen pendientes. R-064 no se declara reabierto por la extracción, pero revisar conservación del transporte y regresiones.
+
+Foco de revisión: binding de permisos al body exacto/servicio/modelo y revocación, límite de rutas/egress, validación/outcomes sin retry y separación public fixture/autoridad. No bloquear por runtime durable/registry/inferencia privada o funcionalidades excluidas de fases posteriores. Próximo gate exclusivo: aceptación independiente B05-02. **No B05-03/Fase04, merge/publicación o main.**
+
+---
+
+# Histórico — B05-01: APPROVE_WITH_FOLLOWUPS y cierre documental
 
 Veredicto independiente aportado por el propietario: **APPROVE_WITH_FOLLOWUPS**, Claude confirma resuelto P1 HTTP101 (`4e00fea`) y permite cerrar B05-01. **R-064 resuelto; B05-01 cerrado**, Fase 03 abierta. El paquete focalizado inferior es histórico, no una revisión pendiente ni trabajo a repetir.
 

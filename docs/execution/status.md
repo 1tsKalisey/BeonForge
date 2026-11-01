@@ -1,8 +1,20 @@
 # Estado persistente
 
-Actualizado: 2026-10-30. Leer este archivo antes de cualquier tarea.
+Actualizado: 2026-11-01. Leer este archivo antes de cualquier tarea.
 
 ## Posición
+
+**B05-02 implementado en `ebbd223`, abierto hasta revisión independiente.** prepareSyntheticInference puro con preview canónico público fijo/hash SHA-256/límites v1; runSyntheticInference exige grant propio vivo de inferencia+metadata, destino/modelo/hash coincidentes, preflight de modelo instalado y un solo POST generate sin streaming. JSON answer=4 validado, nunca respuesta cruda/thinking en salida. Transporte privado compartido con probe (tres rutas fijas), guards HTTP101/close/abort/proxy/loopback/parser/límites conservados. Sin contexto privado, SDK, routing, descargas, CAS o integración de agentes.
+
+**Entorno desbloqueado y comprobado:** Node v24.19.0 real en C:/Program Files/nodejs/node.exe; pnpm12.15.0 shim AppData/Roaming/npm/pnpm.cmd y ejecutable real AppData/Roaming/npm/node_modules/pnpm/pnpm.exe, fuera de %TEMP%. No se modificaron herramientas ni PATH. **595/595 verdes** = 519 anteriores + 76 nuevos: contratos62 + persistencia115 + runtime71 + workspace187 + Ollama153 (77 probe + 76 inferencia) + spike7. Node/SQLite3.53.3 confirmados por spike; frozen/peers/check con exit nativo0, formato/lint/typecheck/build/tests/diff/secretos verdes. Workspace637.68s, Ollama2.55s. Typecheck/lint iniciales de autoría corregidos antes del gate; R-061 no reproducida, causa sin identificar/no resuelta.
+
+Demo **exclusivamente mock protegido**, CLI compilada en procesos separados: preview sin red -> consentimiento explícito/hash -> dos GET metadata -> único POST con bytes exactos -> report answer4/confirmed; inválidos/timeout/HTTP101 no se reintentan. Guard antes de DNS y veto11434 preservados. `test/real-inference.mjs` fuera de suite y no ejecutado: requiere consentimiento expreso, local-only confirmado, modelo instalado y hash. Ninguna consulta o inferencia contra Ollama instalado, descarga o reconfiguración.
+
+Efectos: requestDispatched indica entrega al transporte/posibilidad de envío, no recepción; unknown tras fallo post-despacho no prueba parada del servidor. Report done/model válidos confirma finalización observada incluso si output no válido/revocación suprime resultado. No checkpoints durables/atomicidad/auto-retry. R-065 y riesgos R-063/RST/SIGINT/errores inesperados/R-061 conservados. Logs nativos, exits y hashes: `%TEMP%/beonforge-b0502-aa8972a871874846bc64fef4f8882e7f/`.
+
+Siguiente acción exclusiva: revisión independiente B05-02 suministrada por propietario, paquete actual preparado. B05-01/Fases01–02 aceptados/cerrados; Fase03 abierta. No B05-03/Fase04, merge/publicación o cambios de main e14cfdd. Este punto sustituye los bloqueos históricos de entorno y el estado inferior no implementado.
+
+## Histórico — cierre B05-01 y preparación de B05-02
 
 **B05-01 CERRADO — APPROVE_WITH_FOLLOWUPS independiente** aportado por el propietario. Claude confirma resuelto el P1 HTTP101 (`4e00fea`); R-064 resuelto, no bloqueante. Los **519/519 tests y gates locales anteriores** se verifican por logs/exit codes/hashes; **no se atribuye a Claude ejecución de la suite completa**. Este cierre documental comprobó 37 hashes sin discrepancias y exits frozen/peers/check/final-format/lint/typecheck/guard-final=0. Sin nuevas pruebas ni auditoría: no cambió código funcional. Evidencias originales en `%TEMP%/beonforge-b0501-p1-afad27ab2d074169850331efbcd70bf3/`.
 
@@ -222,7 +234,7 @@ Desde la raíz real del checkout en PowerShell: `git rev-parse --show-toplevel`,
 
 ## Instrucciones exactas para continuar
 
-1. Fases 01/02 y B05-01 aceptados/cerrados. No repetir auditorías/tests/spikes sin cambios funcionales que lo justifiquen ni invocar agentes; este cierre es exclusivamente documental.
-2. B05-02 delimitado en phase-03.md, no implementado. Esperar autorización de implementación; este plan no autoriza inferencia/prueba real, descargas o configuración del servicio. Mantener main intacta, sin merge ni publicación.
-3. Para continuar se requiere Node 24.19.0 instalado en ubicación estable fuera de %TEMP%, con ruta/versión efectiva comprobadas antes de implementación/gates. No cambiar versiones, PATH o herramientas automáticamente; no depender del portátil temporal histórico. Mantener WAL/FULL y SQL en worker.
-4. Preservar pending/uncertain sin reejecución automática y contratos aceptados. B05-02 limita el futuro payload al sintético público fijo y exige permisos propios explícitos de destino/modelo/payload, modelo local instalado/autorizado y consentimiento real separado. No agentes/contexto privado/UI ni modificaciones a F-5 sin regresión demostrada.
+1. Fases01/02 y B05-01 aceptados/cerrados. B05-02 implementado, abierto hasta revisión independiente suministrada por propietario. No invocar agentes ni repetir auditorías/spikes sin necesidad.
+2. Esperar revisión B05-02, no iniciar B05-03/Fase04. Implementación/gates sólo mocks; no prueba real/inferencia/descargas o configuración del servicio sin autorización expresa adicional. Mantener main intacta, sin merge/publicación.
+3. Node24.19.0/pnpm12.15.0 estables ya comprobados; revalidar versión/ruta al continuar, nunca volver a depender de %TEMP% para runtime. No cambiar versiones/PATH/herramientas automáticamente; mantener WAL/FULL y SQL en worker.
+4. Preservar pending/uncertain y contratos. B05-02 sólo admite payload sintético fijo/grant propio destino/modelo/hash; datos de preview no otorgan permisos. No retries ante unknown, agentes/contexto privado/UI ni modificaciones a F-5 sin regresión demostrada.

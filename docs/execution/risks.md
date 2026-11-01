@@ -1,5 +1,15 @@
 # Registro de riesgos
 
+## B05-02 — R-065: inferencia local sintética acotada, revisión pendiente
+
+Implementación `ebbd223`, evidencia local 595/595 y gates verdes, no aceptación independiente ni prueba de un modelo real. Sólo prompt público fijo, grants propios de inferencia/metadata vinculados a destino/modelo/payload, sin permisos por preview/hash/respuesta/CAS. Transporte privado compartido y 77 regresiones probe intactas; 76 casos nuevos con mocks protegidos/CLI. Sin código/contexto privado ni respuesta cruda/thinking en logs/report; sin SDK/routing/descargas/reintentos.
+
+R-063 permanece: loopback no autentica al proceso ni prueba que un alias sea un modelo local. Preflight comprueba nombre instalado exacto, no pesos/digest ni snapshot atómico; operador debe asegurar servicio local-only confiable/modelo autorizado y ausencia de retag concurrente antes de cualquier prueba real. El flag de script --local-only-confirmed es declaración del operador, no comprobación automatizada. No se reconfiguró ni consultó el servicio instalado.
+
+requestDispatched significa entregado al transporte/posibilidad de envío; no prueba recepción/computación. Tras POST, timeout/cancel/RST/HTTPerror sin done/model válidos dejan outcome unknown, sin retries/fallback. done/model coincidentes confirman finalización observada, incluso si JSON interior inválido o permiso revocado impiden devolver respuesta. Cancelar socket no acredita que servidor detuvo cómputo. Estado sólo en memoria, sin EventStore/intent durable/reanudación ni exactamente-una-vez; no introducirlos fuera del plan. Token cap depende del servicio; bytes/tiempo acotados por cliente. No se garantiza determinismo del modelo, sólo evaluación del resultado sintético.
+
+Node24.19.0 estable C:/Program Files/nodejs/node.exe y pnpm12.15.0 estable AppData/Roaming/npm/node_modules/pnpm/pnpm.exe comprobados, desbloquean el requisito de entorno sin cambiar herramientas. R-061 no reproducida/sin causa/no resuelta; clasificación RST/errores inesperados y SIGINT real Windows siguen seguimientos. CLI B05-02 valida salida de éxito/error confirmado/unknown contra mocks, no acredita SIGINT del SO. B05-01/R-064 aceptados e intactos, privacidad/CAS/workspace/D-036 vigentes; Fase03 abierta, no B05-03.
+
 ## B05-01 — R-064 / P1 HTTP101 y seguimientos de auditoría
 
 **R-064 RESUELTO conforme a APPROVE_WITH_FOLLOWUPS independiente** aportado por el propietario: Claude confirma el P1 HTTP101 corregido en `4e00fea` y permite cerrar B05-01. La referencia a REQUEST_CHANGES queda histórica. Rechazo de upgrade/close/abort con settlement único y limpieza verificado según revisión; 77/77 probe, 519/519 y gates son evidencia de ejecución local previa, validada mediante logs/hashes, **no una suite completa ejecutada por Claude**. 37 hashes sin discrepancias y exit codes 0 comprobados en este cierre; sin nueva auditoría/pruebas. El defecto resuelto no se conserva como riesgo aceptado sin corregir.

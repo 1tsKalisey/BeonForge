@@ -12,7 +12,7 @@ Entorno requerido para continuar: **Node 24.19.0 instalado en ubicación estable
 
 ## B05-02 — Primera inferencia local sintética autorizada
 
-**Estado: delimitado/listo para autorización de implementación; no implementado ni ejecutado.** Identificador siguiente al B05-01 cerrado, dentro de Fase 03/B05; no existía definición anterior. No habilita Fase 04 ni cierra Fase 03.
+**Estado: implementado `ebbd223`, pendiente de revisión independiente; sin permiso de inferencia real.** Node v24.19.0 estable en C:/Program Files/nodejs/node.exe y pnpm12.15.0 estable en AppData/Roaming/npm (ejecutable real node_modules/pnpm/pnpm.exe) verificados, fuera TEMP y sin modificar herramientas. Identificador siguiente al B05-01 cerrado. No habilita Fase04 ni cierra Fase03. Alcance/aceptación/exclusiones/rollback siguientes vigentes; desarrollo/gates sólo mocks protegidos.
 
 - **Objetivo:** una única inferencia local explícitamente autorizada, verificable y cancelable, sobre un prompt sintético público fijo: solicitar JSON `{ "answer": 4 }` para `2+2`. Sin entrada libre, ContextPackage, instrucciones del operador, código privado, filesystem o CAS.
 - **Interfaces propuestas mínimas:** `prepareSyntheticInference({ endpoint, model }) -> SyntheticInferencePreviewV1` puro/sin red: payload UTF-8 canónico fijo, SHA-256 de todos los bytes que se enviarán y límites/política v1. `runSyntheticInference(preview, grant, { timeoutMs?, signal? }) -> SyntheticInferenceReportV1`. Preview y hash son datos, nunca autoridad. Report sólo contiene veredicto validado/answer=4, modelo y hash; no devuelve texto libre ni thinking.
@@ -38,6 +38,25 @@ Entorno requerido para continuar: **Node 24.19.0 instalado en ubicación estable
 **Dependencias y rollback:** B05-01 aceptado; Node estable antes de implementar/gates; modelo local/local-only y consentimiento adicional antes de demo real. Riesgos R-063/R-061 y seguimientos RST/SIGINT vigentes; corregir sólo regresiones que impidan los criterios del nodo, sin nueva auditoría general. Revert acotado de B05-02 si falla, conservando contratos/probe/evidencia y sin borrar modelos/datos. Siguiente capacidad: inferencia sintética local supervisada y evaluable; no asignar otro nodo ni avanzar de fase en esta preparación.
 
 Fuentes oficiales de diseño consultadas, sin consultar el servicio instalado: [POST generate](https://docs.ollama.com/api/generate), [local-only](https://docs.ollama.com/faq#how-do-i-disable-ollamas-cloud-features).
+
+### Evidencias B05-02 — implementación y demo mock
+
+`ebbd223`: src/http.ts extrae y extiende sólo transporte privado de tres rutas, src/probe.ts conserva API B05-01 y añade preflight interno vivo; src/inference.ts implementa preview/canonicalidad/grant/estado de despacho/resultados. Barrel src/index.ts preserva exports y añade interfaces; CLI infer preview/run con flags propios/hash exacto y exitcodes según outcome (unknown=2, otra cancelación=130, fallo=1, éxito=0). README documenta límites y confianza. Sin dependencias/lockfile ni contratos Fases01/02 nuevos/modificados.
+
+**595/595**, sin fallos/skips: contratos62 + persistencia115 + runtime71 + workspace187 + Ollama153 (77 anteriores, 76 nuevos) + spike7. Conserva referencia519, añade76. Node24.19.0/SQLite3.53.3, pnpm12.15.0 estables; frozen/peers/check exit nativo0, formato/lint con tipos/typecheck/build/tests/diff/secretos verdes. Workspace637.68s, Ollama2.55s; focal previa153/153 (2.34s). Typecheck/lint iniciales detectaron sólo ajustes de autoría/casts de pruebas y const/import/assertion, corregidos antes del gate. R-061 no reproducida/no resuelta.
+
+| Criterio | Evidencia verificable |
+|---|---|
+| Preview exacto/sin red | inference.test.ts: canonicidad y SHA-256 independiente, bytes reales POST iguales al payload; frozen/limits y claves arbitrarias/getters/rehash privado rechazados, sin red inicial. |
+| Permisos/modelo | Propiedades propias/false/heredadas/Object.prototype/Proxy/getters/null; grant endpoint/model/hash incorrectos; modelo ausente/cloud/ambiguo y longitudes. Revocación en tags y al recibir resultado, preview alterado durante preflight; cero POST antes de permiso válido. |
+| POST único/privacidad | Servidor registra dos GET metadata + un POST exacto; ningún prompt/contexto libre, Cookie/credencial o salida thinking. Report sólo answer4/hash/modelo/clasificación; ninguna ruta de descarga/fallback ni retry. |
+| Integridad/límites | JSON exterior/interior malformados/shape incorrecto/model/done inválidos, extra inner fields, UTF-8 inválido, headers por helper previo; 64KiB outer exactos y excesos, generated4096/4097 bytes, maxmodel256/257 y texto Unicode denegado. |
+| Tiempo/efectos | Deadline total que incluye preflight, antes/después POST, transporte POST silencioso al destruir, cancelación antes/en body, HTTP101/302/500/cierre prematuro. Outcome not_dispatched/unknown/confirmed y recursos cerrados, sin retry; errores tardíos guardados. |
+| CLI/demo | Proceso CLI compilado preview sin red -> consentimiento/hash coincidentes -> preflight -> único POST -> answer4 confirmado. Ausencia de flags/wronghash/timeout no decimal, 101/timeout exit2 con unknown; output inválido exit1 confirmado. Sólo mocks con guard pre-DNS/11434 vetado. |
+
+test/real-inference.mjs separado, sin auto-descubrimiento de tests y NO ejecutado; exige autorización expresa/--local-only-confirmed/endpoint/modelo/hash. No peticiones a Ollama instalado, pesos/modelos nuevos ni inferencia real. Demo real no autorizada en esta tarea: ninguna afirmación de evaluación de un modelo real. Sin estado durable/garantía de autenticidad del servicio; límites R-065 y previos conservados.
+
+Logs nativos/exit codes/hash en `%TEMP%/beonforge-b0502-aa8972a871874846bc64fef4f8882e7f/`; runtime fuera TEMP. Código/test dist actuales, main e14cfdd intacta, sin merge/publicación. Siguiente gate exclusivo: revisión independiente B05-02 por propietario; no B05-03/Fase04 u otra funcionalidad.
 
 ## Histórico — correctivo previo a la aceptación
 
