@@ -1,6 +1,22 @@
 # Estado persistente
 
-Actualizado: 2026-11-01. Leer este archivo antes de cualquier tarea.
+Actualizado: 2026-11-02. Leer este archivo antes de cualquier tarea.
+
+## Posición vigente — M04.1 implementado, pendiente de auditoría
+
+Código **fed1763**: vertical de bugfix determinista en examples/bugfix de runtime; APIs prepareBugfixDemo/runBugfixDemo/inspectBugfixDemo/reviewBugfixDemo y CLI separada demo:bugfix. Reutiliza kernel/SQLite/CAS/workspace/contexto compilados; demo TS nativa Node24 y typecheck con tests. Sin modificaciones del kernel/contratos ni dependencias externas nuevas (sólo dev link workspace). **Fase04 ABIERTA**, M04.1 abierto para revisión independiente del propietario; Fases01–03 siguen aceptadas/cerradas.
+
+D-043 aplicada: únicamente repositorios nuevos locales/descartables dedicados a BeonForge, cuatro archivos sintéticos propios (.gitignore, package.json, src/add.ts, test/add.test.mjs), sin otros proyectos, credenciales, remotos, servicios, inferencias o agentes. Padre privado vacío/canónico explícito; roots/pins/grants propios y bytes revalidados; comandos fijos sin shell. Node permission FS es defensa adicional, no sandbox de SO/red; R-067 conserva esa limitación. No transición automática a entornos reales ni inicio05.
+
+Demo CLI real sintética: proyecto → commit exacto/worktree detached confirmado → ContextPackage/Envelope4 archivos → test rojo por la aserción prevista → parche fijo src/add.ts (a-b→a+b) → test verde → diff/CAS → cierre/reapertura desde otro proceso. Exit0, evidence SHA256 `3495d39461b7d9821038035f38bad8501c99139ca8b380144e06b1df69a47327` (865bytes); base064a5101625739a80344d54c14d6719bbb57c152, worktree histórico confirmed/actual modified, **review pending / integration not_performed**. No aprobación del propietario inferida. Root manual permanece privado/localizable desde `%TEMP%/beonforge-m041-demo-parent.txt`; decisiones de tests approve/discard son entradas sintéticas, no revisión humana real del milestone.
+
+**673/673 verdes** =643 anteriores+30 M04.1: contratos62, persistencia115, workspace187, runtime101, Ollama201, spike7. Frozen/peers/check final nativos0 con Node24.19.0 estable/pnpm12.15.0; formato/lint/typecheck/build/tests/diff/escaneo de secretos verdes. Check final1310,32s, workspace658,83s y runtime589,49s (dev link ordena workspace antes de runtime). Primera pasada672 también verde; última incluye30 casos y fuente estabilizada antes de colectar runtime, sin dist obsoleto. Lint/typecheck/build globales repetidos después del cierre de tests, sin cambios funcionales posteriores.
+
+SQL/CAS reales y SIGKILL: pending/uncertain bloquean sin replay de parche ni limpieza. Dispatch exclusivo/fsync y receipt histórico conservados; revisión explícita ligada a hash, descarte sólo inverso autorizado y postimagen exacta. Pruebas de origen intacto/sentinelas/enlaces/config/env, revocación/cancelación, pérdida de finish, reinicio, revisión pending/truncada/contradictoria y DB ausente sin recreación. Dos regresiones internas rojo→verde (marcador contradice SQL; inspect recreaba DB) corregidas antes del commit; fallos de autoría conocidos registrados, R-061 no reproducida/sin causa/no resuelta.
+
+Logs completos/exits/entorno/regresiones/hashes: `%TEMP%/beonforge-m041-ecbccd3dc5ef4f8cafdd420b176a5e38/`. D-044/R-067 y paquete actual preparados. Próximo paso exclusivo: revisión independiente M04.1 suministrada por propietario; no cerrar04 ni avanzar a otro nodo. Main e14cfdd intacta, sin merge/publicación; vault complementario ausente.
+
+## Histórico — cierre03 y preparación04 antes de M04.1
 
 ## Posición vigente — Fase03 CERRADA / ACEPTADA; Fase04 preparada
 

@@ -1,5 +1,46 @@
 # Fase 04 — Primera vertical de bugfix
 
+## Entrega vigente — M04.1 implementado, abierto para revisión
+
+2026-11-02. Código **fed1763**, comparar `git diff b39e98b..fed1763`. **Fase04 ABIERTA**, nodo implementado localmente y pendiente de aceptación independiente; no cierre automático ni inicio05. Plan inferior conservado como histórico de preparación/criterios aprobados, no posición actual. D-043 continúa obligatoria: el repositorio sintético ya se creó sólo después de autorizar M04.1, sin otros proyectos como objetivos.
+
+API/CLI acotadas bajo packages/runtime/examples/bugfix: prepare crea proyecto/commit/worktree/contexto en nuevo padre privado vacío autorizado; run ejecuta DAG red→patch→green→evidence; inspect reabre SQLite/CAS y distingue historia/checkout/revisión; review registra decisión explícita o descarta sólo el parche conocido. TS ejecutado por Node24 aprobado/typechecked con tests; kernel/workspace/persistencia/contratos se consumen desde dist actual. No nuevos exports del kernel, tablas/schemas de dominio, SDK o ejecutor genérico. Sólo enlace dev workspace/4 líneas de lockfile y script demo separado de CLI existente.
+
+| Criterio | Evidencia funcional y aceptación local |
+|---|---|
+| Entorno D-043 | Fixture propio de4 archivos, git init nuevo/local/sin remotos; padre vacío/canónico privado explícito. Ningún proyecto existente copiado, descubierto o inspeccionado como objetivo; BeonForge sólo es código del producto/gates. |
+| Workspace/contexto | APIs B03 existentes: commit completo exacto, worktree detached confirmed/clean inicial, ContextPackage y Envelope de selección fija con binding OID/hashes/mapa. 12 pins de directorios, identidad Git/source/destino y autorización revalidados. |
+| Rojo verificable | Un test Node fijo de add(2,2): salida1, una prueba fallida y ERR_ASSERTION/nombre esperado. Código de test y package/source exactos, no scripts arbitrarios ni fallo de infraestructura aceptado como rojo. Resumen real en CAS del bloque red. |
+| Corrección/verde/diff | src/add.ts cambia sólo return a-b por return a+b, ligado a raíz/intención/commit/hashes pre/post. File handle verificado, nlink1, write corto rechazado, flush/fsync; test idéntico pasa exit0. Diff Git seguro de un archivo comparado contra patch exacto; origen/index/config/HEAD del fixture original inventariados sin cambios de run/review. |
+| Revisión | Run devuelve succeeded **con review:pending**, no aprobación/integración. Grant propio canReview y SHA de evidencia, canDiscard adicional, marker exclusivo durable y receipt SQL/CAS coherentes. Approve registra entrada explícita del caller; no autentica identidad humana ni hace merge/commit/push. |
+| Descarte | Sólo fixture nuevo de cada test, decisión sintética explícita: inverso exacto AFTER→BEFORE, rojo esperado y diff tracked vacío/current clean. Origen intacto y evidencia histórica verde conservada. Postimagen editada/permiso/hash incorrectos no se sobrescriben. Demo manual real sigue pendiente, no se aprobó/descartó por esos tests. |
+| Recuperación | Start durable antes de efecto, dispatch patch wx/fsync; reapertura reutiliza resultados confirmados sin nuevos eventos. Fault de finish SQL tras escritura real deja pending, SIGKILL tras dispatch bloquea en otro proceso; conserva bytes/marker, no reintento/limpieza. Partial bytes detectados no se reparan. |
+| Frontera segura | Grants heredados/getters/revocación, permisos/root/hash erróneos; src/test/HEAD alterados, extras ignored/untracked, enlaces/junction/hardlink, config Git hostil y variables Node/Git maliciosas rechazados. Node FS permission/test isolation none, env mínimo, sin shell; timeout10s/64KiB por stream y60s/bloque cooperativo. No sandbox SO/red. |
+| Marcadores/storage | Review pendiente/truncado nunca implica aprobación; contradicción con receipt confirmado se rechaza (regresión rojo/verde). Sólo prepare inicializa: DB ausente en sesión existente no se recrea (rojo/verde). Errores estáticos sin stdout/stderr/cause privados; exit1 diagnóstico no prueba ausencia de efectos. |
+
+### Demo observable y límites
+
+CLI sobre root sintético nuevo: base commit `064a5101625739a80344d54c14d6719bbb57c152`, ContextPackage4 archivos/mapa verificados, run exit0/completed red,patch,green,evidence. Evidencia CAS `3495d39461b7d9821038035f38bad8501c99139ca8b380144e06b1df69a47327`/865bytes; segundo proceso inspect exit0, confirmed histórico/current modified, redExit1/greenExit0, review pending, integration not_performed. Root localizable por puntero privado `%TEMP%/beonforge-m041-demo-parent.txt`; logs de inspect dentro de su evidence/. Ninguna inferencia o aprobación humana nueva.
+
+```diff
+-  return a - b;
++  return a + b;
+```
+
+La revisión/descarte funcionales se prueban con decisiones explícitas sintéticas y repos nuevos; no se presenta eso como aceptación humana real. No agente simulado ni evaluación de programación de Ollama. Worktree/Node permission no garantizan confinamiento de SO/red, herramientas y ancestros/caller deben ser confiables/privados/exclusivos. Cortes no son power loss ni exactly-once, CAS no autentica dueño y markers/SQL/FS no son transacción. R-067 y anteriores vigentes; Fase05 y entornos reales requieren sus controles/autorizaciones, D-043 intacta.
+
+### Gates finales y trazabilidad
+
+**673/673** =643 anteriores+30 nuevas (62 contratos+115 persistencia+187 workspace+101 runtime+201 Ollama+7 spike), sin fallos/skips en suite final. Node24.19.0 estable/pnpm12.15.0; frozen/peers/check final exit nativo0, formato/lint/typecheck/build/tests/diff/secretos verdes. Check1310,32s/workspace658,83s/runtime589,49s; tiempo de gates, no SLA del bugfix. El enlace dev hace que pnpm pruebe runtime después de workspace. Primera pasada672 también verde antes del último caso de storage; final prueba los30 con fuente actual estabilizada antes de colectar runtime. Lint/typecheck/build globales repetidos tras finalizar tests; formato documental final separado, sin otro cambio funcional.
+
+Logs stdout/stderr/exits/entorno/regresiones/hashes: `%TEMP%/beonforge-m041-ecbccd3dc5ef4f8cafdd420b176a5e38/`. Autoría: 8.3 TEMP corregido en autorización de tests sin relajar canonical; primer focal20/21 por edición concurrente de esquema de pins entre runner/hijo, resuelto antes de suite estable. Red/green internos review1/1 y storage1/1; cancelación de review antes de intent cubierta. Diagnóstico stdin con --input-type no compatible con worker sustituido por CLI de archivo, sin cambiar kernel; helper de espera de rerun expiró sin matar pruebas, check real final completo. Ningún fallo atribuido a R-061 ni marcado resuelto.
+
+Siguiente paso exclusivo: paquete de revisión independiente M04.1 por propietario. No otro nodo/harness/proveedor ni cierre global04. Rollback del producto: commit inverso acotado de demo/tests, conservar datos/evidencias; sin borrado o reparación automática de raíces.
+
+---
+
+## Histórico — plan aprobado antes de implementar M04.1
+
 Estado: **PREPARADA / NO INICIADA**. Sólo planificación documental autorizada; ninguna ejecución de esta vertical. Dependencia Fases01–03 satisfecha por cierres aceptados, incluido D-042/643 tests y gates finales de03. Fuente normativa: master-plan, fila04, **«Workflow sobre fixture: reproducir, test rojo, cambio, gates, revisión y rollback»**. No se altera ese criterio ni se adelanta la fila05.
 
 Actualización operativa: propietario autoriza implementar exclusivamente M04.1. Archivos: examples/bugfix y tests/README/package scripts/tsconfig.test de runtime, enlace workspace de desarrollo y documentos de ejecución. Ningún cambio al kernel/contratos aceptados. Demo TypeScript ejecutada con Node24 aprobado y typechecked junto a tests; CLI fija sin módulos/comandos arbitrarios. Preparación sobre padre privado vacío explícito; revisión pendiente por defecto, approve/discard sólo con decisión y grants propios ligados a raíz/hash de evidencia. Gates completos/643 anteriores y nuevas integraciones; rollback acotado de commits de demo conservando evidencias, sin borrar datos reales. No05 ni cierre automático04; siguiente gate revisión independiente. El texto de preparación inferior es el plan aprobado, no evidencia de ejecución.

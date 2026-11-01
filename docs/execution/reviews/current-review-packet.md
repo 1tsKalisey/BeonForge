@@ -1,3 +1,51 @@
+# M04.1 — Primera vertical determinista de bugfix
+
+**Implementado, ABIERTO para revisión independiente** suministrada por propietario. Código **fed1763**, comparar `git diff b39e98b..fed1763`; evidencias en commit documental posterior. **Fase04 ABIERTA**, sin cierre automático ni inicio05. Fases01–03 aceptadas/cerradas; D-043 obligatoria. No invocar Claude/otros agentes ni utilizar proyectos existentes como objetivos de prueba.
+
+## Alcance e interfaces
+
+Única demo bajo packages/runtime/examples/bugfix (demo.ts, fixture.ts, cli.mjs, README) y test/bugfix.test.ts; script demo:bugfix/tsconfig.test incluye ejemplos TS nativos Node24 con types estrictos y dev link workspace (4 líneas lockfile). **No modificaciones al kernel, contratos, EventStore/ArtifactStore, workspace/contexto aceptados**. Reutiliza sus exports compilados actualizados; ejemplo ejecuta TS actual con Node24 y se typecheckea junto a tests. Sin SDK, comandos libres, sistema general de fixtures/patches, routing o agentes.
+
+- prepareBugfixDemo(parent): padre privado canónico vacío explícito, crea repo Git local nuevo dedicado con sólo código/datos/bug sintéticos propios. Sin copiar/clonar/descubrir otros proyectos ni usar BeonForge como target. Git template/hooks privados vacíos, identidad sintética, sin remotos/credenciales/servicios. Worktree nuevo detached al commit exacto y ContextPackage/Envelope de4 archivos.
+- runBugfixDemo(root, policy, signal?): permisos propios vivos canRead/canRun/canPatch y hash de preview ligado a root/intent/commit/pre-post/path. DAG red→patch→green→evidence mediante executeWorkflow real; comandos fijos y bytes de fixture exactos antes/después, nunca instrucciones del repo. Patches sólo src/add.ts, dispatch wx/fsync más start SQL durable; estados inciertos bloquean sin retry.
+- inspectBugfixDemo(root, policy): reabre DB existente, contexto/CAS verificados, receipt histórico/worktree actual/attempts/revisión separados. No inicializa DB perdida, empty o unsafe. Estado de marker no puede contradecir receipt confirmado SQLite/CAS.
+- reviewBugfixDemo(root, decision, evidenceSha256, policy, signal?): requiere canReview/hash correcto; discard exige canDiscard y postimagen exacta. Marker exclusivo durable y workflow de decisión; approve sólo registra dato explícito del caller, no identidad humana autenticada ni integración. Discard inverso conocido→rojo esperado→diff limpio; historia verde inmutable. Default run nunca decide por el propietario.
+
+## Evidencia funcional
+
+Fixture TypeScript propio: .gitignore, package.json, src/add.ts con add(2,2) que resta, test/add.test.mjs con la aserción prevista. Nuevo git init/commit local, sin otros proyectos. Materialización/atributos/configuración e identidades de B03 reutilizadas, 12 pins de directorio y file handles verificados/nlink1; Node test con --permission sólo FS-read de worktree, test-isolation=none y sin flags de escritura/child/worker. Entorno mínimo sin inyección Node/Git/credenciales, argv sin shell,10s y64KiB por stdout/stderr; bloque60s cooperativo y se espera a handlers antes de cerrar store. No prometer sandbox SO/red ni defensa contra propietario hostil de ancestros.
+
+Demo CLI real **sintética**, proceso run y posterior inspect separados: base064a5101625739a80344d54c14d6719bbb57c152; salida0/completed red,patch,green,evidence, evidence SHA256 **3495d39461b7d9821038035f38bad8501c99139ca8b380144e06b1df69a47327**,865bytes. Segundo proceso confirma mismo contexto/mapa4 archivos/ref y redExit1/greenExit0, worktree histórico confirmed/actual modified, **review:pending / integration:not_performed**. El padre manual se localiza con `%TEMP%/beonforge-m041-demo-parent.txt`; logs de inspect dentro de evidence/ de ese root autorizado. No aprobar/descartar esa demo sin decisión expresa adicional: las ramas de review en tests son entradas sintéticas, no aceptación humana real.
+
+```diff
+-  return a - b;
++  return a + b;
+```
+
+Tests comparan diff completo (salvo línea index de Git), bytes autorizados y originales, HEAD/config/índice/archivos del fixture fuente, sentinelas sintéticos fuera de subraíces concedidas y conservación de receipt. No auditoría universal de SO. Cut tras dispatch con SIGKILL deja pending y otro proceso devuelve blocked sin nueva escritura; pérdida de finish SQL inyectada tras efecto real también bloquea. Marker preexistente nunca se limpia/reutiliza. Descarte sólo postimagen exacta; revocación/tampering/drift/links/attrs extras/credenciales de entorno no activan código inesperado. Untracked/ignored también se rechazan en este fixture acotado, sin cambiar semántica global de clean.
+
+## Tests y gates locales
+
+**673/673** finales sin fallos/skips =62 contratos+115 persistencia+187 workspace+101 runtime (71 anteriores+30 M04.1)+201 Ollama+7 spike. Baseline643 preservado. Node24.19.0 estable fuera TEMP/pnpm12.15.0; `pnpm.cmd install --frozen-lockfile`, `pnpm.cmd peers check`, `pnpm.cmd check` final nativos0. Formato/lint/typecheck/build/tests/diff/escaneo heurístico de secretos verdes; lint/typecheck/build globales repetidos tras finalizar tests, formato documental final. Check final1310,32s; workspace658,83s y runtime589,49s por orden de dependencias, no SLA.
+
+Primera pasada672 también verde. Dos regresiones internas: review-marker contradice SQL (1 rojo→1 verde) y inspect recreaba DB perdida (1 rojo→1 verde); CLI/helper corrigieron ruta8.3 y consistencia runner/hijo durante edición antes de suite estable. Cancelación review previa a intent, permisos/errores tipados y **30 casos únicos** de integración en bugfix.test.ts, no sumar ejecuciones focalizadas/fixture child a ese total. Fuente final estable antes de colectar runtime en pasada final; sin dist obsoleto. No intermitencia R-061 reproducida/sin causa identificada, no declarada corregida.
+
+Logs completos stdout/stderr/exits/entorno/rojo-verde/autoría/hashes: `%TEMP%/beonforge-m041-ecbccd3dc5ef4f8cafdd420b176a5e38/` (check-final.* es suite definitiva; check.* es pasada anterior). Los logs focalizados contienen skips por selección, no la suite final. Un helper de espera expiró sin ejecutar/matar el gate; el check definitivo real terminó completo. No atribuir ninguna suite/reproducción a auditoría independiente aún no recibida.
+
+## Foco de auditoría solicitado
+
+1. Límites y autorización real de proyecto/checkout/metadata/store, rutas canónicas, enlaces/hardlinks, pins/bytes pre/post, source original intacto y env/comandos fijos.
+2. Correspondencia exacta de parche/hash/diff y evidencia de test rojo por aserción frente a errores de infraestructura; contexto histórico no autoriza checkout vivo.
+3. Pérdida de confirmación/dispatch/SIGKILL, no replay, no recreación de DB ausente y ausencia de limpieza/overwrite automático.
+4. Revisión pending frente a decisiones explícitas del caller, marker/receipt SQL coherentes, discard seguro y ninguna integración/aceptación humana simulada.
+5. Riesgos R-067 y D-043: trusted fixture/host/caller/ACL, Node permissions no son sandbox de red/SO, no liderazgo multiproceso/power-loss/exactly-once. Exit1 diagnóstico puede seguir a efecto incierto; no conceder retry a partir del código de salida.
+
+Siguiente paso exclusivo: revisión M04.1 del propietario. R-057/061/065/066 y anteriores conservados, R-067 pendiente de evaluación independiente. Ningún agente, inferencia/Ollama, repositorio/servicio externo o proyecto real utilizado. Fase04 abierta,05 no iniciada; main intacta, sin merge/publicación.
+
+---
+
+# Histórico — cierre de Fase03 y paquetes anteriores
+
 # Cierre B05-03 y Fase03 — ACCEPTED
 
 Autorización EXPRESA del propietario: **B05-03 CERRADO — APPROVE_WITH_FOLLOWUPS**, código1520799/evidenciasbae2ecd, sin P0/P1/P2; **Fase03 CERRADA / ACEPTADA (CLOSED / ACCEPTED)** conforme a la matriz original y D-042. Acepta residuales para MVP, sin resolverlos ni conceder permisos de inferencia/agentes/ContextPackage/publicación.
