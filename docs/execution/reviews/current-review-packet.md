@@ -1,3 +1,21 @@
+# Cierre B05-03 y Fase03 — ACCEPTED
+
+Autorización EXPRESA del propietario: **B05-03 CERRADO — APPROVE_WITH_FOLLOWUPS**, código1520799/evidenciasbae2ecd, sin P0/P1/P2; **Fase03 CERRADA / ACEPTADA (CLOSED / ACCEPTED)** conforme a la matriz original y D-042. Acepta residuales para MVP, sin resolverlos ni conceder permisos de inferencia/agentes/ContextPackage/publicación.
+
+Evidencias independientes aportadas:48/48 registry,201/201 Ollama,36 reproducciones de Claude sin conexiones HTTP, recuperación real SQLite/segundo proceso.643 globales anteriores acreditados mediante logs y18 hashes contrastados sin discrepancias; **no se atribuye a Claude ejecución de la suite completa**. El paquete auditado inferior se conserva como histórico: ya no hay una revisión pendiente de B05-03 ni se solicita repetirla.
+
+Gates finales locales nuevos, Node24.19.0 estable/pnpm12.15.0: `pnpm.cmd install --frozen-lockfile`=0, `pnpm.cmd peers check`=0, `pnpm.cmd check`=0; formato/lint/typecheck/build/tests. **643/643 efectivos**, cero fallos/skips: contratos62+persistencia115+runtime71+workspace187+Ollama201+spike7. Check703,29s/workspace649,67s/Ollama2,89s. Diff/escaneo heurístico de secretos/formato documental final verificados; logs completos stdout/stderr/exits/entorno/hashes en `%TEMP%/beonforge-phase03-close-a9420384b68142caaef60631b0d8a683/`. R-061 no reproducida, sin causa/no resuelta. Sin cambios funcionales/dependencias/versiones ni peticiones reales a Ollama.
+
+Matriz de cierre en [phase-03.md](../phases/phase-03.md): dependencia02, probe/preflight, clasificación/autorización sintética, inferencia real anterior confirmada/answer4/exit0, salida estructurada, timeout/cancelación cliente, registry/evaluación/recuperación y separación efectiva de permisos cumplidos en alcance auditado. Inferencia previa gemma3-hf:1b74,31s/120s, una ejecución/cero retry;2GET+1POST200 por log pasivo sin request ID/packet capture. Medición inicial, no benchmark o prueba de programación; no reejecutada.
+
+Registry no autoriza inferir, CAS sólo integridad frente al dueño, evaluación declarada y digest no acreditan pesos activos. P3 aceptados de B05-03: identidades textuales alternativas/digests contradictorios, reevaluación mediante nueva raíz, lectura todo-o-nada por revocación, vistas mutables aisladas. R-057/061/065/066, P3 de01/02, ACL/huérfanos/power-loss y falta de sandbox siguen abiertos/clasificados en risks.md.
+
+Siguiente preparación: [Fase04/M04.1](../phases/phase-04.md), **PREPARADA / NO INICIADA**. Único nodo propuesto: vertical bugfix determinista en fixture público, contexto/worktree autorizados, cambio fijo confiable, rojo/verde/diff/revisión y rollback explícito. Sin agente simulado/nuevo subsistema; harness externos siguen en05. No código de04, nueva inferencia, herramientas genéricas, merge/publicación ni cambios a main. Detener tras commit documental atómico; no invocar Claude/otros agentes.
+
+---
+
+# Histórico — paquete B05-03 auditado antes del cierre
+
 # B05-03 — Registry mínimo y evaluación del candidato local
 
 **Implementado, ABIERTO para revisión independiente** suministrada por propietario. Código **1520799**, comparar `git diff 8a20bf3..1520799`; docs/evidencias en commit posterior. Fase03 ABIERTA, no cerrar automáticamente ni iniciar Fases04/05. B05-01/02 y Fases01/02 aceptados/cerrados; sin reabrir sus implementaciones. No invocar Claude/otros agentes.

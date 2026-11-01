@@ -1,12 +1,32 @@
 # Registro de riesgos
 
+## Aceptación de residuales de Fase03 — D-042
+
+Propietario acepta expresamente estos límites como seguimientos del MVP al aprobar B05-03 y cierre03; **no son defectos resueltos ni nuevas autorizaciones**. APPROVE_WITH_FOLLOWUPS sin P0–P2,48/48 registry,201/201 Ollama y36 reproducciones independientes sin HTTP;643 globales por logs, no ejecución completa atribuida a Claude. Se conserva evidencia y clasificación previa; este cierre no cambia código ni corrige los seguimientos.
+
+| Riesgo / seguimiento | Clasificación vigente y condición posterior |
+|---|---|
+| R-057, autenticidad CAS | Residual aceptado bajo caller/raíces/ACL privadas confiables; SHA-256 sólo integridad. Dependencia de otra frontera antes de importar artefactos/afirmaciones de terceros. |
+| R-061, intermitencia | Seguimiento futuro aceptado, no reproducido/sin causa identificada/no resuelto. Si reaparece un gate fallido, conservar logs y bloquear cierre técnico/avance afectado. |
+| R-065, proveedor local | Residual aceptado del sintético; identidad/digest activos no corroborados, alias mutable, timeout/cancelación no garantizan parada remota. Antes de nuevos usos, autorización independiente de destino/modelo/payload, clasificación y controles del efecto. |
+| R-066, registry | Residual aceptado: snapshots/raíces antiguas/ramas explícitas y posibles huérfanos, sin head global/GC/retry automático; evidencia declarada, no live pin ni permisos. |
+| B05-03: identidades textuales | Seguimiento no bloqueante: endpoint IPv4/IPv6/nombres alternativos de modelo pueden representar el mismo servicio/pesos con digests declarados contradictorios en identidades textuales diferentes. No normalizar ni convertir registry en routing ahora. |
+| B05-03: reevaluación | Seguimiento no bloqueante: evidencia histórica inmutable/compleción monótona; determinadas reevaluaciones requieren nueva raíz explícita, no reemplazo silencioso de hechos/procedencia. |
+| B05-03: revocación parcial | Seguimiento no bloqueante: lectura todo-o-nada si se revoca cualquier candidato del snapshot. No es filtrado automático ni permiso persistente por una raíz conocida. |
+| B05-03: vistas mutables | Seguimiento no bloqueante: objeto retornado mutable, sin cambiar CAS ni afectar otras lecturas. No usar una vista modificada como fuente de autoridad. |
+| P3 previos B05-01/02 | Seguimientos futuros conservados: clasificación RST/errores inesperados, SIGINT CLI/script real; JSON answer duplicadas antes de generalizar, hash sin endpoint y grants reutilizables/no caducan. Mostrar/validar destino/modelo/hash separados y consentimiento administrativo único cuando se autorice otra petición. |
+| Worktree sin sandbox, R-049 y privacidad | Residuales aceptados en02/03; dependencias de seguridad antes de ejecutar código/procesos no confiables. Estado clean no incluye untracked/ignored ni resuelve case Windows global; contexto histórico no autoriza checkout vivo/envío. M04.1 sólo fixture público/procesos fijos confiables; harness/herramientas generales siguen en05. |
+| Capacidad de programación | No evaluada; answer4 y74,31s sólo una muestra sintética, no benchmark ni bloqueo por rendimiento. La vertical04 será determinista, no prueba de programación de Ollama. Integración/capacidad de agentes requiere05 y su evidencia propia. |
+
+Ausencia de request ID/captura de paquetes preserva el límite de correlación del único POST observado; aceptación no amplía garantías. ACL privadas/ancestros, artefactos huérfanos, fsync de directorios Windows y pérdida eléctrica siguen sus riesgos anteriores. No permiso implícito para inferencias, ContextPackages, herramientas, archivos privados o publicación.
+
 ## B05-03 — R-066: registro explícito, no autoridad operativa
 
 Registro/evaluación v1 conservan datos declarados, no conceden autorización HTTP o de inferencia. Propiedades propias de lectura/registro/evaluación y allowlist exacta se revalidan alrededor de CAS; leer una referencia no permite usar un modelo ni el checkout. Esquema/SHA-256/canonicalización/consistencia verificables no autentican al dueño del CAS ni reproducen observaciones del operador.
 
 Digest del candidato declarado, no pin del alias/pesos activos ni prueba de instalación actual. El digest concreto del ejemplo es dato de fixture, no corroborado por el reporte sintético ni comprobado contra Ollama en este nodo. Evidencia histórica answer4/74,31s y ventana de log sin request ID/captura no equivalen a benchmark, capacidad de programación, garantía de conteo global o habilitación de contexto privado/herramientas.
 
-Caller conserva referencia raíz y ubicación privada del store: snapshots históricos no tienen head mutable/global ni detección de actualizaciones concurrentes. Dos escrituras desde raíz antigua producen ramas; serializar explícitamente, sin auto-merge/retry. Límite16 candidatos/64KiB; completar evidencia parcial sin reemplazar hechos anteriores. Corte o revocación después de put puede dejar huérfano, sin raíz retornada, limpieza ni transacción distribuida. ACL/CAS/Windows/power-loss anteriores siguen vigentes. Riesgo residual documentado para revisión, no marcado resuelto. R-065/R-061 y cuatro P3/RST/SIGINT/errores inesperados conservados; ninguna nueva inferencia autorizada.
+Caller conserva referencia raíz y ubicación privada del store: snapshots históricos no tienen head mutable/global ni detección de actualizaciones concurrentes. Dos escrituras desde raíz antigua producen ramas; serializar explícitamente, sin auto-merge/retry. Límite16 candidatos/64KiB; completar evidencia parcial sin reemplazar hechos anteriores. Corte o revocación después de put puede dejar huérfano, sin raíz retornada, limpieza ni transacción distribuida. ACL/CAS/Windows/power-loss anteriores siguen vigentes. Residual aceptado expresamente para MVP mediante D-042, no resuelto. R-065/R-061 y cuatro P3/RST/SIGINT/errores inesperados conservados; ninguna nueva inferencia autorizada.
 
 ## Primera demo real — observación y límites, sin nuevos experimentos
 
@@ -14,7 +34,7 @@ Registro documental de la única ejecución expresamente autorizada ya completad
 
 Conteo respaldado por ventana añadida del log servidor: dos GET y un POST200, no exit0 por sí solo. Sin request ID correlacionado ni packet capture; puede haber otros clientes no auditados y no se prueba at-most-once global/ausencia exhaustiva de efectos del SO. No ampliar garantías ni copiar logs sensibles. La muestra no prueba determinismo general, robustez de respuestas no sintéticas o detención remota al cancelar; cancelación/unknown cliente sigue cubierta por mocks, sin reabrir P3/SIGINT como bloqueante aquí.
 
-R-065/R-063 siguen vigentes en el uso real: servidor/modelo/alias local confiable según preparación del operador, no autenticación/pin atómico; hash excluye endpoint y grant no expira/se consume. R-061 sin causa/no resuelta, cuatro P3/RST/errores inesperados/SIGINT conservados. El registry funcional pendiente en este registro histórico se implementa en B05-03/1520799; falta aceptación independiente y decisión de cierre global, no74,31s, P3 aceptados o bugfix/harness04/05. No se ha contactado Ollama ni ejecutado nuevas inferencias/descargas en B05-03.
+R-065/R-063 siguen vigentes en el uso real: servidor/modelo/alias local confiable según preparación del operador, no autenticación/pin atómico; hash excluye endpoint y grant no expira/se consume. R-061 sin causa/no resuelta, cuatro P3/RST/errores inesperados/SIGINT conservados. El registry funcional pendiente en este registro histórico se implementa en B05-03/1520799; aceptación independiente y cierre global aprobados por propietario en D-042, sin convertir74,31s/P3 aceptados/bugfix-harness04/05 en bloqueantes. No se ha contactado Ollama ni ejecutado nuevas inferencias/descargas en B05-03.
 
 ## B05-02 — R-065: residual vigente tras APPROVE_WITH_FOLLOWUPS
 
@@ -31,7 +51,7 @@ R-063 permanece: loopback no autentica al proceso ni prueba que un alias sea un 
 
 requestDispatched significa entregado al transporte/posibilidad de envío; no prueba recepción/computación. Tras POST, timeout/cancel/RST/HTTPerror sin done/model válidos dejan outcome unknown, sin retries/fallback. done/model coincidentes confirman finalización observada, incluso si JSON interior inválido o permiso revocado impiden devolver respuesta. Cancelar socket no acredita que servidor detuvo cómputo. Estado sólo en memoria, sin EventStore/intent durable/reanudación ni exactamente-una-vez; no introducirlos fuera del plan. Token cap depende del servicio; bytes/tiempo acotados por cliente. No se garantiza determinismo del modelo, sólo evaluación del resultado sintético.
 
-Node24.19.0/pnpm12.15.0 estables comprobados en implementación; no entorno cambiado en este registro. R-061 sin causa/no resuelta, RST/errores inesperados/SIGINT real Windows siguen pendientes. CLI validada contra mocks no acredita SIGINT del SO; ejecución real normal tampoco. R-064/B05-01 y privacidad/CAS/workspace/D-036 intactos. Candidato real evaluado sólo en fixture arriba; Fase03 abierta; el registry antes pendiente se implementa en1520799 y espera aceptación independiente/decisión global. Autorización anterior utilizada no concede consultas/configuración/descargas u otra inferencia; esperar nueva instrucción exacta.
+Node24.19.0/pnpm12.15.0 estables comprobados en implementación; no entorno cambiado en este registro. R-061 sin causa/no resuelta, RST/errores inesperados/SIGINT real Windows siguen pendientes. CLI validada contra mocks no acredita SIGINT del SO; ejecución real normal tampoco. R-064/B05-01 y privacidad/CAS/workspace/D-036 intactos. Candidato real evaluado sólo en fixture arriba; Fase03 cerrada por D-042; el registry1520799/bae2ecd aceptado independientemente conserva estos límites. Autorización anterior utilizada no concede consultas/configuración/descargas u otra inferencia; esperar nueva instrucción exacta.
 
 ## B05-01 — R-064 / P1 HTTP101 y seguimientos de auditoría
 

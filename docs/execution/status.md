@@ -2,7 +2,19 @@
 
 Actualizado: 2026-11-01. Leer este archivo antes de cualquier tarea.
 
-## Posición vigente — B05-03 implementado, abierto para revisión
+## Posición vigente — Fase03 CERRADA / ACEPTADA; Fase04 preparada
+
+**B05-03 CERRADO — APPROVE_WITH_FOLLOWUPS** independiente, sin P0/P1/P2, código1520799/evidenciasbae2ecd. Propietario aprueba expresamente cierre global03 y aceptación de riesgos residuales del MVP, no su resolución (D-042). Auditoría48/48 registry,201/201 Ollama y36 reproducciones independientes sin HTTP;643 globales previos acreditados por logs,18 hashes contrastados sin discrepancias. **No se atribuye a Claude ejecución completa de643 tests**.
+
+**Fase03 CERRADA / ACEPTADA (CLOSED / ACCEPTED)**: matriz de phase-03.md satisfecha sin cambiar el gate. Fases01–02 y B05-01/02 siguen cerrados. Se conserva única inferencia real previa gemma3-hf:1b/answer4/confirmed/exit0,74,31s/120s,2GET+1POST200 observados, sin retries ni correlación request ID/packet capture; medición inicial, no benchmark. Este cierre no consulta Ollama, infiere, descarga ni integra agentes.
+
+Gates finales **nuevos:643/643**, sin fallos/skips = contratos62+persistencia115+runtime71+workspace187+Ollama201+spike7. Node24.19.0 estable Program Files/pnpm12.15.0 estable. `pnpm.cmd install --frozen-lockfile`, `pnpm.cmd peers check`, `pnpm.cmd check` nativos0 (check703,29s; workspace649,67s; Ollama2,89s); check incluye formato/lint/typecheck/build/tests. Diff/escaneo heurístico de secretos y formato final documentales verificados. Logs stdout/stderr/exits/entorno/hashes en `%TEMP%/beonforge-phase03-close-a9420384b68142caaef60631b0d8a683/`. Sin cambios funcionales/dependencias/versiones; R-061 no reproducida, causa desconocida/no resuelta.
+
+Registry no autoriza inferencia; CAS da integridad, no autenticidad frente al propietario; evaluación declarada/digest no corroborado/answer4 no prueban pesos activos o programación. R-057/061/065/066, P3 anteriores y cuatro seguimientos nuevos de registry aceptados y abiertos en risks.md. No permiso implícito de ContextPackage/proveedor, herramientas o ejecución. Vault complementario sigue ausente, main e14cfdd intacta, sin merge/publicación.
+
+**Siguiente nodo propuesto: M04.1 — Vertical bugfix determinista sobre fixture autorizado**, plan completo en phase-04.md; **PREPARADA / NO INICIADA**, sin implementación. Reutilizar workflow/worktree/contexto/CAS para rojo→cambio fijo autorizado→verde→diff→revisión/rollback humanos. No agente simulado ni nuevo harness; Codex/OpenCode y ejecución de herramientas generales reservados para05. Detener tras este commit documental, sin iniciar otro nodo.
+
+## Histórico — entrega B05-03 anterior a aceptación
 
 Código **1520799**: registry mínimo de candidatos Ollama explícitos, snapshots canónicos v1 en ArtifactStore y evaluación sintética declarada. APIs `registerLocalCandidate`, `readLocalCandidates`, `recordCandidateEvaluation`; caller conserva referencia raíz/ubicación privada para recuperar tras reinicio. Sin catálogo mutable, red, descargas, inferencias nuevas ni cambios a contratos/kernel/HTTP aceptados. Fixture gemma3-hf:1b conserva answer4/74,31s/procedencia histórica; digest del ejemplo es dato de fixture no corroborado, no pin activo. Comprobaciones automáticas sólo de integridad, esquema y consistencia, no reproducción del proveedor/autenticidad del operador.
 

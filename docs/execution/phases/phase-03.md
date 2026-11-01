@@ -1,6 +1,14 @@
 # Fase 03 — Primer proveedor local
 
-Estado: abierta. B05-03 implementado en1520799, pendiente de revisión independiente y decisión de cierre global. Fases 01 y 02 aceptadas/cerradas; D-036 ACCEPTED permanece vigente.
+Estado: **CERRADA / ACEPTADA (CLOSED / ACCEPTED)**, autorización expresa del propietario/D-042, con APPROVE_WITH_FOLLOWUPS de B05-03 y gates finales verdes. Fases01–02 y B05-01/02 permanecen aceptados/cerrados; D-036 ACCEPTED vigente. No cambios al criterio de salida, permisos nuevos o inicio de04/05.
+
+## Cierre autorizado B05-03 y Fase03
+
+**B05-03 CERRADO — APPROVE_WITH_FOLLOWUPS independiente**, implementación1520799/evidenciasbae2ecd, sin P0/P1/P2. Evidencia de revisión aportada por propietario:48/48 registry,201/201 Ollama y36 reproducciones independientes sin conexiones HTTP; recuperación SQLite real/segundo proceso. Los643 globales anteriores se acreditan por logs y18 hashes contrastados sin discrepancias; **no se atribuye a Claude ejecución de la suite completa**. Propietario aprueba también cierre global conforme a la matriz y acepta residuales como seguimientos MVP, no resueltos.
+
+Gates finales repetidos por solicitud expresa, Node24.19.0 estable/pnpm12.15.0: **643/643** efectivos = contratos62+persistencia115+runtime71+workspace187+Ollama201+spike7; sin fallos/skips ni nuevos tests. `pnpm.cmd install --frozen-lockfile` exit0, `pnpm.cmd peers check` exit0, `pnpm.cmd check` exit0 (formato, lint, typecheck, build y suite completa). Check703,29s/workspace649,67s/Ollama2,89s. Diff y secretos/formato documental final verificados; logs completos nativos/exits/entorno/hashes: `%TEMP%/beonforge-phase03-close-a9420384b68142caaef60631b0d8a683/`. No fallo R-061 reproducido, no causa identificada/no resuelto; ninguna modificación funcional/dependencias/versiones necesaria.
+
+No nuevas inferencias/consultas a Ollama/descargas. Registro no autoriza inferir; CAS sólo integridad frente a propietario; evaluación declarada no confirma pesos activos por digest, y answer4 no prueba programación. Límites de correlación/74,31s preservados abajo. P3 B05-03 aceptados: identidades textuales alternativas/digests contradictorios, reevaluaciones que requieren nueva raíz, lectura todo-o-nada con revocación y vistas mutables sin afectar otras lecturas. R-057/061/065/066 y seguimientos previos abiertos según risks.md. Siguiente preparación documental: [Fase04/M04.1](phase-04.md), sin implementarla ni iniciarla; harness de05 siguen diferidos.
 
 ## Primera demostración real autorizada — evidencia registrada
 
@@ -31,14 +39,15 @@ Se conserva literalmente el gate del master-plan: **«Registry, probes y Ollama 
 | Ollama candidato con salida estructurada (gate03) | gemma3-hf:1b real: respuesta validada answer4/confirmed/exit0; límites y log pasivo consignados arriba. | cumplido | Evaluación del fixture mínimo, no prueba de utilidad en programación ni de otros modelos. |
 | Evals (dependencia03), alcance mínimo aprobado | Caso sintético público versionado en prepareSyntheticInference, predicado answer4 y tests de fallo; un resultado real contrastable contra ese predicado. | cumplido | Una muestra no acredita rendimiento/calidad general; el plan no fija dataset múltiple/SLA que obligue a otro ensayo aquí. |
 | Cancelación/timeout y tratamiento incierto (gate03) | API/señal y deadline absoluto, abort/HTTP101/close/unknown sin retry, tests mock de B05-01/02 y auditorías aceptadas. Ejecución real terminó normal antes del plazo. | cumplido | Capacidad cliente cubierta por contrato/mocks; cancelación real/OS SIGINT/parada remota no acreditadas y siguen limitaciones/P3, no requisitos nuevos. |
-| Registry de proveedor/modelo (gate03) | B05-03/1520799: alta/listado/evaluación en CAS v1; 48 tests de permisos/integridad/duplicación/evidencia, reapertura y segundo proceso; fixture saneada gemma declara procedencia/answer4/74,31s, sin verificación activa de digest/proveedor. | cumplido localmente, pendiente revisión | Aceptación independiente de B05-03 pendiente. Registro no concede permisos operativos. |
-| Salida global de Fase03 | Criterios funcionales mínimos cubiertos localmente; demo real anterior y nueva suite643/643/gates, sin repetir inferencia. | parcialmente cumplido | Revisar B05-03 y decidir cierre explícito; no cierre automático ni nuevo desarrollo mínimo identificado dentro del gate. |
+| Registry de proveedor/modelo (gate03) | B05-03/1520799/bae2ecd aceptado APPROVE_WITH_FOLLOWUPS:48/48 registry,201/201 Ollama,36 reproducciones independientes sin HTTP; CAS real/reapertura/segundo proceso. Evaluación declarada/digest no corroborado conservados. | cumplido | Ninguno dentro del alcance aceptado; P3 en seguimiento, no autorización operativa. |
+| Separación registro/evaluación/permisos | Tests de grants propios/revocación/allowlist y rechazo de registry/vistas/referencias como grants probe/inferencia, códigos exactos/cero despacho; revisión independiente aceptada. | cumplido | Ninguno para sintético; contexto privado/herramientas requieren permisos propios posteriores. |
+| Salida global de Fase03 | Matriz auditada, autorización expresa de cierre D-042 y gates finales643/643/exit0; demo real previa no repetida. | cumplido — CERRADA / ACEPTADA | Sin bloqueantes del alcance03. Residuales aceptados, no resueltos; Fase04 sólo preparada. |
 
 Fuera de esta matriz: Fase04 introduce vertical bugfix sobre fixture (reproducir, rojo, cambio, gates/revisión/rollback); Fase05 introduce harness oficiales Codex/OpenCode, herramientas/permisos/aislamiento y contract tests. No son faltas de Fase03 ni se adelantan. Los P3 de duplicados JSON, endpoint fuera del hash, grants reutilizables, script real30s/SIGINT y R-061/R-065 siguen abiertos; no se convierten en bloqueantes sin ampliar escenario.
 
-## B05-03 — Registry mínimo y evaluación del candidato local
+## B05-03 — Registry mínimo y evaluación del candidato local (CERRADO)
 
-Implementación autorizada expresamente por propietario; sin discrepancias con el gate Registry de master-plan. Sustituye la propuesta inferior, sin redefinir criterios globales ni autorizar cierre de fase.
+Implementación y cierre aceptados expresamente por propietario mediante D-042/APPROVE_WITH_FOLLOWUPS; sin discrepancias con el gate Registry de master-plan. Alcance original conservado abajo y propuesta anterior como trazabilidad; no redefine criterios globales ni concede nuevos permisos.
 
 - Objetivo verificable: registrar/consultar candidatos Ollama explícitos y su evidencia limitada, conservados tras reinicio por referencia CAS.
 - Diseño mínimo: snapshots inmutables canónicos v1 en ArtifactStore existente; caller conserva referencia raíz actual, no catálogo mutable/tabla SQL/eventos de bloques ficticios. Permisos propios vivos de lectura/registro/evaluación con allowlist de identidades exactas. Registro/evaluación no autorizan metadata HTTP ni inferencia.
@@ -47,9 +56,9 @@ Implementación autorizada expresamente por propietario; sin discrepancias con e
 - Aceptación/tests: CAS temporal real con worker/reapertura y segundo proceso, esquemas y datos inválidos/duplicados, evidencia gemma declarada y capacidades derivadas sin puntuaciones, permisos/propiedades propias/revocación, referencias corruptas y separación de grants B05-01/02. Guard de red en tests: cero llamadas a Ollama/inferencias/descargas.
 - Gates: Node24.19.0/pnpm12.15.0 estables, frozen/peers/formato/lint/typecheck/build/595 anteriores+tests nuevos/diff/secretos. Sin deps externas nuevas ni cambios a contratos aceptados.
 - Exclusiones/rollback: no SDK/routing/scheduler/model downloads/UI/harness/nueva evaluación real. Revert acotado de B05-03 preservando blobs/raíces anteriores; no borrar/restaurar datos automáticamente. Snapshot nuevo no sustituye head concurrente implícitamente: caller gestiona referencias/ramas, sin transacciones distribuidas.
-- Salida: revisión independiente B05-03; actualizar matriz según evidencia, mantener Fase03 abierta hasta decisión expresa. No Fases04/05.
+- Salida cumplida: revisión independiente B05-03 aceptada y decisión expresa de cierre global03 registrada con gates finales verdes. Fase04 sólo preparada, Fase05 sin iniciar.
 
-### Evidencias B05-03 — implementado, pendiente de revisión
+### Histórico — evidencias de entrega B05-03 antes de la aceptación
 
 Código **1520799**, comparación `git diff 8a20bf3..1520799`. Interfaces públicas compiladas `registerLocalCandidate(ref|null, candidate, policy, store)`, `readLocalCandidates(ref, policy, store)`, `recordCandidateEvaluation(ref, candidateId, evidence, policy, store)`. Reutiliza ArtifactReference/ArtifactStore y worker, sin nuevos contratos de dominio/tablas ni dependencias externas: dos enlaces workspace, lockfile actualizado offline antes de frozen final. Alta explícita distinta de tags, disponibilidad, evaluación y permiso de inferencia; no ampliar B05-01/02.
 

@@ -1,6 +1,6 @@
 # Plan maestro de ejecución
 
-Actualizado: 2026-10-28. Fuentes operativas: `AGENTS.md`, esta memoria de ejecución y `docs/product/software-factory-objective.md`. La especificación complementaria es `knowledge/AI/18 BeonForge Agentic OS/BeonForge Agentic OS MOC.md` y sus 22 documentos, cuya lectura histórica consta en PREP-001. El vault no está disponible en este checkout; no se ha vuelto a auditar. Es de solo lectura y no se incorpora a Git por defecto.
+Actualizado: 2026-11-01. Fuentes operativas: `AGENTS.md`, esta memoria de ejecución y `docs/product/software-factory-objective.md`. La especificación complementaria es `knowledge/AI/18 BeonForge Agentic OS/BeonForge Agentic OS MOC.md` y sus 22 documentos, cuya lectura histórica consta en PREP-001. El vault no está disponible en este checkout; no se ha vuelto a auditar. Es de solo lectura y no se incorpora a Git por defecto.
 
 Inspección inicial y herramientas: `docs/execution/preparation-report.md`.
 
@@ -35,15 +35,15 @@ BeonForge será un plano de control local-first, vendor-neutral, con contratos d
 
 ## Dependencias y límites transversales
 
-Estado vigente 2026-11-01: B05-01/02 y Fases01–02 cerrados. B05-03 implementado en1520799: registry explícito y evaluación limitada en CAS v1, 48 pruebas nuevas,643/643 locales y gates completos verdes. Matriz phase-03.md conserva gate exacto: registry verificado localmente, pendiente aceptación independiente. Evidencia real previa gemma/answer4/74,31s no repetida; digest del ejemplo sólo fixture no acreditado. **Fase03 abierta** hasta revisión/decisión expresa, sin otro desarrollo mínimo identificado dentro del gate. Registro/CAS no autorizan inferencia; R-066/R-065/R-061 y P3 conservados. No Fases04/05, main intacta.
+Estado vigente 2026-11-01: **Fases01–03 CERRADAS / ACEPTADAS**. B05-01/02/03 cerrados APPROVE_WITH_FOLLOWUPS; B05-03/1520799/bae2ecd aprobado sin P0–P2,48/48 registry/201/201 Ollama/36 reproducciones independientes sin HTTP,643 globales anteriores por logs/18 hashes (no suite completa atribuida a Claude). Propietario aprueba cierre global03/D-042; matriz de phase-03.md satisfecha sin cambiar el gate y gates finales nuevos643/643/exit0. Demo real previa gemma/answer4/74,31s conserva límites, no repetida. Riesgos/P3 aceptados para MVP, no resueltos; registry/CAS/digest no conceden permisos ni prueban identidad activa/programación. **Fase04 PREPARADA / NO INICIADA**: [M04.1 — vertical bugfix determinista sobre fixture autorizado](phases/phase-04.md). Workflow/contexto/worktree/tests/diff/revisión/rollback con intervención fija confiable; Codex/OpenCode/harness permanecen en05. Sin nuevas inferencias, cambios funcionales, merge/publicación o cambios de main.
 
 Los bloques del objetivo son hitos de producto, no sustituyen las dependencias de fase: B00 corresponde a esta reconciliación; B01/B02 al kernel de Fase 01; B03 a Fase 02; B04 a Fase 05; B05 a Fase 03; B06 a la API y Fase 09; B07 a Fase 06; B08 a la coordinación de Fases 01/07; B09 es transversal; B10 agrupa evolución posterior. No se adelantan proveedores ni UI por el orden numérico de los bloques. Entrenamiento, OmniRoute y plugins permanecen diferidos fuera del MVP.
 
-Fase 01/B03-01/B03-02/B03-03 aceptados y cerrados. **Fase 02 sigue abierta**: B03-04 recibe APPROVE_WITH_FOLLOWUPS; P2 de integridad y privacidad corregidos localmente en 18d71dd/8820f3a, **426/426** y gates verdes, sin cierre operativo hasta revisión focalizada. R-047/050 ya revisados en el nodo; case exacto exigido para selección, R-049 global/R-048 parcial siguen abiertos. R-037/038/040/041, privacidad/snapshot R-052/053 y R-054 conservan sus límites. Siguiente gate: revisión focalizada B03-04 aportada por usuario, sin otro nodo iniciado. Sin merge/publicación ni cambios de main.
+Registro histórico previo a cierres02/03, conservado para trazabilidad (no posición actual): Fase 01/B03-01/B03-02/B03-03 aceptados y cerrados. **Fase 02 sigue abierta**: B03-04 recibe APPROVE_WITH_FOLLOWUPS; P2 de integridad y privacidad corregidos localmente en 18d71dd/8820f3a, **426/426** y gates verdes, sin cierre operativo hasta revisión focalizada. R-047/050 ya revisados en el nodo; case exacto exigido para selección, R-049 global/R-048 parcial siguen abiertos. R-037/038/040/041, privacidad/snapshot R-052/053 y R-054 conservan sus límites. Siguiente gate: revisión focalizada B03-04 aportada por usuario, sin otro nodo iniciado. Sin merge/publicación ni cambios de main.
 
 Cada fase conserva seguridad, threat model, paridad, migración, backup/restore, observabilidad, documentación y cobertura. No se incorporan Nx, Turborepo, NgRx, LangGraph, Temporal, Graphiti, vector DB, Kubernetes o microservicios por anticipación. Repositorios y frameworks citados en el vault son candidatos. Fases 00–01 usan un solo escritor, sin IA de producto, modelos locales, OmniRoute, routing automático ni dashboard.
 
-## Operación por tarea
+## Operación por tarea — registros históricos de fases anteriores
 
 Última actualización: revisión focalizada acepta independientemente confirmación/atributos B03-02. Corrección menor stdin local y plan B03-03 preparados; B03-03 no tenía alcance ejecutable y no se implementa en este turno. Propuesta limitada .gitignore/validación actual en phase-02.md; permisos y exclusiones de fase intactos.
 
