@@ -8,6 +8,7 @@
   "include": [
     "test/**/*.ts",
     "examples/bugfix/**/*.ts",
-    "examples/simulated/**/*.ts"
+    "examples/simulated/**/*.ts",
+    "examples/codex/**/*.ts"
   ]
 }
