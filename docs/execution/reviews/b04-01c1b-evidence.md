@@ -1,0 +1,65 @@
+# B04-01c.1b — corrección Windows y evidencia para revisión
+
+Fecha: 2026-11-02. Base `add2457`, c.1 continúa BLOCKED. No aceptación independiente ni avance a c.2/c.3. D-043/D-046 vigentes. Vault complementario `knowledge/AI/18 BeonForge Agentic OS` ausente. No Claude ni subagentes invocados.
+
+Código y pruebas: **b9c61c3**, `git diff add2457..b9c61c3`. Siete archivos: preflight.ts, probes.ts, windows-job.ts, windows-job-cli.mjs, windows/PreflightJob.cs y los dos tests codex. Documentación/retractación en commit separado. Rama `phase/02-project-inspection`; main permanece en `e14cfdd1fc933ad3cbfd7cee9c18aa9740f755e7`.
+
+## Objetivo, alcance y rollback
+
+Corregir exclusivamente P1-1 y evaluar el control del árbol del futuro Codex. Archivos: examples/codex/{probes.ts,preflight.ts,windows-job.ts,windows-job-cli.mjs,windows/PreflightJob.cs,README.md}, dos tests focalizados y registros de ejecución. Sin kernel, contratos públicos, dependencias, adaptador, inferencias, credenciales, setup global, destinos de red ni repositorios objetivo. Los programas son sintéticos propios; ningún proyecto ajeno o BeonForge se usa como target de agente.
+
+Aceptación: asociación previa, Job no heredable/sin breakaway/KILL_ON_JOB_CLOSE, cinco cierres forzados <=500ms, pérdida del launcher, Jobs anidados, rechazos de identidad y compatibilidad MXC con membresía observable. Fallo/desconocido bloquea. Revert acotado de los commits de esta corrección conservando informes/SQL/CAS/raíces; no borrar datos, repetir efectos inciertos o modificar main. Siguiente nodo exclusivo: revisión independiente suministrada por propietario.
+
+## P1-1: reproducción y clasificación
+
+**Confirmado: atribución inválida.** La inspección inicial identifica spawn no detached; la regresión comportamental reproduce después ambas variantes sin MXC: la original pierde hijo/nieto tras salir el padre y la corregida conserva ambos a500ms, antes de la expiración independiente. Sus Jobs implícitos de libuv interferían con la medición. La desaparición observada no demuestra terminación por MXC. Se retira expresamente de status, phase-05, coverage, README y paquete de revisión. `TREE` usa ahora detached; el fixture nuevo usa CreateProcessW sin Jobs propios ni flags breakaway y sus descendientes no heredan handles.
+
+Controles nativos sin Job: salida normal y TerminateProcess del padre dejan vivos hijo/nieto a la observación de 500ms; después se limpian mediante handles originales, verificados. Esto demuestra que el fixture nuevo no contiene el mecanismo que se atribuía a MXC. No reproduce un cierre MXC: en este ejecutor la prueba corregida no arranca ese backend. La expiración de seguridad de 30s de los fixtures nativos y de 4s de la sonda antigua es limpieza separada, nunca evidencia de terminación.
+
+## Implementación mínima y fronteras
+
+Helper Windows específico de diagnóstico, C#/.NET Framework usando P/Invoke Win32; es PE administrado, no binario C++ independiente. Compilador inbox Framework64 v4.0.30319, sin restore/instalación. Hashes de fuente/compilador/PE y rutas se guardan en el informe privado. No hay interfaz de comandos arbitrarios, configuración de agente ni integración con el supervisor aceptado.
+
+CreateProcessW CREATE_SUSPENDED con PROC_THREAD_ATTRIBUTE_JOB_LIST (asociación atómica al crear) → IsProcessInJob → comprobación de receipt vacío → ResumeThread. Así tampoco queda una ventana de proceso suspendido huérfano si muere el launcher entre creación y una llamada separada a AssignProcessToJobObject; esta última sólo es necesaria para el Job anidado, siempre antes de reanudar. Un fallo nunca reanuda el hijo. Job anónimo con flags sólo KILL_ON_JOB_CLOSE; handle comprobado no heredable. Codex hereda únicamente stdin/stdout/stderr mediante PROC_THREAD_ATTRIBUTE_HANDLE_LIST. Los descendientes del fixture no heredan handles; la raíz recibe únicamente los tres stdio, nunca el handle del Job. El proceso launcher no pertenece a su propio Job y posee su único handle; su muerte dispara el cierre del Job. No se concede breakaway. TerminateJobObject y QueryInformationJobObject confirman cero miembros; se esperan los handles originales de los fixtures, evitando identidad por PID durante cancelación normal/forzada.
+
+Al morir el launcher no se conserva un handle al Job (lo impediría probar KILL_ON_JOB_CLOSE); el controlador exige ausencia de todos los PIDs enumerados de ese Job, incluidos conhost. La reutilización de PID o denegación de observación bloquea conservadoramente. No se presume que ausencia de un PID pruebe ausencia universal de procesos no enumerados. La membresía es heredada, no reparada asignando descendientes a posteriori. Tests anidados crean segundo Job antes de reanudar y terminan desde el exterior.
+
+El fixture nativo expira a 30s como último límite de limpieza. Observaciones válidas ocurren en <500ms desde terminación, tras startup acotado a 8s. El receipt completo requiere newline; lecturas durante escritura no se consideran evidencia. Fallos exploratorios de sharing de receipts se conservaron conceptualmente y fueron corregidos antes del gate final. No se modifica el límite de 500ms; su exceso bloquea. Sin límite CPU/RSS configurado.
+
+Job Object no es sandbox FS/red. Procesos creados por servicios externos, WMI, COM, tareas programadas, brokers o canales fuera del árbol pueden quedar fuera. No se ejecutan esas vías. Si MXC delega en un servicio no asociado, el Job del CLI no demuestra membresía previa de la carga. No se declara confinado el host ni se habilitan agentes.
+
+## Identidad de ejecutables y backend
+
+CLI npm nativo 0.166.0: `%APPDATA%/npm/node_modules/@openai/codex/node_modules/@openai/codex-win32-x64/vendor/x86_64-pc-windows-msvc/bin/codex.exe`, SHA-256 `9d563ee4e0441ff9d59d612013e0460ddf8e5709735c2d9f6b98b7ef8ca4eb42`, coincide con c.1. Adyacente `codex-code-mode-host.exe`: SHA-256 `977c1f01c9efac0bfe1b9032717c95f92e1c965c8441a8dacbfe824c5c79a527`; sin FileVersion observable. Se pinnea por precaución, **no se observó su uso por sandbox**. No se ejecuta code-mode-host para descubrir una versión. No se usan shims npm.
+
+Manifest local del paquete binario: `@openai/codex` versión `0.166.0-win32-x64`, SHA-256 `e099edf7636d3a7878f4485a71ad6ec35bd473b93daef0ce6a3476b45d54045a`. Es metadato de distribución, no una versión independiente verificada de code-mode-host.
+
+Antes de despacho el helper verifica rutas físicas canónicas/no reparse, GetFinalPathNameByHandle, identidad del archivo/único enlace y SHA-256 sobre handles que deniegan compartir escritura y borrado. Mantiene esos handles hasta finalizar. Comprueba salida exacta de --version bajo esos pins, con configuración/entorno privados. Tests rechazan Self con hash incorrecto y un codex.exe sintético alterado sin receipts de hijos. Esto no autentica proveedor ni resiste administrador/propietario hostil o sustitución concurrente de directorios ancestros; por ello no se habilita despacho real.
+
+Cadena efectiva observada: helper compilado → codex.exe (--version y sandbox) y, en fixture directo, helper → helper → helper con conhost.exe por proceso. No hay carga MXC ejecutada ni cadena efectiva completa identificable. Se registra por separado backend solicitado `mxc` y observado `unavailable`/`not_verified`, nunca inferido sólo por flags. Diagnóstico nativo literal: `Error: failed to prepare MXC sandbox: native MXC is unavailable on this executor`. Ocurre tanto sin Job propio como con Job. La sonda anterior corregida también verifica versión y falla startup. No es prueba de incompatibilidad causada por Job ni de que MXC funcione; es un bloqueo de capacidad en este ejecutor. No se reintenta con acceso completo ni setup global.
+
+## Resultados separados
+
+**A. Control de ciclo de vida Codex/MXC: BLOCKED.** Subescenario directo sintético PASS: normal mediante limpieza del launcher, cinco cierres forzados <=500ms, launcher muerto, asociación previa y Jobs anidados; sin supervivientes observados. No extender a Codex/MXC: startup no disponible, membresía/servicios/cadena de helpers y cancelación no demostrados. Las cinco repeticiones requeridas se ejecutan sólo en el escenario directo controlado; cinco cierres MXC no pueden acreditarse sin arranque. No ampliar el plazo ni ocultar pruebas no ejecutadas.
+
+**B. Confinamiento integral del anfitrión: BLOCKED.** Ni FS/red del host ni herramientas de una sesión real están probados. Los sentinelas anteriores permanecen evidencia histórica de comandos, no certificación vigente del host. Cero inferencias, credenciales, tráfico a proveedores, configuración global, push/merge o cambios a main.
+
+## Gates, logs y hashes
+
+Directorio privado: `%TEMP%/beonforge-c1b-evidence-d952a0397b6b4413a159d1a773bdcae5/`; puntero `%TEMP%/beonforge-c1b-last.txt`. Logs stdout/stderr/exits de install, peers, check, focalizados, preflight corregido, diagnóstico sintético y MXC. Los informes referencian raíces de build y escenarios, observaciones, fuente, compiler y hashes; índices finales source-sha256.json/evidence-sha256.json. No se versionan binarios, logs, SQLite/CAS o rutas privadas completas.
+
+Node24.19.0/pnpm12.15.0. Frozen install exit0 tras aprobación del acceso al lock del store (primer intento sandbox exit1, acceso denegado); salida aprobada transcrita del resultado de herramienta y marcada como tal en metadata, sin fingir redirección raw. Peers exit0. **pnpm.cmd check exit0,739/739**: contratos62+persistencia115+workspace187+runtime167+Ollama201+spike7, cero skips/fallos. Check incluye formato/lint/typecheck/build/tests. La regresión comportamental final de P1-1 se fijó después de la colección runtime de check16:54:36; **check no se presenta como validación final de esa revisión del test**. Lint completo, typecheck de tests, formato y28 focalizados posteriores exit0; la suite runtime completa final de runtime-verified registra **167/167, exit0**, inicio16:58:58 y620,18s, con la fuente final (test modificado antes de esa colección). Fuentes TS de producción previas a check; fuente C# final16:46:44 anterior a ambas colecciones runtime. No R-061 resuelto.
+
+Informe sintético atómico SHA-256 `0ecad2a9acb08690035afe117580be710a0a1953a2bcef76c29b00fd1aa0805e`: normal13ms, forzadas **8/6/7/8/7ms**, muerte launcher4ms (los seis miembros enumerados, incluidos conhost, ausentes). Job vacío en los cierres controlados. Baselines sin Job dejan hijo/nieto vivos; limpieza posterior confirmada por handles, no por expiración. Jobs anidados comprobados por el test completo, no por inferencia de MXC.
+
+Informe MXC atómico SHA-256 `fb2c6b5012e74fe50f6d840b46d6ebb5da088b057972fe1f89ff8258be2573d3`: versión exacta verificada en los tres intentos (baseline normal/forzada y normal bajo Job); backend unavailable, sin receipts ni cancelaciones MXC acreditadas. SHA de fuente C# compartida por ambos informes y checkout: `28c94ba33c7e4c26183d7e79f8b3e02d13a7887c0923b46a70d97e980cae2f00`. Ejecutable compilado y compiler hashes/rutas individuales dentro de cada informe; PE varía por compilación y no sustituye el pin de fuente.
+
+Exit2 de CLI diagnóstica es BLOCKED deliberado; no equivale a fallo de tests/gates. Fallos de autoría conservados: quotes TOML iniciales, alias temporal8.3 rechazado, node eval de PowerShell sin quotes, worker heredó --input-type, reader de receipts con sharing conflictivo, intento de OutputEncoding con stdio inválido y primera regresión que usó execFile(detached) no soportado y observaba demasiado pronto. La regresión final usa spawn tipado y espera500ms para cierre asíncrono, antes de expiración; **no cambia el límite de cancelación500ms**. El runtime-final intermedio rojo no es resultado definitivo; conservar sus logs y tipos rojos. Ninguno se usa como prueba positiva; no son R-061 ni están atribuidos a Claude.
+
+## Revisión y c.2 pendiente
+
+Revisar orden asociación/reanudación, flags y handles, ausencia de Jobs propios del fixture, identidad predispatch, medición <=500ms/cleanup separada, miembros adicionales y afirmaciones retiradas. Reproducir sólo escenarios sintéticos autorizados y clasificar hallazgos antes de corregir. No invocar Claude desde BeonForge.
+
+Para c.2 faltan: aceptación de esta corrección y resolver/decidir de forma expresa el bloqueo de MXC en un ejecutor permitido; demostrar cadena efectiva/membresía previa/cierre MXC y fronteras del host que correspondan al perfil aprobado. Después, autorización de c.2 para adaptador estrecho con mocks, grants vivos, límites/protocolo JSONL y evidencia durable reutilizando kernel/SQLite/CAS. No requiere ni concede inferencia/credenciales; c.3 sigue opt-in separado compatible con D-043.
+
+Fuentes de contraste, no pruebas: [Windows sandbox oficial](https://learn.chatgpt.com/docs/windows/windows-sandbox), [Job Objects](https://learn.microsoft.com/en-us/windows/win32/procthread/job-objects), [Jobs anidados](https://learn.microsoft.com/en-us/windows/win32/procthread/nested-jobs). La documentación admite que creación mediante servicios puede no heredar Job; no sustituye observación local de MXC.

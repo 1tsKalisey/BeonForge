@@ -1,5 +1,63 @@
 # B04-01c.1 — Local Codex sandbox preflight
 
+## B04-01c.1b correction — both Codex outcomes BLOCKED
+
+P1-1 is confirmed: the original Node descendants used libuv's implicit Jobs.
+Their disappearance on normal exit was **not evidence of MXC tree cleanup**.
+That attribution is withdrawn. `TREE` now uses detached descendants to avoid
+those Jobs. The corrected real diagnostic cannot currently start MXC, so its
+normal/forced MXC observations remain unverified, not transferred from the old run.
+
+The bounded Windows helper in `windows/PreflightJob.cs` uses native Win32 APIs
+through C#/.NET Framework, compiled locally with the inbox Framework64 csc.
+It is a managed PE with a CLR dependency, not a standalone native C++ binary.
+No compiler/runtime installation, agent adapter or general supervisor is added.
+Only its authored fixture, or Codex's fixed `--version` / `sandbox` diagnostic,
+can be launched. See [the evidence and review scope](../../../../docs/execution/reviews/b04-01c1b-evidence.md).
+
+The helper creates Codex suspended, atomically associates (PROC_THREAD_ATTRIBUTE_JOB_LIST) a non-inheritable, unnamed Job with
+only KILL_ON_JOB_CLOSE (neither breakaway flag), checks membership, then resumes.
+The child never inherits the Job handle. Atomic creation avoids an orphaned suspended process if the launcher dies before a separate assignment call. Codex receives only an explicit stdio
+handle list; fixture descendants inherit no handles. Association failure kills the
+still-suspended child. No process is assigned retrospectively.
+Pinning uses held read handles denying write/delete sharing, SHA-256,
+canonical final paths, physical file identity and single-link checks. Codex and
+the adjacent code-mode-host are checked before version/sandbox dispatch; both
+hashes are fixed in source. This does not authenticate the vendor or protect
+against a hostile administrator or concurrent replacement of ancestor directories.
+
+Synthetic direct execution passes normal cleanup by the launcher, five forced
+terminations under 500ms, explicit nested Jobs and launcher death. The fixture
+uses CreateProcessW, no Job of its own, and a separate 30s safety expiry that
+cannot count as success. Original process handles and Job emptiness are checked;
+launcher-death observations also include the associated conhost PIDs. Negative
+controls without a Job retain child/grandchild, then clean them by owned handles.
+
+**A. Codex lifecycle: BLOCKED.** Baseline and Job-wrapped Codex both report
+`native MXC is unavailable on this executor`. Requested backend is distinguished
+from observed backend. No successful MXC launch, effective helper chain, nested
+MXC/Job compatibility or five successful MXC cancellations is demonstrated.
+**B. Whole-host confinement: BLOCKED.** Jobs constrain lifecycle of their members,
+not filesystem or network. Services, WMI/COM/brokers and other out-of-tree creation
+can escape ordinary process inheritance; none is permitted or tested here. A
+Codex helper created through those routes cannot be claimed to belong to our Job.
+No external traffic, credentials, setup command or full-access fallback is used.
+
+Explicit diagnostics (canonical absolute binary path for CODEX):
+
+```text
+node packages/runtime/examples/codex/windows-job-cli.mjs --allow-local-synthetic-job-probes synthetic
+node packages/runtime/examples/codex/windows-job-cli.mjs --allow-local-mxc-probes CODEX
+```
+
+Reports/logs and build/source/compiler hashes stay in newly created private
+beonforge-c1b-* temp roots, retained for independent review. Exit2 records BLOCKED,
+including a successful synthetic-only lifecycle test. Ordinary Vitest gates build
+the helper and exercise synthetic processes only; they never execute Codex.
+
+The following describes the original diagnostic. Its normal-exit attribution
+has been withdrawn; historical hashes/logs are retained, not promoted to proof.
+
 This diagnostic invokes only pinned Codex 0.166.0 `--version` and `sandbox`
 commands with authored synthetic programs. No `exec`, model, auth command,
 subscription credential or external service is used. Default quality gates never
@@ -57,8 +115,9 @@ metadata. The CLI's operator-facing output contains private diagnostic locations
 
 ## BLOCKED is a valid diagnostic result
 
-The real local run demonstrated MXC startup, all filesystem sentinels, loopback
-denial and normal-exit tree cleanup. Forced termination of Codex did **not** remove
+The original local run recorded startup and filesystem/loopback sentinels.
+Normal-exit tree cleanup was confounded by libuv Jobs and is withdrawn as MXC
+evidence. Forced termination of Codex did **not** remove
 the synthetic tree within500ms. The tree disappeared later through self-expiry;
 the diagnostic left no observed survivors after settling. This does not establish
 forced tree termination or cancellation of a future agent.
@@ -68,13 +127,13 @@ host or agent tools; no agent session is authorized to test those here. Thus the
 overall report is always BLOCKED/readyForAgent:false at this stage, even when
 commandSandbox alone passes. There is no caller-controlled override to PASS.
 
-Windows Job Objects are evaluated as a possible next narrowly scoped control,
-not implemented: containing only the CLI is insufficient evidence that workloads
+Windows Job Objects were not implemented in the original c.1; c.1b above adds
+a bounded diagnostic. Containing only the CLI is insufficient evidence that workloads
 launched through MXC helpers/brokers belong to the same job before execution.
 Membership, nested-job compatibility, lifecycle and no-escape race would need real
 tests; retroactive PID assignment is not accepted as a guarantee. A Job Object
 would not fix filesystem/network/host trust on its own. No speculative native
-launcher or infrastructure is added while these independent blocks remain.
+production launcher or infrastructure is authorized by this diagnostic.
 
 ## Opt-in operation
 

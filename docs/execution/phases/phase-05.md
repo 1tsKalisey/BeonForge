@@ -1,10 +1,19 @@
 # Fase 05 — Harness externos
 
-## B04-01c.1 — implementado localmente / BLOCKED, revisión pendiente
+## B04-01c.1b — corrección acotada / BLOCKED, revisión pendiente
+
+P1-1 confirmado: la sonda anterior confundía Jobs implícitos de libuv con terminación por MXC. Atribución retirada; descendientes Node detached y fixture nuevo CreateProcessW sin Jobs propios. Helper Windows C#/.NET con APIs Win32: creación suspendida, asociación/comprobación antes de reanudar, Job no heredable/sin breakaway/KILL_ON_JOB_CLOSE, pins de ejecutables y tests sintéticos. No launcher de producción ni agente autorizado. Código/pruebas **b9c61c3** sobre add2457. Gates: frozen (tras permiso lock store), peers y check exit0 (**739/739**); validación final posterior:28 focalizados y runtime completo **167/167**, lint/typecheck/formato exit0. La evidencia detalla la colección anterior de check y su repetición final, sin ocultar resultados intermedios rojos.
+
+**A. Ciclo de vida Codex/MXC: BLOCKED.** Subescenario directo sintético PASS (normal con limpieza por launcher, cinco forzadas <=500ms, muerte launcher y Jobs anidados). Baselines sin Job dejan hijo/nieto vivos; limpieza por handles separada. MXC no arranca en el ejecutor actual, con o sin Job: `native MXC is unavailable on this executor`. No compatibilidad/cadena efectiva completa/cierre MXC demostrado.
+
+**B. Confinamiento integral del anfitrión: BLOCKED.** Job no aísla FS/red ni creación mediante servicios/brokers externos. No inferencias, credenciales, tráfico a proveedores, setup global, cambios a main/push/merge ni c.2/c.3. Identidad CLI0.166.0/hash anterior confirmados; code-mode-host pinneado no equivale a uso observado. Vault ausente. Detalle, límites, reproducibilidad, gates y rollback: [evidencia c.1b](../reviews/b04-01c1b-evidence.md). Siguiente paso exclusivo: revisión independiente suministrada por propietario, sin cierre automático.
+
+
+## Histórico c.1 — implementación original / atribución normal retirada por P1-1
 
 Implementación **be0f165** sobre base509c118; comparar `git diff 509c118..be0f165`. Rama preservada, main intacta. Codex CLI0.166.0/hash anterior verificados. Sólo diagnóstico oficial MXC con programas sintéticos fijos, CODEX_HOME/LOCALAPPDATA/TEMP/config privados nuevos, analytics desactivado, sin configuración global. No codex exec, modelo, credenciales, API remota, repositorio objetivo o c.2/c.3. Vault complementario ausente.
 
-Observado: controles positivos FS y denegación de lectura/escritura fuera del ámbito; loopback sintético denegado frente a control positivo del host; salida normal termina hijo/nieto antes de autoexpiración. Al terminar Codex forzosamente, descendientes siguen vivos a500ms; desaparecen por autoexpiración4s, limpieza confirmada por separado. No garantía de cancelación del árbol. Frontera del host CLI/herramientas del agente y red externa NO demostradas. **readyForAgent:false**. Siguiente paso: revisión independiente de c.1 y decisión acotada sobre bloqueos; no avanzar a c.2.
+Observado: controles positivos FS y denegación de lectura/escritura fuera del ámbito; loopback sintético denegado frente a control positivo del host; la atribución de terminación normal a MXC queda RETIRADA por P1-1 (Jobs implícitos de libuv); ese resultado no prueba control del árbol por MXC. Al terminar Codex forzosamente, descendientes siguen vivos a500ms; desaparecen por autoexpiración4s, limpieza confirmada por separado. No garantía de cancelación del árbol. Frontera del host CLI/herramientas del agente y red externa NO demostradas. **readyForAgent:false**. Siguiente paso: revisión independiente de c.1 y decisión acotada sobre bloqueos; no avanzar a c.2.
 
 Objetivo/alcance c.1: medir únicamente identidad, sandbox de comandos y ciclo de vida; archivos examples/codex, test/codex-preflight.test.ts y tsconfig.test. Sin contratos públicos/dependencias nuevas, sin helper nativo. Criterio PASS global NO satisfecho por dos bloqueos observados/no demostrados; implementación de diagnóstico no equivale a aceptación del nodo.
 

@@ -1,5 +1,13 @@
 # Registro de riesgos
 
+## B04-01c.1b — corrección P1-1, sin aceptación nueva
+
+P1-1 confirmado: retirada la atribución del cierre normal a MXC, interferida por Jobs implícitos de libuv. Fixture nuevo CreateProcessW sin Jobs propios y sonda Node corregida detached. Helper de diagnóstico Windows C#/.NET con asociación atómica al Job al crear suspendido, verificación antes de reanudar, KILL_ON_JOB_CLOSE/no breakaway/handle no heredable; resultados sintéticos directos no autorizan agente.
+
+**A Codex/MXC BLOCKED:** el ejecutor actual devuelve `native MXC is unavailable on this executor` tanto en baseline como bajo Job; cadena efectiva de helpers, membresía y compatibilidad MXC/anidados no demostradas. **B anfitrión BLOCKED:** Job no confina FS/red ni creación a través de servicios/brokers externos. Conservar R-057/061/065/066/067 y todos los límites; R-061 no reproducido/resuelto. Sin cambios globales, credenciales o inferencias. Evidencia, plazo500ms, garantías limitadas, rollback y gates en [c.1b](reviews/b04-01c1b-evidence.md). No avanzar c.2/c.3.
+
+El registro c.1 inferior es histórico: Job específico ahora existe sólo como diagnóstico; no demuestra compatibilidad con MXC ni sustituye los bloqueos.
+
 ## B04-01c.1 — bloqueos efectivos, no aceptados para agente real
 
 1. Cancelación del host Codex no termina árbol MXC sintético a500ms. Autoexpiración4s confirma limpieza del diagnóstico, NO confinamiento de procesos arbitrarios. Bloquea despacho real. Job Objects no implementados: broker/membresía previa/jobs anidados todavía sin prueba.
