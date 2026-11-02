@@ -1,5 +1,15 @@
 # Matriz de cobertura de implementación
 
+Correctivo **de441e3** sobre base e8d70a6; comparar `git diff e8d70a6..de441e3`. P2-1 corregido localmente, pendiente de verificación independiente; B04-01b NO cerrado/aceptado.
+
+Validación final del correctivo: **26/26 focalizados y711/711 globales** =62 contratos+115 persistencia+187 workspace+139 runtime+201 Ollama+7 spike. Node24.19.0/pnpm12.15.0; frozen/peers/check exit0. Fuente TS final12:06:12/13 anterior a colección runtime12:07:24; lint/typecheck/build globales y formato repetidos para fuente final. Dos evidencias rojas:5 getters/herencia antes del parche y1 contaminación de descriptor antes del endurecimiento; skips de filtros no son suite completa. Logs stdout/stderr/exits/hashes en `%TEMP%/beonforge-b0401b-fix-92d3dfc6ad6749d28b9f89829d15b3b4/`. Sin tests nuevos atribuidos a Claude, sin cierre/aceptación de b ni nuevos bloques. R-061 no reproducida/resuelta; riesgos vigentes. Diff/escaneo heurístico de secretos sin hallazgos.
+
+## B04-01b — cobertura correctiva pendiente de revisión
+
+26 focalizados verdes =17 anteriores+9 nuevos. P2-1 cinco rojas antes del parche, accessors/inherited/proxy/payload y snapshot estable/argv efectivo después; cancelación previa cancelled con evidencia; cierre no confirmado uncertain, reapertura y no redispatch; estados exactos timeout/cancelación. Matriz de P3 y límites en risks.md. Gate completo final verde; sólo prototipo verificado localmente, no aceptación de b o integración real. Sin cambios de contratos/dependencias/fixtures aceptados. No se atribuye suite a Claude.
+
+## Histórico previo al correctivo de b
+
 Implementación B04-01b: **dd61d13**, comparar `git diff 4389b3f..dd61d13`. Formalización a/D-046:4389b3f. Verificado localmente, ABIERTO para revisión independiente; no aceptación ni siguiente nodo iniciado.
 
 Gates finales B04-01b: **17/17 focalizados y702/702 globales**, sin fallos finales = contratos62+persistencia115+workspace187+runtime130+Ollama201+spike7. Node24.19.0/pnpm12.15.0 estables; frozen/peers/check exit0, formato/lint/typecheck/build/tests incluidos, diff y escaneo heurístico de secretos verificados. Workspace690,88s/runtime563,41s son tiempos de suite, no SLA. Logs stdout/stderr/exits, entorno, fuentes y SHA-256 en `%TEMP%/beonforge-b0401b-561881138bb34d93bbcc5ca1bb05ab96/`. No se atribuye suite a Claude; revisión independiente pendiente, B04-01b ABIERTO. R-061 no reproducida ni resuelta. Código final estabilizado antes de gate completo. Fallos de autoría previos documentados; dist reconstruido desde fuentes actuales.

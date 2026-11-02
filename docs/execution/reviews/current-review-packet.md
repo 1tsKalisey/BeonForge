@@ -1,5 +1,21 @@
 # B04-01b — Supervisor simulado, revisión pendiente
 
+SHA-256 supervisor.ts actual: `5cf88c3489ec20170199e0e9c34ade5ac0d3eef6f197c50d83876a0e484a0ab2`. Índices de fuentes/logs en sources-sha256.json/sha256.json del directorio privado indicado. Fuentes funcionales estables antes de la colección de runtime; post-lint/post-typecheck/post-format-check acreditan controles globales posteriores. No despliegue/push, agentes reales o nuevos bloques.
+
+Correctivo **de441e3** sobre base e8d70a6; comparar `git diff e8d70a6..de441e3`. P2-1 corregido localmente, pendiente de verificación independiente; B04-01b NO cerrado/aceptado.
+
+Validación final del correctivo: **26/26 focalizados y711/711 globales** =62 contratos+115 persistencia+187 workspace+139 runtime+201 Ollama+7 spike. Node24.19.0/pnpm12.15.0; frozen/peers/check exit0. Fuente TS final12:06:12/13 anterior a colección runtime12:07:24; lint/typecheck/build globales y formato repetidos para fuente final. Dos evidencias rojas:5 getters/herencia antes del parche y1 contaminación de descriptor antes del endurecimiento; skips de filtros no son suite completa. Logs stdout/stderr/exits/hashes en `%TEMP%/beonforge-b0401b-fix-92d3dfc6ad6749d28b9f89829d15b3b4/`. Sin tests nuevos atribuidos a Claude, sin cierre/aceptación de b ni nuevos bloques. R-061 no reproducida/resuelta; riesgos vigentes. Diff/escaneo heurístico de secretos sin hallazgos.
+
+## Revisión focalizada solicitada — correctivo B04-01b
+
+Base e8d70a6; auditoría recibida APPROVE_WITH_FOLLOWUPS, cero P0/P1, un P2 y seis P3. Matriz de hallazgos/seguimientos en risks.md. Corregido localmente P2-1 y abordados P3-1/2/3/6. P3-4/5 abiertos: escalado de señales ausente e IPC sin límite de bytes, según enunciados originales aportados por propietario. B04-01b no cerrado/aceptado; no otro bloque iniciado.
+
+Foco: descriptores propios de request capturados una vez, rechazo seguro de accessors/herencia/proxies/prototipos proxy sin invocarlos, copia del payload y uso exclusivo del snapshot para hash/grant/protocolo/argv. Los grants siguen revalidándose en vivo. Getters cambiantes no pueden validar success y despachar wait; mutar request después no cambia argv/bytes. Cancelación previa devuelve cancelled con evidencia compatible; timeout failed/cancelación cancelled comprobados. Close no observado se demora mediante mock sobre proceso real que sí termina; evidencia uncertain/CAS/SQLite y reapertura bloquean redispatch.
+
+26 focalizados verdes (17 previos+9); cinco rojas previas capturadas con filtro, no confundir17 skips del filtro con suite completa. Primer intento de cancelar con error incompatible con schema detectado/corregido; tipos/lint de mocks corregidos antes de full gate. Gate completo final verde. No logs de valores privados ni nuevos contratos/dependencias/fixtures aceptados. Sin garantías nuevas de SO/red/Job Objects/CPU/RSS. R-061 no reproducida/resuelta. No ejecutar Claude desde este agente; esperar dictamen suministrado por propietario.
+
+## Histórico previo al correctivo de b
+
 Implementación B04-01b: **dd61d13**, comparar `git diff 4389b3f..dd61d13`. Formalización a/D-046:4389b3f. Verificado localmente, ABIERTO para revisión independiente; no aceptación ni siguiente nodo iniciado.
 
 Gates finales B04-01b: **17/17 focalizados y702/702 globales**, sin fallos finales = contratos62+persistencia115+workspace187+runtime130+Ollama201+spike7. Node24.19.0/pnpm12.15.0 estables; frozen/peers/check exit0, formato/lint/typecheck/build/tests incluidos, diff y escaneo heurístico de secretos verificados. Workspace690,88s/runtime563,41s son tiempos de suite, no SLA. Logs stdout/stderr/exits, entorno, fuentes y SHA-256 en `%TEMP%/beonforge-b0401b-561881138bb34d93bbcc5ca1bb05ab96/`. No se atribuye suite a Claude; revisión independiente pendiente, B04-01b ABIERTO. R-061 no reproducida ni resuelta. Código final estabilizado antes de gate completo. Fallos de autoría previos documentados; dist reconstruido desde fuentes actuales.

@@ -1,5 +1,29 @@
 # Registro de riesgos
 
+Correctivo **de441e3** sobre base e8d70a6; comparar `git diff e8d70a6..de441e3`. P2-1 corregido localmente, pendiente de verificación independiente; B04-01b NO cerrado/aceptado.
+
+Validación final del correctivo: **26/26 focalizados y711/711 globales** =62 contratos+115 persistencia+187 workspace+139 runtime+201 Ollama+7 spike. Node24.19.0/pnpm12.15.0; frozen/peers/check exit0. Fuente TS final12:06:12/13 anterior a colección runtime12:07:24; lint/typecheck/build globales y formato repetidos para fuente final. Dos evidencias rojas:5 getters/herencia antes del parche y1 contaminación de descriptor antes del endurecimiento; skips de filtros no son suite completa. Logs stdout/stderr/exits/hashes en `%TEMP%/beonforge-b0401b-fix-92d3dfc6ad6749d28b9f89829d15b3b4/`. Sin tests nuevos atribuidos a Claude, sin cierre/aceptación de b ni nuevos bloques. R-061 no reproducida/resuelta; riesgos vigentes. Diff/escaneo heurístico de secretos sin hallazgos.
+
+## Correctivo focalizado B04-01b — pendiente de revisión
+
+Auditoría independiente APPROVE_WITH_FOLLOWUPS aportada por propietario: cero P0/P1, P2-1 obligatorio y seis P3. Sólo correctivo de b; no aceptación formal, proveedor real, nuevo bloque o cierre05. Objetivo: vincular validación/hash/grant/argv a snapshot único y datos propios, clasificar cancelación comprobada y verificar incertidumbre. Archivos funcionales: examples/simulated/supervisor.ts y test/supervisor.test.ts. Sin contratos públicos/dependencias/fixtures aceptados alterados. Rollback por revert acotado conservando SQLite/CAS/evidencias; sin retry/limpieza de intentos inciertos.
+
+| Hallazgo | Evidencia / estado local |
+|---|---|
+| P2-1 | Cinco regresiones rojas antes del cambio (17 anteriores omitidas por filtro). Descriptores propios capturados una vez; accessors/campos heredados/proxies y prototipos proxy rechazados sin ejecutar getters; mapa de descriptores protegido contra herencia. Payload copiado; snapshot validado exclusivo para hash/protocolo/argv. Regresiones de getters cambiantes, contaminación de prototipo, proxy revocado y mutación posterior/argv success. Corregido localmente, pendiente verificación independiente. |
+| P3-1 | Cancelación previa al despacho devuelve cancelled, evidencia conservada y cero hijo. Resultado sin error incompatible con contrato cancelled; regresión verifica estado concreto. Corregido localmente. |
+| P3-2 | Test de close no observado: proceso real termina pero mock de prueba demora su notificación más que el plazo; supervisor persiste uncertain/closed:false. Se espera entrega del close y se reabre SQLite; no redispatch. No se deja un hijo real sin terminar ni se simula durabilidad. Cubierto localmente. |
+| P3-3 | Prueba intercepta spawn real y observa argv efectivo del hijo: modo success pese a mutaciones posteriores, preload lifeline, permiso Node y heap. No es una prueba de sandbox ni de un agente real. Cubierto localmente. |
+| P3-4 | ABIERTO/no bloqueante para fixture confiable: sin escalado a SIGKILL; child.kill() usa SIGTERM en POSIX y TerminateProcess en Windows según auditor. No garantiza árboles arbitrarios; bloquea agentes reales hasta mecanismo de terminación seguro demostrado. No implementar escalado/Job Objects aquí. |
+| P3-5 | ABIERTO/no bloqueante para fixture confiable: canal IPC lifeline no contabiliza ni limita bytes del hijo con maxOutputBytes. Riesgo previo a procesos no confiables, no aceptado automáticamente para Codex real; no implementar IPC genérico ahora. |
+| P3-6 | Timeout exige failed y cancelación exige cancelled; anterior aserción disyuntiva sustituida. Persiste evidencia y observa cierre en escenario soportado. Corregido localmente. |
+
+26/26 focalizados (17 anteriores+9 nuevas). Gate completo final verde. Logs privados red/green/focused/exits en `%TEMP%/beonforge-b0401b-fix-92d3dfc6ad6749d28b9f89829d15b3b4/`; red5/5 fallan antes de parche, primer intento de cancelación mostró resultado incompatible con schema y se corrigió, tipos/lint iniciales corregidos antes del gate. R-057/061/065/066/067 y límites de procesos/red/CPU/RSS/power loss/exactly-once vigentes. No causa nueva de R-061 ni afirmación de resolución. Próxima acción: revisión focalizada aportada por usuario, no nuevo bloque ni cierre automático.
+
+
+Regresión adicional de P2-1: Object.prototype.value no puede disfrazar descriptor accesor como dato propio; una roja antes y verde después con Object.hasOwn sobre descriptor, sin invocar getter. Captura final estable antes de colección de runtime en gate global; lint/typecheck globales repetidos para esa fuente.
+## Histórico previo al correctivo de b
+
 Implementación B04-01b: **dd61d13**, comparar `git diff 4389b3f..dd61d13`. Formalización a/D-046:4389b3f. Verificado localmente, ABIERTO para revisión independiente; no aceptación ni siguiente nodo iniciado.
 
 Gates finales B04-01b: **17/17 focalizados y702/702 globales**, sin fallos finales = contratos62+persistencia115+workspace187+runtime130+Ollama201+spike7. Node24.19.0/pnpm12.15.0 estables; frozen/peers/check exit0, formato/lint/typecheck/build/tests incluidos, diff y escaneo heurístico de secretos verificados. Workspace690,88s/runtime563,41s son tiempos de suite, no SLA. Logs stdout/stderr/exits, entorno, fuentes y SHA-256 en `%TEMP%/beonforge-b0401b-561881138bb34d93bbcc5ca1bb05ab96/`. No se atribuye suite a Claude; revisión independiente pendiente, B04-01b ABIERTO. R-061 no reproducida ni resuelta. Código final estabilizado antes de gate completo. Fallos de autoría previos documentados; dist reconstruido desde fuentes actuales.
