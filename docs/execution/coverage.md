@@ -1,5 +1,9 @@
 # Matriz de cobertura de implementación
 
+Autorización expresa vigente: **B04-01a CLOSED / ACCEPTED — APPROVE_WITH_FOLLOWUPS**; P3-3/4/5 y R-057/061/065/066/067 abiertos. **D-046 ACCEPTED** por propietario: vertical Codex primero, API/Angular parcial tras API estable, OpenCode/routing después y multiagente diferido. No eliminación de capacidades ni permiso de proveedor/credenciales/envío. B04-01b autorizado exclusivamente con fixture simulado; pendiente de implementación/revisión, no aceptación. D-043 intacta. El estado anterior inferior se conserva como histórico.
+
+## Histórico previo a esta autorización
+
 B04-01a: **verificado localmente y recomendado para cierre por auditor APPROVE_WITH_FOLLOWUPS; aceptación formal PENDIENTE**. P3-1/2/6 documentales corregidos; P3-3/4/5 sin cobertura adicional, abiertos en risks.md.685/685 previos conservados, sin nuevos tests funcionales. No supervisor/proveedor real implementado ni autorización implícita. Roadmap vertical-first es dirección aprobada; cambio formal de secuencia/gates pendiente D-046.
 
 ## Histórico / evidencia anterior

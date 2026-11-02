@@ -1,5 +1,7 @@
 # Plan maestro de ejecución
 
+D-046 ACCEPTED expresamente: secuencia vertical-first vigente en filas05/06/09; multiagente07 posterior. B04-01a CLOSED/ACCEPTED, b sólo simulado autorizado. Sin cambiar gates ya aceptados de01–04. Documentación previa de D-046 pendiente es histórica.
+
 ## Dirección vertical-first aprobada; cambios formales pendientes
 
 Prioridad de planificación: supervisor Codex mínimo → bugfix generado sobre Git sintético nuevo → API local/interfaz Angular de tareas y revisión → OpenCode/routing determinista → multiagente. Reutilizar capacidades existentes; cada bloque aporta vertical observable o resuelve un bloqueo de seguridad demostrado.
@@ -39,11 +41,11 @@ BeonForge será un plano de control local-first, vendor-neutral, con contratos d
 | 02 Workspace y contexto | Worktree acotado y ContextPackage reproducible con instrucciones, mapa, exclusión de rutas privadas y rechazo conservador previo a persistencia; sin redacción transformadora ni autorización implícita de envío. | 01 |
 | 03 Primer proveedor local | Registry, probes y Ollama candidato evaluado con salida estructurada y cancelación | 02, clasificación de datos, política, evals |
 | 04 Vertical bugfix | Workflow sobre fixture: reproducir, test rojo, cambio, gates, revisión y rollback | 01–03 |
-| 05 Harness externos | Adaptadores soportados de OpenCode y Codex CLI, perfiles y contract tests; Claude Code independiente | 04 |
-| 06 Routing y OmniRoute | Reglas auditables, presupuestos, fallback y shadow; OmniRoute restringido a datos no sensibles | 03, 05, política y evals |
+| 05 Harness externos | D-046: primera vertical supervisada Codex/perfil/contract tests; ampliación OpenCode posterior a superficie API/Angular parcial. Claude independiente | 04; operación real requiere autorización/confinamiento |
+| 06 Routing y OmniRoute | D-046: routing determinista básico tras OpenCode; ampliaciones/OmniRoute diferidas | 03, adaptadores05 aceptados, política y evals |
 | 07 Subagentes | Delegación contractual, worktrees aislados, integrador único y comparación con agente único | 02, 05–06 |
 | 08 Contexto y memoria avanzada | Índice incremental, recuperación evaluada y promoción controlada de memoria | 04, evals |
-| 09 Dashboard Angular | Vistas de runs, approvals, artefactos y gates desde API versionada, con accesibilidad y reconexión | API estable |
+| 09 Dashboard Angular | D-046: entrega parcial tareas/ejecuciones/tests/diff/revisión después de vertical Codex; resto incremental | API local estable, vertical Codex aceptada; no depende del cierre global05/06/07 |
 | 10 Entrenamiento | Dataset lineage, primer LoRA/SFT ante fallo medido, canary y rollback | registry, evals, licencia |
 | 11 Plugins | Manifiesto, permisos, instalación deshabilitada, contract tests y retirada | kernel y política estables |
 

@@ -1,5 +1,9 @@
 # Registro de decisiones
 
+Autorización expresa vigente: **B04-01a CLOSED / ACCEPTED — APPROVE_WITH_FOLLOWUPS**; P3-3/4/5 y R-057/061/065/066/067 abiertos. **D-046 ACCEPTED** por propietario: vertical Codex primero, API/Angular parcial tras API estable, OpenCode/routing después y multiagente diferido. No eliminación de capacidades ni permiso de proveedor/credenciales/envío. B04-01b autorizado exclusivamente con fixture simulado; pendiente de implementación/revisión, no aceptación. D-043 intacta. El estado anterior inferior se conserva como histórico.
+
+## Histórico previo a esta autorización
+
 **D-046 — PROPOSED / PENDIENTE DE APROBACIÓN FORMAL.** Propietario aprueba dirección vertical-first, no modificación automática de fases/gates. Propuesta detallada en phase-05.md/master-plan: primera vertical Codex, superficie local API/Angular después de API estable, OpenCode/routing básico posteriores y multiagente diferido. Requiere aprobar formalmente división de gate05 y entrega parcial09 antes de aplicarlas. Conservar todos los objetivos/contratos/decisiones aceptados; no nueva arquitectura, eliminación funcional ni permiso de ejecución/envío/credenciales. D-043 intacta. B04-01a recomendado por auditor, no aceptación formal atribuida. No implementar b en este turno.
 
 ## Histórico / evidencia anterior

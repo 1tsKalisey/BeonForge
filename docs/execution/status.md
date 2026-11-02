@@ -1,5 +1,9 @@
 # Estado persistente
 
+Autorización expresa vigente: **B04-01a CLOSED / ACCEPTED — APPROVE_WITH_FOLLOWUPS**; P3-3/4/5 y R-057/061/065/066/067 abiertos. **D-046 ACCEPTED** por propietario: vertical Codex primero, API/Angular parcial tras API estable, OpenCode/routing después y multiagente diferido. No eliminación de capacidades ni permiso de proveedor/credenciales/envío. B04-01b autorizado exclusivamente con fixture simulado; pendiente de implementación/revisión, no aceptación. D-043 intacta. El estado anterior inferior se conserva como histórico.
+
+## Histórico previo a esta autorización
+
 Gates documentales nuevos: Node24.19.0/pnpm12.15.0, frozen/peers/format:check/diff exit0; escaneo heurístico sin hallazgos y alcance sólo7 Markdown. No nuevos lint/typecheck/build/tests funcionales por ausencia de cambios de código/dependencias;685/685 sigue evidencia previa, no nueva ejecución ni suite completa atribuida a Claude. Logs/exits/hashes privados en `%TEMP%/beonforge-b0401a-auditdocs-3a2989e82c0148849c02db0271f1405c/`. Commit inverso documental permite rollback sin alterar datos.
 
 B04-01a: auditoría externa **APPROVE_WITH_FOLLOWUPS**, sin P0–P2. P3-1/2/6 corregidos sólo documentalmente; P3-3/4/5 abiertos con criterios en risks.md. **Cierre preparado, aceptación formal del propietario pendiente**; no iniciar b. Código d19c10a/evidencias d2f036a intactos,685/685 es evidencia previa. Dirección de planificación vertical-first aprobada; cambios de fases/gates sólo propuestos en D-046, no aceptados. D-043/R-057/061/065/066/067 vigentes. Gates documentales de este correctivo registrados al finalizar; vault complementario ausente. Rollback por revert documental, sin alterar datos o producto.
