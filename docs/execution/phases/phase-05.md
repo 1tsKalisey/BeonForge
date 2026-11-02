@@ -1,5 +1,20 @@
 # Fase 05 — Harness externos
 
+Implementación B04-01b: **dd61d13**, comparar `git diff 4389b3f..dd61d13`. Formalización a/D-046:4389b3f. Verificado localmente, ABIERTO para revisión independiente; no aceptación ni siguiente nodo iniciado.
+
+Gates finales B04-01b: **17/17 focalizados y702/702 globales**, sin fallos finales = contratos62+persistencia115+workspace187+runtime130+Ollama201+spike7. Node24.19.0/pnpm12.15.0 estables; frozen/peers/check exit0, formato/lint/typecheck/build/tests incluidos, diff y escaneo heurístico de secretos verificados. Workspace690,88s/runtime563,41s son tiempos de suite, no SLA. Logs stdout/stderr/exits, entorno, fuentes y SHA-256 en `%TEMP%/beonforge-b0401b-561881138bb34d93bbcc5ca1bb05ab96/`. No se atribuye suite a Claude; revisión independiente pendiente, B04-01b ABIERTO. R-061 no reproducida ni resuelta. Código final estabilizado antes de gate completo. Fallos de autoría previos documentados; dist reconstruido desde fuentes actuales.
+
+## B04-01b — supervisor simulado, alcance de implementación autorizado
+
+Objetivo: despacho autorizado de fixture fijo, salida validada, eventos/resultado SQL/CAS y recuperación sin replay. Componentes: examples/simulated/supervisor.ts/README y test/supervisor.test.ts más lector/crash/lifeline de test; tsconfig.test incluye ejemplo. Sin kernel/domain/public exports/dependencias nuevas, patch, agente real, credenciales o repositorio objetivo. Contratos locales al ejemplo; EventStore/ArtifactStore/executeWorkflow reutilizados. Lectura de bytes históricos no concede permiso operativo.
+
+Aceptación: grants propios vivos ligados a run/hash de payload/modo/límites/scripts; pin/paths/argv/env; entrada64KiB, salida64KiB/stream, plazo50..5000ms y confirmación de cierre1000ms, un activo por módulo. Protocolo canónico fijo comparado incrementalmente por bytes; BOM/duplicados rechazados en frontera. Preservar fixture a. Casos válidos/inválidos, fronteras/overflow, permisos/revocación, timeout/cancelación, crash y reapertura real/segundo proceso/pérdida finish, sin reintentos de pending/uncertain.
+
+Límite explícito: Node prohíbe child_process/workers y sólo lee fixture; IPC lifeline termina hijo directo al perder supervisor. No manejo genérico de descendientes Windows, Job Objects, CPU/RSS/egress, sandbox SO/red ni defensa contra host/propietario hostil. Esas ausencias bloquean agentes/código no confiable y no se publicitan como garantías. Heap V8 no es límite total de memoria. Los tests sólo prueban el escenario de procesos conocidos. Detalle operativo en packages/runtime/examples/simulated/README.md.
+
+Plan/rollback: implementar mínimo y17 tests funcionales, gates oficiales completos y revisión independiente. Revert acotado conservando SQL/CAS/evidencias; no borrar, reparar o repetir resultados inciertos. B04-01b abierto, sin aceptación independiente ni siguiente nodo implementado. Primer fallo de autoría de lector nativo por parameter property TS incompatible corregido; errores de tipos de stdio IPC y lint de IPC test corregidos antes de gate final. No R-061 resuelto. Gates completos finales verdes.
+
+
 Autorización expresa vigente: **B04-01a CLOSED / ACCEPTED — APPROVE_WITH_FOLLOWUPS**; P3-3/4/5 y R-057/061/065/066/067 abiertos. **D-046 ACCEPTED** por propietario: vertical Codex primero, API/Angular parcial tras API estable, OpenCode/routing después y multiagente diferido. No eliminación de capacidades ni permiso de proveedor/credenciales/envío. B04-01b autorizado exclusivamente con fixture simulado; pendiente de implementación/revisión, no aceptación. D-043 intacta. El estado anterior inferior se conserva como histórico.
 
 ## Histórico previo a esta autorización

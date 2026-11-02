@@ -1,5 +1,21 @@
 # Registro de riesgos
 
+Implementación B04-01b: **dd61d13**, comparar `git diff 4389b3f..dd61d13`. Formalización a/D-046:4389b3f. Verificado localmente, ABIERTO para revisión independiente; no aceptación ni siguiente nodo iniciado.
+
+Gates finales B04-01b: **17/17 focalizados y702/702 globales**, sin fallos finales = contratos62+persistencia115+workspace187+runtime130+Ollama201+spike7. Node24.19.0/pnpm12.15.0 estables; frozen/peers/check exit0, formato/lint/typecheck/build/tests incluidos, diff y escaneo heurístico de secretos verificados. Workspace690,88s/runtime563,41s son tiempos de suite, no SLA. Logs stdout/stderr/exits, entorno, fuentes y SHA-256 en `%TEMP%/beonforge-b0401b-561881138bb34d93bbcc5ca1bb05ab96/`. No se atribuye suite a Claude; revisión independiente pendiente, B04-01b ABIERTO. R-061 no reproducida ni resuelta. Código final estabilizado antes de gate completo. Fallos de autoría previos documentados; dist reconstruido desde fuentes actuales.
+
+## B04-01b — proceso fijo y recuperación conservadora, revisión pendiente
+
+Grants propios vivos ligados a run/hash; store/host/runtime/binario/ancestros y caller confiables. Scripts fijos con SHA/canonical/nlink; sin parámetros de ejecutable/cwd/env externos. Un activo por módulo, no liderazgo entre procesos. Cambios privilegiados entre syscalls quedan fuera de garantía (R-067). CAS sólo integridad, no autenticidad del dueño (R-057).
+
+Input64KiB, salida64KiB por stream,50..5000ms y1000ms para observar close tras kill; kernel15s cooperativo no limita cola SQL. Revocación20ms no es instantánea ni retroactiva. Si no se observa cierre, uncertain y bloqueo local hasta close; no retry/limpieza. SQL finish perdido y SIGKILL dejan pending sin redispatch. Sin transacción distribuida/exactly-once/power loss. stdout sólo protocolo público validado, stderr contado/no persistido; resumen incluye exit/signal y observación close, no razonamiento/secretos.
+
+IPC lifeline y ausencia de child_process/workers probadas para hijo conocido Windows; **no árbol genérico ni Job Object**, no defensa frente a hijo hostil que desactive mecanismo. **Node no aísla red** y heap V8 32MiB no es CPU/RSS/egress: ausencias bloqueantes para código no confiable/agentes reales, no garantías obtenidas. Fixture inspeccionado no realiza operaciones de red; pruebas no prueban confinamiento universal.
+
+P3-3: prueba observa varios chunks reales y protocolo fijo incremental, sin parser JSONL general. P3-4: frontera b rechaza BOM/duplicados con regresiones, a inmutable conserva comportamiento. P3-5: b cubre input65536/65537 y salida exacta/overflow; no se atribuye nuevo test argv extra a a. Followups generales siguen pendientes de evaluación independiente. R-057/061/065/066/067 y tres P3 de04 abiertos. No R-061 reproducida/resuelta. Primer fallo lector por sintaxis TS nativa no soportada y errores iniciales stdio/lint corregidos antes del gate global.17 focalizados verdes, suite completa final verde.
+
+## Histórico anterior a B04-01b
+
 ## Auditoría B04-01a recibida — APPROVE_WITH_FOLLOWUPS
 
 Informe externo proporcionado por propietario; sin P0/P1/P2. **Recomendado para cierre por auditor; aceptación formal del propietario PENDIENTE.** Este correctivo sólo documental prepara el cierre; no declara CLOSED/ACCEPTED ni autoriza B04-01b.

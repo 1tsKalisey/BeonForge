@@ -1,5 +1,15 @@
 # Matriz de cobertura de implementación
 
+Implementación B04-01b: **dd61d13**, comparar `git diff 4389b3f..dd61d13`. Formalización a/D-046:4389b3f. Verificado localmente, ABIERTO para revisión independiente; no aceptación ni siguiente nodo iniciado.
+
+Gates finales B04-01b: **17/17 focalizados y702/702 globales**, sin fallos finales = contratos62+persistencia115+workspace187+runtime130+Ollama201+spike7. Node24.19.0/pnpm12.15.0 estables; frozen/peers/check exit0, formato/lint/typecheck/build/tests incluidos, diff y escaneo heurístico de secretos verificados. Workspace690,88s/runtime563,41s son tiempos de suite, no SLA. Logs stdout/stderr/exits, entorno, fuentes y SHA-256 en `%TEMP%/beonforge-b0401b-561881138bb34d93bbcc5ca1bb05ab96/`. No se atribuye suite a Claude; revisión independiente pendiente, B04-01b ABIERTO. R-061 no reproducida ni resuelta. Código final estabilizado antes de gate completo. Fallos de autoría previos documentados; dist reconstruido desde fuentes actuales.
+
+## B04-01b — prototipo funcional pendiente de aceptación
+
+B04-01a CLOSED/ACCEPTED, D-046 ACCEPTED (4389b3f). Supervisor del fixture fijo: grants vivos/pins/argv/env, límites, verificación incremental canónica, SQL/CAS reales, inspección/reapertura/segundo proceso y bloqueo de pending sin replay.17 nuevas integraciones locales verdes, suite completa final verde. No prueba de Codex real ni framework, sandbox OS/red, CPU/RSS, Job Objects o descendientes arbitrarios. Falta de esas garantías bloquea mayor alcance. No fuente/contrato público del kernel alterado; tsconfig.test incluye ejemplo. Matriz detallada en phase-05.md/README y paquete b. Fase05 abierta, ningún siguiente nodo implementado.
+
+## Histórico anterior a B04-01b
+
 Autorización expresa vigente: **B04-01a CLOSED / ACCEPTED — APPROVE_WITH_FOLLOWUPS**; P3-3/4/5 y R-057/061/065/066/067 abiertos. **D-046 ACCEPTED** por propietario: vertical Codex primero, API/Angular parcial tras API estable, OpenCode/routing después y multiagente diferido. No eliminación de capacidades ni permiso de proveedor/credenciales/envío. B04-01b autorizado exclusivamente con fixture simulado; pendiente de implementación/revisión, no aceptación. D-043 intacta. El estado anterior inferior se conserva como histórico.
 
 ## Histórico previo a esta autorización

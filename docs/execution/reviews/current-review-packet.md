@@ -1,4 +1,32 @@
-# B04-01a — Fixture determinista, revisión pendiente
+# B04-01b — Supervisor simulado, revisión pendiente
+
+Implementación B04-01b: **dd61d13**, comparar `git diff 4389b3f..dd61d13`. Formalización a/D-046:4389b3f. Verificado localmente, ABIERTO para revisión independiente; no aceptación ni siguiente nodo iniciado.
+
+Gates finales B04-01b: **17/17 focalizados y702/702 globales**, sin fallos finales = contratos62+persistencia115+workspace187+runtime130+Ollama201+spike7. Node24.19.0/pnpm12.15.0 estables; frozen/peers/check exit0, formato/lint/typecheck/build/tests incluidos, diff y escaneo heurístico de secretos verificados. Workspace690,88s/runtime563,41s son tiempos de suite, no SLA. Logs stdout/stderr/exits, entorno, fuentes y SHA-256 en `%TEMP%/beonforge-b0401b-561881138bb34d93bbcc5ca1bb05ab96/`. No se atribuye suite a Claude; revisión independiente pendiente, B04-01b ABIERTO. R-061 no reproducida ni resuelta. Código final estabilizado antes de gate completo. Fallos de autoría previos documentados; dist reconstruido desde fuentes actuales.
+
+## B04-01b — supervisor simulado implementado localmente, pendiente de revisión
+
+Autorización sólo simulada; a CLOSED/ACCEPTED y D-046 ACCEPTED, sin nuevas autorizaciones de proveedor. APIs locales previewSimulatedRequest/runSimulatedProcess/inspectSimulatedProcess en examples/simulated, no exports públicos ni paquetes/dependencias nuevas. Hijo fijo y lifeline con SHA/canonical/nlink, argv/env explícitos, grants propios vivos y serialización local. Kernel/SQLite/CAS/checkpoints reutilizados; start durable previo a spawn. Inspección/reapertura y segundo proceso verifican resultado confirmado; finish perdido/SIGKILL dejan pending y bloquean sin redispatch.
+
+17 pruebas focalizadas verdes. Gate oficial completo final verde; no aceptación independiente ni cierre05. Primer fallo de lector por parameter property TS nativo, luego tipado stdio IPC y lint de mensaje IPC corregidos antes de gate completo. No reproducción de R-061 identificada, sigue abierta. Logs privados localizables mediante %TEMP%/beonforge-b0401b-last.txt. Sin código/contexto enviado, modelos, agentes reales, publicación o target Git ajeno. No patch/test de proyecto: sólo procesos sintéticos de mantenimiento del producto.
+
+Límites y riesgos: input64KiB; salida64KiB/stream;50..5000ms más1000ms para confirmar cierre, kernel15s cooperativo; un activo por módulo/proceso. Cuenta/descarta stderr, no lo persiste; sólo resumen sintético/exit/signal/hashes y propuesta fija. IPC lifeline y denegación child_process probadas en Windows para hijo directo conocido. **No** Job Object, árbol genérico, CPU/RSS/egress o sandbox SO/red. Esas garantías ausentes bloquean agentes/código no confiable; Node heap32MiB no limita RSS. Si falta close, uncertain y bloqueo local hasta cierre observado; no retry/limpieza. Sin liderazgo multiproceso/power loss/exactly-once ni autenticación humana. Host/caller/raíces/store y binario son confiables (R-057/067).
+
+P3-3: observación real de varios chunks y comparación incremental de protocolo fijo; no parser JSONL general. P3-4: frontera b rechaza BOM/duplicados y tiene regresiones, fixture a inmutable conserva comportamiento. P3-5: b prueba input65536/65537 y frontera exacta de salida/overflow; argumentos del proceso fijos, no se añade ni se atribuye el test de argv extra del fixture a. No declarar cerrados followups más amplios sin revisión. R-057/061/065/066/067 y P3 de04 conservados.
+
+Próximo milestone propuesto: autorización de la primera vertical Codex con Git nuevo sintético, worktree/contexto autorizados, corrección generada validada, tests/diff y posterior revisión desde API/Angular mínima (D-046). Antes: revisar b, verificar CLI/perfil/host/herramientas/red y obtener permiso específico compatible con D-043 para credenciales/envío/destino/modelo/payload. No implementar adaptador real o UI en este nodo.
+
+SHA-256 supervisor.ts: `c717fc4103f7878303eb35da66052667e0e53a1e71648b48a8632870b5962a67`. Índice completo sources-sha256.json y hashes de logs en directorio privado indicado; los primeros fallos de autoría se resumen en authoring.txt, no se afirma que existan sus logs crudos locales completos. No atribuir pruebas/gates nuevos a Claude.
+
+## Foco independiente solicitado para B04-01b
+
+1. Verificar binding grant/run/payload/modo/límites/hashes de scripts y denegación sin spawn, grants propios/revocación y no autoridad desde evidencia CAS.
+2. Revisar protocolo fijo incremental/UTF-8/BOM/duplicados, límites byte-exactos y que ningún stdout/stderr no validado se persiste o ejecuta.
+3. Contrastar cierre/exit/signal/cancelación, SIGKILL e IPC lifeline del hijo conocido, prohibición Node de descendientes y limitaciones Windows/host/red/CPU/RSS. No extrapolar sandbox.
+4. SQL/CAS reales: start antes de efecto, finish perdido/pending bloqueado, reapertura sin replay y lector nativo de otro proceso. Sin autenticación humana/power loss/exactly-once.
+5. Alcance: no nuevo paquete/dependencia/API pública, agente real, tools generales, target Git o UI; siguiente milestone sólo propuesto.
+
+## Histórico anterior a B04-01b
 
 Autorización expresa vigente: **B04-01a CLOSED / ACCEPTED — APPROVE_WITH_FOLLOWUPS**; P3-3/4/5 y R-057/061/065/066/067 abiertos. **D-046 ACCEPTED** por propietario: vertical Codex primero, API/Angular parcial tras API estable, OpenCode/routing después y multiagente diferido. No eliminación de capacidades ni permiso de proveedor/credenciales/envío. B04-01b autorizado exclusivamente con fixture simulado; pendiente de implementación/revisión, no aceptación. D-043 intacta. El estado anterior inferior se conserva como histórico.
 

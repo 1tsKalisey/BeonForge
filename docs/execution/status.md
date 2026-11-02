@@ -1,5 +1,17 @@
 # Estado persistente
 
+Implementación B04-01b: **dd61d13**, comparar `git diff 4389b3f..dd61d13`. Formalización a/D-046:4389b3f. Verificado localmente, ABIERTO para revisión independiente; no aceptación ni siguiente nodo iniciado.
+
+Gates finales B04-01b: **17/17 focalizados y702/702 globales**, sin fallos finales = contratos62+persistencia115+workspace187+runtime130+Ollama201+spike7. Node24.19.0/pnpm12.15.0 estables; frozen/peers/check exit0, formato/lint/typecheck/build/tests incluidos, diff y escaneo heurístico de secretos verificados. Workspace690,88s/runtime563,41s son tiempos de suite, no SLA. Logs stdout/stderr/exits, entorno, fuentes y SHA-256 en `%TEMP%/beonforge-b0401b-561881138bb34d93bbcc5ca1bb05ab96/`. No se atribuye suite a Claude; revisión independiente pendiente, B04-01b ABIERTO. R-061 no reproducida ni resuelta. Código final estabilizado antes de gate completo. Fallos de autoría previos documentados; dist reconstruido desde fuentes actuales.
+
+## B04-01b — implementado localmente, pendiente de revisión
+
+B04-01a CLOSED/ACCEPTED y D-046 ACCEPTED por propietario (4389b3f). B04-01b implementa sólo supervisor del fixture simulado y lifeline IPC, APIs locales preview/run/inspect en examples/simulated; kernel/SQLite/CAS reutilizados, sin nuevos exports públicos/dependencias.17 focalizados verdes; gate completo final verde. No aceptación independiente ni cierre05. Scope/criterios/rollback en phase-05.md y README del ejemplo. R-057/061/065/066/067 y followups anteriores conservados.
+
+No proceso arbitrario, parche, target Git, contexto enviado, proveedor real, credencial, publicación o integración. El padre/hijo son fixtures sintéticos de mantenimiento del producto, no BeonForge como objetivo de agente. IPC y permisos de hijo no son Job Object/sandbox SO/red/CPU/RSS ni manejo de árboles hostiles: esos usos permanecen bloqueados. Siguiente gate exclusivo: revisión independiente b; después proponer primera vertical Codex sobre Git nuevo sintético y API/Angular según D-046, con permisos y confinamiento propios. No implementar otro nodo aquí.
+
+## Histórico anterior a B04-01b
+
 Autorización expresa vigente: **B04-01a CLOSED / ACCEPTED — APPROVE_WITH_FOLLOWUPS**; P3-3/4/5 y R-057/061/065/066/067 abiertos. **D-046 ACCEPTED** por propietario: vertical Codex primero, API/Angular parcial tras API estable, OpenCode/routing después y multiagente diferido. No eliminación de capacidades ni permiso de proveedor/credenciales/envío. B04-01b autorizado exclusivamente con fixture simulado; pendiente de implementación/revisión, no aceptación. D-043 intacta. El estado anterior inferior se conserva como histórico.
 
 ## Histórico previo a esta autorización
