@@ -1,5 +1,28 @@
 # Registro de riesgos
 
+## Aceptación expresa de residuales M04.1/Fase04
+
+Propietario acepta cierre M04.1/Fase04 con APPROVE_WITH_FOLLOWUPS, sin resolver los riesgos. D-043 sigue obligatoria. R-067 queda revisado independientemente/aceptado sólo para fixture confiable y efectos fijos; no se generaliza a agentes o código arbitrario. El encabezado histórico de revisión pendiente inferior corresponde a la entrega anterior.
+
+| Riesgo/seguimiento | Clasificación y condición posterior |
+|---|---|
+| M04.1 P3-1 | Seguimiento aceptado: algunos fallos anteriores al efecto se clasifican uncertain y bloquean permanentemente. Antes de habilitar recuperación operativa general, distinguir predispatch conocido de efecto incierto; hoy no retry/repair automático y puede requerir fixture nuevo. |
+| M04.1 P3-2 | Seguimiento aceptado: redExit/greenExit del resumen sin refs explícitas a salidas de tests; requiere también kernel/SQLite. Dependencia antes de presentarlo como prueba autocontenida/independiente; no fabricar referencias ni cambiar evidencia histórica. |
+| M04.1 P3-3 | Seguimiento aceptado: corte entre review.json/workflow puede quedar pending sin recuperación operativa. Bloquea interpretar ese pending como decisión humana completable; conservar/informar, no borrar ni simular aprobación. |
+| R-057 | Residual aceptado: CAS verifica integridad, no autenticidad del propietario. Control de confianza necesario antes de importar/evaluar evidencia de terceros. |
+| R-061 | Seguimiento no reproducido, causa desconocida, **NO RESUELTO**. Conservar logs completos; fallo de gate reproducido bloqueará cierre/avance afectado. |
+| R-065 | Residual proveedor local aceptado en03; cancelación cliente no demuestra parada remota, identidad/digest no corroborados. Ningún nuevo permiso de inferencia/envío. |
+| R-066 | Residual de registry/raíces históricas/persistencia/huérfanos aceptado; registro/evaluación no autorizan ejecución. No head global/GC/normalización añadidos. |
+| R-067, host/caller/raíces | Residual aceptado sólo con fixture y comandos conocidos, ACL privadas/ancestros/Git/PATH confiables, uso serial. Ausencia de sandbox SO/red, garantías de pérdida eléctrica, exactly-once o liderazgo multiproceso; no aplicable automáticamente a código generado. |
+| Decisiones approve/discard | Parámetros API/CLI explícitos, no identidad humana autenticada; cierre del milestone no aprueba/integraría su parche. Frontera auténtica de aprobación pendiente antes de alegar esa capacidad. |
+| Fase05 y D-043 | Dependencia bloqueante para ejecución real: versión/interfaz/perfil, confinamiento de host CLI y herramientas, credenciales/egress/autorización de contexto. D-043 actual prohíbe servicios externos/credenciales reales; propuesta Codex remota requiere decisión expresa compatible, no excepción implícita por este plan. Sin demostración de aislamiento, ejecución bloqueada. |
+
+P3 anteriores de01–03, ACL/artefactos huérfanos/fsync de directorios Windows/power loss conservados. Ninguna aceptación equivale a permiso de datos privados, proyecto real, red, integración o envío a proveedor. No corrección funcional de P3 en este cierre.
+
+---
+
+## Histórico anterior al cierre de Fase04
+
 ## M04.1 — R-067: vertical sintética y efectos acotados, pendiente de revisión
 
 Sólo repositorio nuevo dedicado/código sintético conocido, sin agentes, red/proveedores o credenciales. Node --permission limita lecturas al worktree y no concede escritura/subprocesos/workers al test, **no es sandbox del SO ni de red**. El proceso anfitrión/Git/PATH/runtime y caller son confiables, con ACL/ancestros privados y uso exclusivo del operador; comprobaciones antes/después no son openat/snapshot atómico ni protección frente a dueño privilegiado concurrente. No habilitar código no confiable/entornos reales/harness de05 por este éxito: D-043 y sus autorizaciones posteriores siguen bloqueando esa ampliación.
@@ -12,7 +35,7 @@ Root manual de demostración y logs quedan privados; no limpieza de artefactos d
 
 ## D-043 — Límite obligatorio de entornos sintéticos
 
-Fases04/05 y demos posteriores sólo pueden utilizar un nuevo repo local/descartable dedicado, sin código/datos/bugs tomados de otros proyectos, credenciales reales, bases de producción, servicios externos o remotos. No auto-descubrimiento ni uso de BeonForge como objetivo de un agente. Esta restricción reduce exposición, **no resuelve sandbox, ACL, concurrencia o egress**: worktree no confina procesos. Si una ejecución requiere confinamiento no demostrable, detenerla; no cambiar a otro proyecto o ampliar permisos. Los planes de harness de05 no autorizan sus credenciales/conexiones reales, aunque el repo sea sintético; su eventual habilitación requiere una decisión explícita compatible con D-043. Entornos reales requieren decisión del propietario, evaluación de seguridad y autorización específica de proyecto/operaciones. Ningún éxito sintético elimina esta dependencia. Estado actual: sólo plan; no entorno creado ni ejecución autorizada por este documento.
+Fases04/05 y demos posteriores sólo pueden utilizar un nuevo repo local/descartable dedicado, sin código/datos/bugs tomados de otros proyectos, credenciales reales, bases de producción, servicios externos o remotos. No auto-descubrimiento ni uso de BeonForge como objetivo de un agente. Esta restricción reduce exposición, **no resuelve sandbox, ACL, concurrencia o egress**: worktree no confina procesos. Si una ejecución requiere confinamiento no demostrable, detenerla; no cambiar a otro proyecto o ampliar permisos. Los planes de harness de05 no autorizan sus credenciales/conexiones reales, aunque el repo sea sintético; su eventual habilitación requiere una decisión explícita compatible con D-043. Entornos reales requieren decisión del propietario, evaluación de seguridad y autorización específica de proyecto/operaciones. Ningún éxito sintético elimina esta dependencia. Estado vigente: M04.1 ejecutado únicamente sobre fixtures nuevos sintéticos y aceptado; Fase05 sólo preparada, sin ejecución autorizada por este documento.
 
 ## Aceptación de residuales de Fase03 — D-042
 

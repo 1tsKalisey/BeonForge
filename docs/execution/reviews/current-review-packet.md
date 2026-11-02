@@ -1,5 +1,21 @@
 # M04.1 — Primera vertical determinista de bugfix
 
+## Cierre de M04.1/Fase04 — aceptación independiente recibida
+
+Propietario aprueba expresamente **M04.1 APPROVE_WITH_FOLLOWUPS y cierre global Fase04**, con aceptación de P3/residuales sin considerarlos resueltos. Código fed1763, evidencias8f921c0. Auditoría independiente recibida: **30/30 tests específicos y40 reproducciones**, dos inicialmente inválidas repetidas correctamente; **36 hashes de evidencias y8 hashes de fuentes verificados**. Los **673/673 globales** y gates previos se acreditaron mediante logs contrastados, **no ejecución completa atribuida a Claude**.
+
+Matriz original de11 criterios con pruebas/funciones y demo CAS en [phase-04.md](../phases/phase-04.md). Contexto/worktree/rojo/parche fijo/verde/diff/persistencia/recuperación/revisión pendiente/descarte sintético y origen intacto aceptados. Sin agente, Ollama, servicio externo/proyecto real o permiso de integración. D-043 obligatoria, no revisión humana autenticada ni sandbox SO/red.
+
+Gates finales nuevos de este cierre: **673/673 tests**, sin fallos ni skips = contratos62 + persistencia115 + workspace187 + runtime101 (incluidos30 M04.1) + Ollama201 + spike7. Node24.19.0 estable en Program Files y pnpm12.15.0. `pnpm.cmd install --frozen-lockfile`=0, `pnpm.cmd peers check`=0 y `pnpm.cmd check`=0; check incluye formato/lint/typecheck/build/tests. Duración1268,39s (workspace662,33s; runtime546,70s), medición del gate, no SLA. Fuente/dependencias intactas, dist recompilado por el gate. R-061 no reproducida, causa desconocida/no resuelta. Diff/escaneo heurístico de secretos y formato final documentales registrados con exit0. Logs completos stdout/stderr/exits/tiempos/entorno y SHA-256: `%TEMP%/beonforge-phase04-close-57e4785b9d0a4a7292165714d74ecb01/`. Advertencias LF/CRLF y cambios HEAD de fixtures son salidas de tests sintéticos, no cambios al checkout del producto. **M04.1 y Fase04 CERRADOS / ACEPTADOS (CLOSED / ACCEPTED)** tras autorización expresa y gates; Fase05 sólo preparada, NO INICIADA.
+
+P3 aceptados sin corregir: clasificación preefecto uncertain puede bloquear permanentemente; evidencia final redExit/greenExit dependiente de kernel/SQLite sin refs explícitas de salidas; review.json previo a workflow puede quedar pending irrecuperable. API/CLI no autentican identidad humana. R-057/061/065/066/067 conservados, R-061 no reproducida/sin causa/no resuelta.
+
+[Plan Fase05/B04-01 propuesto](../phases/phase-05.md) sólo documental, **NO INICIADO/IMPLEMENTADO**. Codex recomendado condicionalmente; D-043/credenciales/envío/confinamiento pueden impedir la ejecución, sin fallback ni permiso implícito. No revisión repetida o agente externo invocado durante este cierre; esperar instrucción expresa del propietario. Paquete auditado original conservado abajo como histórico, ya no solicitud de auditoría M04.1 pendiente.
+
+---
+
+## Histórico anterior al cierre de Fase04
+
 **Implementado, ABIERTO para revisión independiente** suministrada por propietario. Código **fed1763**, comparar `git diff b39e98b..fed1763`; evidencias en commit documental posterior. **Fase04 ABIERTA**, sin cierre automático ni inicio05. Fases01–03 aceptadas/cerradas; D-043 obligatoria. No invocar Claude/otros agentes ni utilizar proyectos existentes como objetivos de prueba.
 
 ## Alcance e interfaces

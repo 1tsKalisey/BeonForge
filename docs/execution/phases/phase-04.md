@@ -1,5 +1,41 @@
 # Fase 04 — Primera vertical de bugfix
 
+## Cierre autorizado de M04.1 y Fase04 — 2026-11-02
+
+Propietario aprueba expresamente **M04.1 APPROVE_WITH_FOLLOWUPS** y cierre global04 conforme al gate original: «Workflow sobre fixture: reproducir, test rojo, cambio, gates, revisión y rollback». Acepta residuales/P3 como seguimientos, no su resolución. Cierre técnico verificado por los gates finales indicados abajo; no se redefine ningún criterio.
+
+Auditoría suministrada:30/30 tests específicos ejecutados independientemente,40 reproducciones (incluidas dos inicialmente inválidas repetidas correctamente),36 hashes de evidencias y8 hashes de fuentes contrastados.673/673 globales acreditados mediante logs; **no se atribuye a Claude la ejecución de la suite completa**. Commits fed1763 y8f921c0. Sin hallazgos bloqueantes comunicados. No repetición de auditoría, agentes, inferencias ni acceso a otros proyectos.
+
+| Criterio vigente | Estado auditado | Evidencia concreta |
+|---|---|---|
+| 1. Dependencias01–03 | Cumplido | Cierres aceptados en status/phase-01/02/03;03 registrado7f84b21. No dependencia de harness05 para parche fijo. |
+| 2. D-043 | Cumplido | fixture.ts contiene4 archivos sintéticos propios; prepareBugfixDemo crea nuevo Git local sin remotos. bugfix.test.ts: preparación deniega padre ocupado/relativo/enlazado, no descubre otros proyectos. |
+| 3. Proyecto/worktree autorizado | Cumplido | prepareBugfixDemo usa registro/creación B03; commit064a5101625739a80344d54c14d6719bbb57c152 en demo, detached/receipt confirmado,12 pins/permisos. Tests de fuera de raíz/sustitución/enlaces/configuración. |
+| 4. Contexto reproducible | Cumplido | ContextPackage/Envelope4 archivos; referencias/OID y mapa verificados por inspect en proceso separado. Test CLI de recuperación del mismo contexto/evidencia. |
+| 5. Test rojo | Cumplido | Test fijo synthetic-add-2-plus-2 falla por ERR_ASSERTION, exit1/un fallo; no se acepta fallo de infraestructura como rojo. Handler red y caso integrado M041. |
+| 6. Corrección limitada | Cumplido | Preview SHA ligado a intención/commit/pre-post; sólo src/add.ts: return a-b → return a+b, grants propios vivos. Tests de manipulación/revocación/dispatch preexistente. |
+| 7. Test verde | Cumplido | Mismo test intacto exit0/un pass, handler green; caso integrado verifica postimagen autorizada. |
+| 8. Evidencia/diff persistidos | Cumplido en alcance | CAS3495d39461b7d9821038035f38bad8501c99139ca8b380144e06b1df69a47327/865bytes, diff exacto de un archivo, SQL/checkpoints/segundo proceso. P3-2: no prueba autocontenida ni refs de salidas en el resumen final. |
+| 9. Recuperación conservadora | Cumplido | Test pérdida de finish SQL tras escritura real y SIGKILL tras dispatch; segundo proceso blocked/pending, sin repetir/limpiar/reescribir. P3-1/P3-3 limitan recuperación operativa, no se promete reparación. |
+| 10. Revisión pendiente, no integración | Cumplido | run/inspect devuelven review pending/integration not_performed; tests de approve sólo registran dato del caller, nunca merge/push. Marker se contrasta con SQL/CAS. Sin identidad humana autenticada. |
+| 11. Descarte/origen intacto | Cumplido | Test discard explícito ligado a evidencia y postimagen: inverso autorizado → bytes originales → rojo esperado/diff vacío; inventarios de original/HEAD/índice/config/sentinelas intactos. Sólo fixtures distintos, no decisión real sobre demo manual. |
+
+Gates finales nuevos de este cierre: **673/673 tests**, sin fallos ni skips = contratos62 + persistencia115 + workspace187 + runtime101 (incluidos30 M04.1) + Ollama201 + spike7. Node24.19.0 estable en Program Files y pnpm12.15.0. `pnpm.cmd install --frozen-lockfile`=0, `pnpm.cmd peers check`=0 y `pnpm.cmd check`=0; check incluye formato/lint/typecheck/build/tests. Duración1268,39s (workspace662,33s; runtime546,70s), medición del gate, no SLA. Fuente/dependencias intactas, dist recompilado por el gate. R-061 no reproducida, causa desconocida/no resuelta. Diff/escaneo heurístico de secretos y formato final documentales registrados con exit0. Logs completos stdout/stderr/exits/tiempos/entorno y SHA-256: `%TEMP%/beonforge-phase04-close-57e4785b9d0a4a7292165714d74ecb01/`. Advertencias LF/CRLF y cambios HEAD de fixtures son salidas de tests sintéticos, no cambios al checkout del producto. **M04.1 y Fase04 CERRADOS / ACEPTADOS (CLOSED / ACCEPTED)** tras autorización expresa y gates; Fase05 sólo preparada, NO INICIADA.
+
+Los30 casos nuevos están en packages/runtime/test/bugfix.test.ts; funciones/CLI en examples/bugfix, contratos aceptados intactos. Detalles y hashes históricos de la demo se conservan abajo. El cierre de fase acepta la capacidad de revisión pendiente/descarte, no integra el parche de la demo ni autentica al humano.
+
+### Seguimientos aceptados, no corregidos
+
+- **P3-1:** fallos previos a efectos pueden clasificarse uncertain y bloquear permanentemente; distinguir predispatch conocido de incertidumbre real en futura ampliación. No reintentar por asumir que no hubo efecto.
+- **P3-2:** redExit/greenExit finales sin referencias CAS explícitas a salidas de tests; evidencia depende del kernel/SQLite. Fortalecer trazabilidad antes de usarla como prueba independiente.
+- **P3-3:** corte entre review.json y workflow puede dejar pending sin recuperación operativa; pending no equivale a revisión humana todavía completable. No reinterpretar marcador como confirmación, borrar o repetir automáticamente.
+
+R-067 y R-057/061/065/066 siguen abiertos/aceptados para este alcance, sin sandbox SO/red, power loss, exactly-once/liderazgo multiproceso ni autenticación humana. Condiciones más amplias requieren controles/autorizaciones posteriores. Siguiente: sólo preparación [Fase05/B04-01](phase-05.md), NO INICIADA; D-043 obligatoria. Rollback de este cierre por commit inverso documental, sin alterar datos/evidencias ni código aceptado.
+
+---
+
+## Histórico anterior al cierre de Fase04
+
 ## Entrega vigente — M04.1 implementado, abierto para revisión
 
 2026-11-02. Código **fed1763**, comparar `git diff b39e98b..fed1763`. **Fase04 ABIERTA**, nodo implementado localmente y pendiente de aceptación independiente; no cierre automático ni inicio05. Plan inferior conservado como histórico de preparación/criterios aprobados, no posición actual. D-043 continúa obligatoria: el repositorio sintético ya se creó sólo después de autorizar M04.1, sin otros proyectos como objetivos.

@@ -1,5 +1,21 @@
 # Estado persistente
 
+Actualizado: 2026-11-02. Posición vigente: **M04.1 y Fase04 CERRADOS / ACEPTADOS (CLOSED / ACCEPTED)**. Fases01–03 siguen aceptadas/cerradas. Propietario acepta expresamente M04.1 y cierre04 con APPROVE_WITH_FOLLOWUPS, residuales/P3 aceptados sin resolverlos. Implementación fed1763/evidencias8f921c0. Auditoría independiente:30/30 específicos,40 reproducciones (dos inicialmente inválidas repetidas correctamente),36 hashes de evidencias y8 de fuentes verificados;673 globales previos contrastados por logs, no ejecución completa atribuida a Claude.
+
+Matriz de once criterios/evidencia en [phase-04.md](phases/phase-04.md). Demo aceptada: fixture Git nuevo4 archivos sintéticos → worktree detached/commit exacto → ContextPackage/Envelope → rojo → parche fijo autorizado sólo src/add.ts → verde → diff/CAS → reinicio/lectura; review pending, integration not_performed. Descarte explícito probado en fixtures separados restaura bytes/rojo/diff limpio y origen intacto. Revisión del milestone aceptada no decide approve/discard de la demo ni autentica una identidad humana.
+
+Gates finales nuevos de este cierre: **673/673 tests**, sin fallos ni skips = contratos62 + persistencia115 + workspace187 + runtime101 (incluidos30 M04.1) + Ollama201 + spike7. Node24.19.0 estable en Program Files y pnpm12.15.0. `pnpm.cmd install --frozen-lockfile`=0, `pnpm.cmd peers check`=0 y `pnpm.cmd check`=0; check incluye formato/lint/typecheck/build/tests. Duración1268,39s (workspace662,33s; runtime546,70s), medición del gate, no SLA. Fuente/dependencias intactas, dist recompilado por el gate. R-061 no reproducida, causa desconocida/no resuelta. Diff/escaneo heurístico de secretos y formato final documentales registrados con exit0. Logs completos stdout/stderr/exits/tiempos/entorno y SHA-256: `%TEMP%/beonforge-phase04-close-57e4785b9d0a4a7292165714d74ecb01/`. Advertencias LF/CRLF y cambios HEAD de fixtures son salidas de tests sintéticos, no cambios al checkout del producto. **M04.1 y Fase04 CERRADOS / ACEPTADOS (CLOSED / ACCEPTED)** tras autorización expresa y gates; Fase05 sólo preparada, NO INICIADA.
+
+P3-1 clasificación conservadora uncertain incluso antes de efecto; P3-2 evidencia final sin refs explícitas a salidas de tests/dependiente de SQL; P3-3 review intent intermedio puede quedar pending sin recuperación operativa. No corregidos. R-057/061/065/066/067 conservados; R-061 no reproducida, causa desconocida/no resuelta. Sin sandbox SO/red, garantías de power loss, exactly-once, liderazgo multiproceso o aprobación humana autenticada. Riesgos admisibles para fixture confiable no habilitan código arbitrario/agentes.
+
+**Fase05 PREPARADA DOCUMENTALMENTE / NO INICIADA**, [plan B04-01 propuesto](phases/phase-05.md), primer desglose del bloque B04: harness Codex CLI para propuesta acotada de bugfix sintético, pruebas de contrato y permisos, supervisor aplica/testea/revisa. Selección condicionada a versión/perfil/confinamiento y autorización específica; no adaptador implementado. D-043 vigente: servicios/credenciales externos prohibidos por mandato actual; una variante remota requiere decisión expresa compatible, además de autorizar payload/destino/modelo. No inferir permisos por este cierre ni usar otro proyecto como alternativa. Siguiente acción: decisión del propietario sobre B04-01 y sus bloqueos, no ejecución automática.
+
+Sólo documentación modificada en este cierre; sin agentes/inferencias/Ollama, nuevos repos de demo, cambios funcionales/dependencias, merge/publicación o main. Los gates usan sólo fixtures sintéticos existentes. Vault complementario ausente. Rollback: commit inverso documental acotado, conservar SQL/CAS/roots y evidencias.
+
+---
+
+## Histórico anterior al cierre de Fase04
+
 Actualizado: 2026-11-02. Leer este archivo antes de cualquier tarea.
 
 ## Posición vigente — M04.1 implementado, pendiente de auditoría
@@ -294,9 +310,9 @@ Evidencia histórica anterior a REQUEST_CHANGES (no sustituye las correcciones y
 
 Desde la raíz real del checkout en PowerShell: `git rev-parse --show-toplevel`, `git status --short --branch`, `git diff --check`. Sólo ante error de propiedad usar `git -c safe.directory=<raíz-absoluta-verificada>` por comando. Gates: `pnpm.cmd install --frozen-lockfile`, `pnpm.cmd peers check`, `pnpm.cmd check` (formato, lint, typecheck, build y tests). Si falta `pnpm.cmd`, usar `corepack.cmd pnpm` como en B00-01.
 
-## Instrucciones exactas para continuar
+## Instrucciones exactas para continuar — vigentes tras este cierre
 
-1. Fases01/02, B05-01 y B05-02 aceptados/cerrados; B05-02 APPROVE_WITH_FOLLOWUPS sin P0–P2. No invocar agentes ni repetir auditorías/suites sin cambios que lo justifiquen. Fase03 abierta.
-2. Primera autorización real ya utilizada en un intento confirmado, no repetir ni consultar servicio por este registro. Esperar decisión sobre propuesta B05-03/registry, sin iniciar nodos/fases posteriores. Ningún nuevo permiso de inferencia/descargas/configuración. Main intacta, sin merge/publicación.
-3. Node24.19.0/pnpm12.15.0 estables ya comprobados; revalidar versión/ruta al continuar, nunca volver a depender de %TEMP% para runtime. No cambiar versiones/PATH/herramientas automáticamente; mantener WAL/FULL y SQL en worker.
-4. Preservar pending/uncertain y contratos. Sólo payload sintético/grant propio destino/modelo/hash; hash no incluye endpoint, grant reutilizable/sin caducidad. Preview no autoriza nada, una invocación se limita administrativamente. No retries ante unknown ni generalización a respuestas no sintéticas sin tratar claves duplicadas. Sin agentes/contexto privado/UI o modificaciones a F-5 sin regresión demostrada.
+1. M04.1 aceptado APPROVE_WITH_FOLLOWUPS por propietario; cierre técnico global04 verificado por los gates finales registrados arriba. No reabrir auditorías de01–04 ni corregir P3 aceptados dentro de este cierre documental.
+2. Fase05 sólo preparada en phase-05.md, B04-01 propuesto/no iniciado. Esperar autorización de implementación y resolver sus bloqueos antes de cualquier ejecución real. El primer nodo no sustituye el gate global05 de ambos adaptadores/perfiles/contract tests.
+3. D-043 obligatoria: únicamente nuevos repos Git sintéticos dedicados; BeonForge no es target. Sin servicios/credenciales reales por defecto: variante Codex remota exige decisión expresa compatible y autorización de payload/destino/modelo, autenticación oficial y confinamiento demostrado. No permisos por CAS, registry, plan o éxito sintético.
+4. Mantener Node24.19.0/pnpm12.15.0 estables, grants propios/revocación y separación historia/checkout; pending/uncertain no permiten retries ni limpieza. R-057/061/065/066/067 y P3 abiertos. No agentes, inferencias, herramientas externas, merge/publicación o cambio de main por este cierre.
