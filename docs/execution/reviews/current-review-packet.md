@@ -1,4 +1,23 @@
-# B04-01b — Cierre aceptado y preparación de B04-01c
+# B04-01c.1 — Preflight local BLOCKED, revisión independiente pendiente
+
+## B04-01c.1 — implementado localmente / BLOCKED, revisión pendiente
+
+Implementación **be0f165** sobre base509c118; comparar `git diff 509c118..be0f165`. Rama preservada, main intacta. Codex CLI0.166.0/hash anterior verificados. Sólo diagnóstico oficial MXC con programas sintéticos fijos, CODEX_HOME/LOCALAPPDATA/TEMP/config privados nuevos, analytics desactivado, sin configuración global. No codex exec, modelo, credenciales, API remota, repositorio objetivo o c.2/c.3. Vault complementario ausente.
+
+Observado: controles positivos FS y denegación de lectura/escritura fuera del ámbito; loopback sintético denegado frente a control positivo del host; salida normal termina hijo/nieto antes de autoexpiración. Al terminar Codex forzosamente, descendientes siguen vivos a500ms; desaparecen por autoexpiración4s, limpieza confirmada por separado. No garantía de cancelación del árbol. Frontera del host CLI/herramientas del agente y red externa NO demostradas. **readyForAgent:false**. Siguiente paso: revisión independiente de c.1 y decisión acotada sobre bloqueos; no avanzar a c.2.
+
+Node24.19.0 estable/pnpm12.15.0; frozen, peers y check exit0. Suite completa **734/734** (contratos62+persistencia115+workspace187+runtime162+Ollama201+spike7), incluidos23 nuevos. Fuente final de probes13:56:26 anterior a colección runtime14:05:43; lint/typecheck/build/formato y23 focalizados repetidos después con exit0. Logs completos stdout/stderr/exits y hashes privados: `%TEMP%/beonforge-c1-0e1812f7df284526b296f4ee0a10063c/`. Diff/staged paths y escaneo heurístico de secretos verificados sin hallazgos. Índices privados source-sha256.txt/evidence-sha256.txt permiten contrastar fuentes y logs; no subir SQLite/CAS/logs. No ejecución atribuida a Claude. R-061 no reproducida ni resuelta.
+
+Informe final CAS SHA-256 `df9e1f45628a216e36b84cff7195cdfda83b8b0caf1863d227b61b1be352f421`,1765 bytes; reapertura SQLite y lectura/verificación byte a byte desde segundo proceso exit0. Diagnostic CLI exit2 significa BLOCKED registrado correctamente, no gate fallido. Hash binario `9d563ee4e0441ff9d59d612013e0460ddf8e5709735c2d9f6b98b7ef8ca4eb42`; perfil `1593da9669756a2c557fd0b3d6aad89d094d8f6a2ab000e92cdefb06903320a7`; programas `d40df0fd68e84741c6b872133c075344e5206c94af1cb01e93c160ec2bbb5885`.
+### Revisión focalizada solicitada
+
+Comparar implementación contra base509c118. Revisar examples/codex/{preflight.ts,probes.ts,preflight-cli.mjs,README.md}, test/codex-preflight.test.ts y tsconfig.test. Verificar rechazo sin autorización/hash correcto, entorno privado/argv acotados, controles positivos y negativos, no confundir autoexpiración con cancelación, plazo conservador de observación, saneamiento CAS/reapertura y ausencia de permiso operativo derivado del informe. No declarar listo para agente ni cerrar c.1 por tests verdes.
+
+Evidencia final: verified-preflight.{stdout,stderr,exit}.txt y reopen-final.*; focused verified-focused.* y check.*. Primer lector auxiliar falló por BOM UTF-16 de redirección PowerShell; lector final retiró BOM y verificó bytes. Fallos exploratorios conservados: sintaxis antigua sandbox windows intentó ejecutable inexistente (CreateProcess error2), LOCALAPPDATA ausente, Node archivo mjs/lstat raíz denegado, ensayo tree con escape inválido y primer test con alias8.3. No son pruebas de confinamiento exitosas ni R-061. Config final/raíces nuevas y programas eval fijos corrigen la metodología sin ampliar permisos. Historial de ensayos retained; informe final anterior es la evidencia vigente.
+
+Criterio independiente: validar hechos y BLOCKED, no solicitar ejecución real ni inferencias. Los23 tests no sustituyen pruebas MXC opt-in; CLI diagnóstica no implementa adaptador. Fuentes oficiales consultadas: https://learn.chatgpt.com/docs/windows/windows-sandbox y https://learn.chatgpt.com/docs/permissions ; sólo las observaciones locales acreditan versión instalada. Job Objects: https://learn.microsoft.com/en-us/windows/win32/procthread/job-objects .
+
+## Histórico previo a B04-01c.1
 
 Gates de este cierre documental: Node24.19.0/pnpm12.15.0, `pnpm.cmd install --frozen-lockfile`, peers y format:check exit0; diff/alcance/escaneo heurístico de secretos verdes. Sin nuevos lint/typecheck/build/tests funcionales: sólo7 Markdown,711/711 es evidencia previa. Inspección Codex version/help exit0, sin agente/sandbox setup/credenciales. Logs/exits/metadata/hashes privados en `%TEMP%/beonforge-b0401b-close-888135c0caf44f9e8df7cbee801bf4f7/`. Este cierre no prueba confinamiento efectivo ni autoriza c.
 

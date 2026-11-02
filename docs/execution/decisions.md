@@ -1,5 +1,11 @@
 # Registro de decisiones
 
+## B04-01c.1 — aplicación acotada de la autorización de diagnóstico
+
+No nueva decisión arquitectónica ni ampliación de D-043/D-046. Usar únicamente comando oficial sandbox MXC con configuración privada, nunca fallback. Evaluar hechos separados del permiso operativo: informe siempre readyForAgent:false porque estos probes no acreditan frontera CLI/herramientas. Fallo de cancelación mantiene BLOCKED. No helper Job Object especulativo mientras falte probar membresía de procesos MXC antes de ejecutar y la frontera del host. c.2/c.3 no iniciados; cambios de aislamiento o setup OS requerirán decisión específica. No alterar supervisor simulado aceptado, contratos ni dependencias.
+
+## Histórico previo a B04-01c.1
+
 ## Aceptación de B04-01b por propietario
 
 CLOSED / ACCEPTED — APPROVE_WITH_FOLLOWUPS tras segunda auditoría; P2-1 y P3-1/2/3/6 confirmados,26/26 focalizados por Claude y711 globales por evidencias. P3-4/5 y riesgos vigentes conservados; valueOf del payload requiere caller confiable. No cambio arquitectónico ni credencial/envío/ejecución real autorizado. Preparar B04-01c en tres unidades, no implementarlo. D-046 ACCEPTED mantiene dirección hacia Software Factory con UI, OpenCode/routing y multiagente posteriores; Codex sólo primer ejecutor. D-043 no se amplía implícitamente.

@@ -1,5 +1,25 @@
 # Fase 05 — Harness externos
 
+## B04-01c.1 — implementado localmente / BLOCKED, revisión pendiente
+
+Implementación **be0f165** sobre base509c118; comparar `git diff 509c118..be0f165`. Rama preservada, main intacta. Codex CLI0.166.0/hash anterior verificados. Sólo diagnóstico oficial MXC con programas sintéticos fijos, CODEX_HOME/LOCALAPPDATA/TEMP/config privados nuevos, analytics desactivado, sin configuración global. No codex exec, modelo, credenciales, API remota, repositorio objetivo o c.2/c.3. Vault complementario ausente.
+
+Observado: controles positivos FS y denegación de lectura/escritura fuera del ámbito; loopback sintético denegado frente a control positivo del host; salida normal termina hijo/nieto antes de autoexpiración. Al terminar Codex forzosamente, descendientes siguen vivos a500ms; desaparecen por autoexpiración4s, limpieza confirmada por separado. No garantía de cancelación del árbol. Frontera del host CLI/herramientas del agente y red externa NO demostradas. **readyForAgent:false**. Siguiente paso: revisión independiente de c.1 y decisión acotada sobre bloqueos; no avanzar a c.2.
+
+Objetivo/alcance c.1: medir únicamente identidad, sandbox de comandos y ciclo de vida; archivos examples/codex, test/codex-preflight.test.ts y tsconfig.test. Sin contratos públicos/dependencias nuevas, sin helper nativo. Criterio PASS global NO satisfecho por dos bloqueos observados/no demostrados; implementación de diagnóstico no equivale a aceptación del nodo.
+
+Límites:10s/64KiB por stream y1s cierre del launcher; ventana500ms cancelación/1000ms normal anterior al plazo conservador de autoexpiración. Raíces temporales físicas nuevas, rechazo links/rutas no canónicas, argv/env fijos sin shell anfitrión. Sólo sentinelas públicos y conexión127.0.0.1 a puerto propio efímero, no red externa. Riesgos del propietario/host confiable persisten. No probar credenciales leyendo archivos reales.
+
+Evaluación Job Objects: fallo demostrado de cancelación justifica estudiar control específico, pero Job alrededor del host no prueba membresía previa de cargas creadas por helpers/brokers MXC. Faltan compatibilidad jobs anidados, asociación antes de ejecución y lifecycle; tampoco resuelve frontera host/FS/red. No añadir infraestructura especulativa ni asignar PIDs retroactivamente como garantía. Mantener BLOCKED, no fallback full access.
+
+Rollback: revert acotado de implementación/documentación conservando informes y raíces privadas; ninguna limpieza destructiva automática ni retry del agente. Revisar código, hechos y límites independientemente; c.2/c.3 sin iniciar.
+
+Node24.19.0 estable/pnpm12.15.0; frozen, peers y check exit0. Suite completa **734/734** (contratos62+persistencia115+workspace187+runtime162+Ollama201+spike7), incluidos23 nuevos. Fuente final de probes13:56:26 anterior a colección runtime14:05:43; lint/typecheck/build/formato y23 focalizados repetidos después con exit0. Logs completos stdout/stderr/exits y hashes privados: `%TEMP%/beonforge-c1-0e1812f7df284526b296f4ee0a10063c/`. Diff/staged paths y escaneo heurístico de secretos verificados sin hallazgos. Índices privados source-sha256.txt/evidence-sha256.txt permiten contrastar fuentes y logs; no subir SQLite/CAS/logs. No ejecución atribuida a Claude. R-061 no reproducida ni resuelta.
+
+Informe final CAS SHA-256 `df9e1f45628a216e36b84cff7195cdfda83b8b0caf1863d227b61b1be352f421`,1765 bytes; reapertura SQLite y lectura/verificación byte a byte desde segundo proceso exit0. Diagnostic CLI exit2 significa BLOCKED registrado correctamente, no gate fallido. Hash binario `9d563ee4e0441ff9d59d612013e0460ddf8e5709735c2d9f6b98b7ef8ca4eb42`; perfil `1593da9669756a2c557fd0b3d6aad89d094d8f6a2ab000e92cdefb06903320a7`; programas `d40df0fd68e84741c6b872133c075344e5206c94af1cb01e93c160ec2bbb5885`.
+
+## Histórico previo a B04-01c.1
+
 Gates de este cierre documental: Node24.19.0/pnpm12.15.0, `pnpm.cmd install --frozen-lockfile`, peers y format:check exit0; diff/alcance/escaneo heurístico de secretos verdes. Sin nuevos lint/typecheck/build/tests funcionales: sólo7 Markdown,711/711 es evidencia previa. Inspección Codex version/help exit0, sin agente/sandbox setup/credenciales. Logs/exits/metadata/hashes privados en `%TEMP%/beonforge-b0401b-close-888135c0caf44f9e8df7cbee801bf4f7/`. Este cierre no prueba confinamiento efectivo ni autoriza c.
 
 ## B04-01c — vertical Codex propuesta, NO INICIADA
