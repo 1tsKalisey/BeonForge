@@ -1,5 +1,7 @@
 # Plan maestro de ejecución
 
+Estado vigente: B04-01b CLOSED/ACCEPTED por propietario, APPROVE_WITH_FOLLOWUPS; Fase05 abierta. [B04-01c](phases/phase-05.md) preparado en tres unidades, no iniciado. Cierre no autoriza proveedor real/credenciales/envío: preflight efectivo y consentimiento específico son bloqueantes. D-046 vigente, sin alterar otros gates: Codex vertical → API/Angular → OpenCode/routing → multiagente; producto final multimodelo/multiagente, no framework anticipado. R-057/061/065/066/067 y P3-4/5 conservados.
+
 D-046 ACCEPTED expresamente: secuencia vertical-first vigente en filas05/06/09; multiagente07 posterior. B04-01a CLOSED/ACCEPTED, b sólo simulado autorizado. Sin cambiar gates ya aceptados de01–04. Documentación previa de D-046 pendiente es histórica.
 
 ## Dirección vertical-first aprobada; cambios formales pendientes

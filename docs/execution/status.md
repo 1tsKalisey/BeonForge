@@ -1,5 +1,15 @@
 # Estado persistente
 
+Gates de este cierre documental: Node24.19.0/pnpm12.15.0, `pnpm.cmd install --frozen-lockfile`, peers y format:check exit0; diff/alcance/escaneo heurístico de secretos verdes. Sin nuevos lint/typecheck/build/tests funcionales: sólo7 Markdown,711/711 es evidencia previa. Inspección Codex version/help exit0, sin agente/sandbox setup/credenciales. Logs/exits/metadata/hashes privados en `%TEMP%/beonforge-b0401b-close-888135c0caf44f9e8df7cbee801bf4f7/`. Este cierre no prueba confinamiento efectivo ni autoriza c.
+
+B04-01b **CLOSED / ACCEPTED — APPROVE_WITH_FOLLOWUPS**, autorización expresa del propietario tras segunda auditoría. P2-1 y P3-1/2/3/6 confirmados; P3-4/5 abiertos sólo aceptados para fixture confiable. Claude ejecutó26/26 focalizados;711 globales contrastados por evidencias, no suite completa atribuida a Claude. Código de441e3/evidencias e34cc88 intactos, sin contratos/dependencias alterados.
+
+Seguimientos y cierre detallado en phase-05.md/risks.md: conversión payload puede ejecutar valueOf del caller; aserción cero spawns previa mejorable; focused intermedio no es resultado final (green-final2/check son finales). R-057/061/065/066/067 abiertos, no garantías nuevas de red/CPU/RSS/árbol/IPC/power loss/exactly-once. No reabrir código sin defecto bloqueante.
+
+**B04-01c preparado, NO INICIADO** en tres unidades de phase-05.md: preflight/confinamiento y terminación, adaptador con mocks/evidencia, primera vertical real sólo opt-in autorizado. Codex0.166.0 instalado identificado/hash y version/help sin agente; perfil efectivo aún no probado. No permisos de credenciales/envío, setup OS o ejecución real. D-043 y D-046 vigentes, Fase05 abierta. Codex primer ejecutor; Software Factory multimodelo/multiagente con API/Angular, OpenCode/routing posteriores. Sólo documentos cambiados, vault externo ausente. Rollback por revert documental, conservando evidencias.
+
+## Histórico anterior al cierre de b
+
 Correctivo **de441e3** sobre base e8d70a6; comparar `git diff e8d70a6..de441e3`. P2-1 corregido localmente, pendiente de verificación independiente; B04-01b NO cerrado/aceptado.
 
 Validación final del correctivo: **26/26 focalizados y711/711 globales** =62 contratos+115 persistencia+187 workspace+139 runtime+201 Ollama+7 spike. Node24.19.0/pnpm12.15.0; frozen/peers/check exit0. Fuente TS final12:06:12/13 anterior a colección runtime12:07:24; lint/typecheck/build globales y formato repetidos para fuente final. Dos evidencias rojas:5 getters/herencia antes del parche y1 contaminación de descriptor antes del endurecimiento; skips de filtros no son suite completa. Logs stdout/stderr/exits/hashes en `%TEMP%/beonforge-b0401b-fix-92d3dfc6ad6749d28b9f89829d15b3b4/`. Sin tests nuevos atribuidos a Claude, sin cierre/aceptación de b ni nuevos bloques. R-061 no reproducida/resuelta; riesgos vigentes. Diff/escaneo heurístico de secretos sin hallazgos.

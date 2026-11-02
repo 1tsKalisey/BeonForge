@@ -1,4 +1,16 @@
-# B04-01b — Supervisor simulado, revisión pendiente
+# B04-01b — Cierre aceptado y preparación de B04-01c
+
+Gates de este cierre documental: Node24.19.0/pnpm12.15.0, `pnpm.cmd install --frozen-lockfile`, peers y format:check exit0; diff/alcance/escaneo heurístico de secretos verdes. Sin nuevos lint/typecheck/build/tests funcionales: sólo7 Markdown,711/711 es evidencia previa. Inspección Codex version/help exit0, sin agente/sandbox setup/credenciales. Logs/exits/metadata/hashes privados en `%TEMP%/beonforge-b0401b-close-888135c0caf44f9e8df7cbee801bf4f7/`. Este cierre no prueba confinamiento efectivo ni autoriza c.
+
+## B04-01b CLOSED / ACCEPTED — APPROVE_WITH_FOLLOWUPS
+
+Propietario autoriza expresamente cierre documental conforme a segunda auditoría independiente: P2-1 corregido sin bypass demostrable; P3-1/2/3/6 confirmados corregidos; P3-4/5 abiertos no bloqueantes **sólo para supervisor simulado confiable**. Código de441e3/evidencias e34cc88. Claude ejecutó26/26 focalizados;711/711 globales contrastados por evidencias, no ejecución completa atribuida a Claude. Sin contratos públicos/dependencias cambiados. Fase05 abierta, D-046 y D-043 vigentes; sin permiso de agente real, credenciales, envío, proyecto real o integración.
+
+Seguimientos: Buffer.from/conversión del payload puede ejecutar código del caller mediante valueOf u otros mecanismos: caller confiable sigue siendo frontera (R-067), no deserializador seguro para objetos arbitrarios. Mejorar en futuro aserción de cancelación previa con contador explícito cero spawns. focused.stdout es intermedio, no resultado final: green-final2.stdout acredita26/26 y check.stdout711/711; conservar fallos y filtros históricos sin presentarlos como última corrida. No reabrir código sin defecto bloqueante demostrado.
+
+P3-4 sin escalado de señales/árbol Windows general y P3-5 IPC sin límite de bytes permanecen abiertos. No se transfieren garantías del fixture a Codex: confinamiento de host/herramientas/red, CPU/RSS y terminación efectiva son prerrequisitos de c. R-057/061/065/066/067 siguen abiertos; R-061 no reproducida/causa desconocida/no resuelta. CAS no autentica al propietario, no exactly-once/power loss/liderazgo global ni autenticación humana.
+
+## Histórico anterior al cierre de b
 
 SHA-256 supervisor.ts actual: `5cf88c3489ec20170199e0e9c34ade5ac0d3eef6f197c50d83876a0e484a0ab2`. Índices de fuentes/logs en sources-sha256.json/sha256.json del directorio privado indicado. Fuentes funcionales estables antes de la colección de runtime; post-lint/post-typecheck/post-format-check acreditan controles globales posteriores. No despliegue/push, agentes reales o nuevos bloques.
 

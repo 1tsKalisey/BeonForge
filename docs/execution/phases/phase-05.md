@@ -1,5 +1,67 @@
 # Fase 05 — Harness externos
 
+Gates de este cierre documental: Node24.19.0/pnpm12.15.0, `pnpm.cmd install --frozen-lockfile`, peers y format:check exit0; diff/alcance/escaneo heurístico de secretos verdes. Sin nuevos lint/typecheck/build/tests funcionales: sólo7 Markdown,711/711 es evidencia previa. Inspección Codex version/help exit0, sin agente/sandbox setup/credenciales. Logs/exits/metadata/hashes privados en `%TEMP%/beonforge-b0401b-close-888135c0caf44f9e8df7cbee801bf4f7/`. Este cierre no prueba confinamiento efectivo ni autoriza c.
+
+## B04-01c — vertical Codex propuesta, NO INICIADA
+
+Objetivo: tarea → Codex CLI oficial → propuesta → validación → tests → diff → revisión pendiente. Sólo planificación, sin despachar agente. Reutilizar kernel, EventStore/ArtifactStore, contratos, worktrees y contexto. No modificar supervisor simulado aceptado salvo defecto bloqueante. Codex es primer ejecutor, no destino final: API/Angular, OpenCode/routing y multiagente siguen D-046.
+
+### Inspección local no invasiva
+
+CLI npm: **codex-cli 0.166.0**, confirmada por binario con `--version`; `exec --help` exit0. Binario: `%APPDATA%/npm/node_modules/@openai/codex/node_modules/@openai/codex-win32-x64/vendor/x86_64-pc-windows-msvc/bin/codex.exe`. SHA-256 **9d563ee4e0441ff9d59d612013e0460ddf8e5709735c2d9f6b98b7ef8ca4eb42**. Shims npm detectados, no utilizarlos como shell. Hash local no autentica distribución: revalidar ruta canónica/identidad/hash antes de uso. Aplicación Appx26.1027.3384.0 distinta de versión CLI npm.
+
+Sólo version/help, binario directo sin shell, timeout10s/salida64KiB, cwd/CODEX_HOME privados vacíos y entorno mínimo sin tokens. No agente, login/auth-status, listado de modelos o lectura de archivos de autenticación. Help local acredita json/output-schema/ephemeral/ignore-user-config y sandbox read-only/workspace-write; advierte que ignore-user-config no desactiva autenticación de CODEX_HOME. No heredar HOME/configuración personal para el adaptador.
+
+Windows11 Pro25H2 **26200.9711** cumple mínimo de build documentado para MXC, pero **disponibilidad, activación y perfil efectivo NO comprobados**. No se activó sandbox, característica, cuenta, ACL o firewall; la configuración de este chat no prueba confinamiento de BeonForge.
+
+### c.1 — Preflight y frontera efectiva, sin proveedor
+
+Entrada: binario/version/hash explícitos, perfil soportado, raíces privadas nuevas/sentinelas sintéticos y límites. Salida CAS: hechos observados, perfil efectivo/controles probados o **blocked**, nunca permiso de inferencia. Preferir sandbox oficial MXC cuando se demuestre compatible; no fallback automático a full access/unelevated. Verificar por separado CLI anfitrión y comandos/hijos. Read-only/cwd/HOME no deniegan por sí solos herramientas o lecturas ajenas.
+
+Probes inocuos locales: negar lecturas/escrituras fuera de raíces, red de herramientas y herencia de credenciales; sin otros proyectos ni modelo. Denegar shell, MCP, skills/plugins, subagentes, web y Git del agente mediante política soportada comprobada, no por prompt. Si el sandbox protege sólo comandos y no al host CLI, blocked: decisión específica antes de añadir un entorno aislado, no infraestructura automática.
+
+Terminación: prever launcher Windows específico Codex con Job Object kill-on-job-close, proceso suspendido/asignado antes de reanudar, handles no heredables/breakaway deshabilitado y compatibilidad con jobs anidados/MXC probada. Helper nativo mínimo sólo si interfaz oficial no cubre la garantía: necesidad concreta P3-4, no framework. Job no es sandbox FS/red ni evita todo lanzamiento mediante brokers: prohibir esas rutas o blocked. Memoria/CPU a nivel job sólo si efectivamente configurados/verificados; heap V8 no limita RSS.
+
+Aceptación: hijo/nieto sintéticos terminan al cancelar/perder launcher/supervisor; fallo de asignación no permite despacho; sentinelas demuestran controles. Cualquier setup OS/cuentas/ACL/firewall/instalación requiere aprobación concreta. Versión/hash/perfil distinto invalida informe. Sin prueba de confinamiento efectivo, ninguna ejecución real.
+
+### c.2 — Adaptador estrecho y evidencia, implementación sólo con mocks
+
+Proponer funciones locales preparar preview/ejecutar una vez/inspeccionar; no contratos públicos nuevos sin necesidad. Grant propio vivo liga run/intento, binario/perfil, proveedor/destino/modelo, payload/hash, raíces/operaciones/límites. Entrada por DTO/bytes controlados: no confiar en objetos arbitrarios que ejecuten valueOf. ContextEnvelope se lee con permisos actuales, instrucciones separadas de contenido; referencia CAS no autoriza envío.
+
+Binario nativo, argv fijos y stdin, entorno allowlist/config privada; sin shell/npm shim/IPC Node/lifeline del fake, auto-approval o bypass. Preparar comando exacto sólo tras c.1 y elección autorizada de modelo. Una ejecución activa, start durable antes de efecto, sin resume/retry automático. Salida oficial exec/json no concede permisos ni acredita tests. Propuesta final con schema mínimo: commit, src/add.ts, SHA de preimagen y reemplazo UTF-8; agente sólo propone.
+
+Validación incremental UTF-8 fatal/JSONL, schema/eventos admitidos, duplicados/campos extra, línea incompleta y final estructurado. Rechazar desconocidos, no ejecutar texto. Persistir únicamente estados/resúmenes saneados/contadores y refs CAS, nunca razonamiento, credenciales o streams crudos. Sin parser universal de agentes.
+
+Límites propuestos: contexto16 archivos/16KiB archivo/32KiB total e instrucciones4KiB; stdin64KiB; stdout/stderr1MiB por stream, línea64KiB,4096 eventos, propuesta16KiB; deadline120s (hasta300s sólo autorizado) y cierre5s. Diferenciar cola/ejecución/cierre/SQL; no truncar para éxito. Sin confirmación de árbol terminado o finish perdido, uncertain/pending sin retry, ni garantía de parar cálculo remoto.
+
+Pruebas: mocks de proceso Codex sin proveedor, snapshot/hash/argv, grants inválidos cero spawns explícitos, revocación, chunks controlados UTF-8/JSONL/BOM/duplicados, fronteras/flood, spawn/exit/error/cancelación/timeout/crash y pérdida de confirmación. SQLite/CAS y lector de segundo proceso reales. Archivos previstos bajo `packages/runtime/examples/codex/` y `packages/runtime/test/`, helper Windows sólo justificado por c.1; no SDK/paquete genérico ni cambios al kernel por anticipación.
+
+### c.3 — Primera corrección generada, opt-in separado
+
+Requiere c.1/c.2 aceptados y autorización **nueva, específica y compatible con D-043**: excepción concreta para proveedor/credenciales/envío, manteniendo sólo repo Git nuevo sintético. Identificar endpoints/proveedor/modelo, autenticación oficial/custodia, payload exacto/hash/clasificación pública, binario/perfil, roots/operaciones/límites y una ejecución administrativa sin reintentos. No extraer/exportar tokens ni reutilizar suscripciones como API. Herramientas/tests no reciben credenciales; falta de separación de autenticación/host/herramientas/egress bloquea. No API de pago obligatoria.
+
+Crear Git nuevo con plantillas propias04; registro/commit exacto/worktree/contexto y rojo fijo. Una llamada autorizada genera propuesta sin recibir la postimagen conocida. Supervisor valida commit/preimagen/allowlist y postimagen sintética admisible antes de aplicar/ejecutar: es gate, no generador. Revalidar permisos/identidad/estado; aplicar sólo src/add.ts, test fijo verde, diff de un archivo, refs CAS de resúmenes de tests y reapertura. Original/metadatos/store fuera de permisos del agente, sin scripts arbitrarios/instalaciones.
+
+Gate final: propuesta real autorizada → verde/diff/evidencia recuperable → review pending/integration not_performed. Drift/incertidumbre bloquean. Sin merge/push/rollback automático ni identidad humana autenticada fingida. Opt-in real nunca entra en gates automáticos. Después: revisión independiente y vertical API/Angular mínima, no UI/routing/multiagente dentro de c.
+
+### Fuentes y condiciones de avance
+
+Documentación oficial consultada2026-11-02: [Codex exec](https://learn.chatgpt.com/docs/non-interactive-mode), [Windows sandbox](https://learn.chatgpt.com/docs/windows/windows-sandbox), [permisos](https://learn.chatgpt.com/docs/permissions); documentación no sustituye pruebas en host. [Job Objects](https://learn.microsoft.com/en-us/windows/win32/procthread/job-objects) y [límites](https://learn.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-jobobject_basic_limit_information): contención/terminación de miembros, no aislamiento de seguridad universal.
+
+Tras autorizar implementación se puede desarrollar c.1 y c.2 sin credenciales, con probes locales aprobados/mocks/persistencia real. Hoy sólo plan. c.3, uso de autenticación/envío y cualquier setup OS requieren autorización expresa adicional; éxito simulado o cierre b no la concede. Riesgos R-057/061/065/066/067 y P3-4/5 siguen abiertos. Rollback futuro por revert acotado conservando evidencia/datos, sin reparar/repetir automáticamente efectos inciertos.
+
+## Histórico previo a preparación de c
+
+## B04-01b CLOSED / ACCEPTED — APPROVE_WITH_FOLLOWUPS
+
+Propietario autoriza expresamente cierre documental conforme a segunda auditoría independiente: P2-1 corregido sin bypass demostrable; P3-1/2/3/6 confirmados corregidos; P3-4/5 abiertos no bloqueantes **sólo para supervisor simulado confiable**. Código de441e3/evidencias e34cc88. Claude ejecutó26/26 focalizados;711/711 globales contrastados por evidencias, no ejecución completa atribuida a Claude. Sin contratos públicos/dependencias cambiados. Fase05 abierta, D-046 y D-043 vigentes; sin permiso de agente real, credenciales, envío, proyecto real o integración.
+
+Seguimientos: Buffer.from/conversión del payload puede ejecutar código del caller mediante valueOf u otros mecanismos: caller confiable sigue siendo frontera (R-067), no deserializador seguro para objetos arbitrarios. Mejorar en futuro aserción de cancelación previa con contador explícito cero spawns. focused.stdout es intermedio, no resultado final: green-final2.stdout acredita26/26 y check.stdout711/711; conservar fallos y filtros históricos sin presentarlos como última corrida. No reabrir código sin defecto bloqueante demostrado.
+
+P3-4 sin escalado de señales/árbol Windows general y P3-5 IPC sin límite de bytes permanecen abiertos. No se transfieren garantías del fixture a Codex: confinamiento de host/herramientas/red, CPU/RSS y terminación efectiva son prerrequisitos de c. R-057/061/065/066/067 siguen abiertos; R-061 no reproducida/causa desconocida/no resuelta. CAS no autentica al propietario, no exactly-once/power loss/liderazgo global ni autenticación humana.
+
+## Histórico anterior al cierre de b
+
 Correctivo **de441e3** sobre base e8d70a6; comparar `git diff e8d70a6..de441e3`. P2-1 corregido localmente, pendiente de verificación independiente; B04-01b NO cerrado/aceptado.
 
 Validación final del correctivo: **26/26 focalizados y711/711 globales** =62 contratos+115 persistencia+187 workspace+139 runtime+201 Ollama+7 spike. Node24.19.0/pnpm12.15.0; frozen/peers/check exit0. Fuente TS final12:06:12/13 anterior a colección runtime12:07:24; lint/typecheck/build globales y formato repetidos para fuente final. Dos evidencias rojas:5 getters/herencia antes del parche y1 contaminación de descriptor antes del endurecimiento; skips de filtros no son suite completa. Logs stdout/stderr/exits/hashes en `%TEMP%/beonforge-b0401b-fix-92d3dfc6ad6749d28b9f89829d15b3b4/`. Sin tests nuevos atribuidos a Claude, sin cierre/aceptación de b ni nuevos bloques. R-061 no reproducida/resuelta; riesgos vigentes. Diff/escaneo heurístico de secretos sin hallazgos.

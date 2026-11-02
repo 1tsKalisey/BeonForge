@@ -1,5 +1,11 @@
 # Registro de decisiones
 
+## Aceptación de B04-01b por propietario
+
+CLOSED / ACCEPTED — APPROVE_WITH_FOLLOWUPS tras segunda auditoría; P2-1 y P3-1/2/3/6 confirmados,26/26 focalizados por Claude y711 globales por evidencias. P3-4/5 y riesgos vigentes conservados; valueOf del payload requiere caller confiable. No cambio arquitectónico ni credencial/envío/ejecución real autorizado. Preparar B04-01c en tres unidades, no implementarlo. D-046 ACCEPTED mantiene dirección hacia Software Factory con UI, OpenCode/routing y multiagente posteriores; Codex sólo primer ejecutor. D-043 no se amplía implícitamente.
+
+## Histórico previo al cierre de b
+
 Autorización expresa vigente: **B04-01a CLOSED / ACCEPTED — APPROVE_WITH_FOLLOWUPS**; P3-3/4/5 y R-057/061/065/066/067 abiertos. **D-046 ACCEPTED** por propietario: vertical Codex primero, API/Angular parcial tras API estable, OpenCode/routing después y multiagente diferido. No eliminación de capacidades ni permiso de proveedor/credenciales/envío. B04-01b autorizado exclusivamente con fixture simulado; pendiente de implementación/revisión, no aceptación. D-043 intacta. El estado anterior inferior se conserva como histórico.
 
 ## Histórico previo a esta autorización

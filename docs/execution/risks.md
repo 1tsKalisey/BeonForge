@@ -1,5 +1,17 @@
 # Registro de riesgos
 
+Gates de este cierre documental: Node24.19.0/pnpm12.15.0, `pnpm.cmd install --frozen-lockfile`, peers y format:check exit0; diff/alcance/escaneo heurístico de secretos verdes. Sin nuevos lint/typecheck/build/tests funcionales: sólo7 Markdown,711/711 es evidencia previa. Inspección Codex version/help exit0, sin agente/sandbox setup/credenciales. Logs/exits/metadata/hashes privados en `%TEMP%/beonforge-b0401b-close-888135c0caf44f9e8df7cbee801bf4f7/`. Este cierre no prueba confinamiento efectivo ni autoriza c.
+
+## B04-01b CLOSED / ACCEPTED — APPROVE_WITH_FOLLOWUPS
+
+Propietario autoriza expresamente cierre documental conforme a segunda auditoría independiente: P2-1 corregido sin bypass demostrable; P3-1/2/3/6 confirmados corregidos; P3-4/5 abiertos no bloqueantes **sólo para supervisor simulado confiable**. Código de441e3/evidencias e34cc88. Claude ejecutó26/26 focalizados;711/711 globales contrastados por evidencias, no ejecución completa atribuida a Claude. Sin contratos públicos/dependencias cambiados. Fase05 abierta, D-046 y D-043 vigentes; sin permiso de agente real, credenciales, envío, proyecto real o integración.
+
+Seguimientos: Buffer.from/conversión del payload puede ejecutar código del caller mediante valueOf u otros mecanismos: caller confiable sigue siendo frontera (R-067), no deserializador seguro para objetos arbitrarios. Mejorar en futuro aserción de cancelación previa con contador explícito cero spawns. focused.stdout es intermedio, no resultado final: green-final2.stdout acredita26/26 y check.stdout711/711; conservar fallos y filtros históricos sin presentarlos como última corrida. No reabrir código sin defecto bloqueante demostrado.
+
+P3-4 sin escalado de señales/árbol Windows general y P3-5 IPC sin límite de bytes permanecen abiertos. No se transfieren garantías del fixture a Codex: confinamiento de host/herramientas/red, CPU/RSS y terminación efectiva son prerrequisitos de c. R-057/061/065/066/067 siguen abiertos; R-061 no reproducida/causa desconocida/no resuelta. CAS no autentica al propietario, no exactly-once/power loss/liderazgo global ni autenticación humana.
+
+## Histórico anterior al cierre de b
+
 Correctivo **de441e3** sobre base e8d70a6; comparar `git diff e8d70a6..de441e3`. P2-1 corregido localmente, pendiente de verificación independiente; B04-01b NO cerrado/aceptado.
 
 Validación final del correctivo: **26/26 focalizados y711/711 globales** =62 contratos+115 persistencia+187 workspace+139 runtime+201 Ollama+7 spike. Node24.19.0/pnpm12.15.0; frozen/peers/check exit0. Fuente TS final12:06:12/13 anterior a colección runtime12:07:24; lint/typecheck/build globales y formato repetidos para fuente final. Dos evidencias rojas:5 getters/herencia antes del parche y1 contaminación de descriptor antes del endurecimiento; skips de filtros no son suite completa. Logs stdout/stderr/exits/hashes en `%TEMP%/beonforge-b0401b-fix-92d3dfc6ad6749d28b9f89829d15b3b4/`. Sin tests nuevos atribuidos a Claude, sin cierre/aceptación de b ni nuevos bloques. R-061 no reproducida/resuelta; riesgos vigentes. Diff/escaneo heurístico de secretos sin hallazgos.
