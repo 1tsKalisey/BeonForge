@@ -1,5 +1,5 @@
 import { it, expect } from 'vitest';
-import { execFile } from 'node:child_process';
+import { execFile, spawn } from 'node:child_process';
 import process from 'node:process';
 import { SENTINEL, TREE, PROFILE } from '../examples/codex/probes.ts';
 import {
@@ -11,6 +11,7 @@ import { openSqlitePersistence } from '@beonforge/persistence';
 import { mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
+import { setTimeout as delay } from 'node:timers/promises';
 
 function facts(): PreflightFacts {
   return {
@@ -109,6 +110,73 @@ it('profile selects MXC/network off and no broad filesystem read or fallback', (
   expect(PROFILE).not.toContain('danger-full-access');
   expect(PROFILE).not.toContain('unelevated');
 });
+it.skipIf(process.platform !== 'win32')(
+  'reproduces the original libuv cleanup confound and verifies unassisted Node descendants',
+  async () => {
+    const exists = (pid: number) => {
+      try {
+        process.kill(pid, 0);
+        return true;
+      } catch (error) {
+        if (
+          error &&
+          typeof error === 'object' &&
+          'code' in error &&
+          error.code === 'ESRCH'
+        )
+          return false;
+        throw error;
+      }
+    };
+    for (const detached of [false, true]) {
+      const source = detached ? TREE : TREE.replaceAll(',detached:true', '');
+      const stdout = await new Promise<string>((resolve, reject) => {
+        const child = spawn(
+          process.execPath,
+          ['--input-type=module', '--eval', source, '--', 'normal'],
+          {
+            env: { SystemRoot: process.env.SystemRoot },
+            detached: true,
+            windowsHide: true,
+            timeout: 5000,
+            stdio: ['ignore', 'pipe', 'ignore'],
+          },
+        );
+        let output = '';
+        child.stdout.on('data', (bytes: Buffer) => {
+          output += bytes.toString();
+          if (output.length > 65536) {
+            child.kill();
+            reject(new Error('receipt_overflow'));
+          }
+        });
+        child.once('error', reject);
+        child.once('close', (code) =>
+          code === 0 ? resolve(output) : reject(new Error('probe_failed')),
+        );
+      });
+      const receipt = JSON.parse(stdout) as {
+        root: number;
+        child: number;
+        grand: number;
+        expiresAt: number;
+      };
+      try {
+        await delay(500); // Job closure is asynchronous; observation precedes expiry.
+        expect(Date.now()).toBeLessThan(receipt.expiresAt - 1000);
+        expect(exists(receipt.root)).toBe(false);
+        expect(exists(receipt.child)).toBe(detached);
+        expect(exists(receipt.grand)).toBe(detached);
+      } finally {
+        await delay(4500);
+        expect([receipt.root, receipt.child, receipt.grand].some(exists)).toBe(
+          false,
+        );
+      }
+    }
+  },
+  20000,
+);
 it.each([SENTINEL, TREE])(
   'authored eval probes have valid module syntax without executing them',
   async (source) => {

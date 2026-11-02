@@ -17,10 +17,10 @@ import {spawn} from 'node:child_process'; import process from 'node:process';
 const mode=process.argv[1], source=process.execArgv[process.execArgv.indexOf('--eval')+1];
 if(mode==='leaf') { setTimeout(()=>{},4000); }
 else if(mode==='child') {
- const expiresAt=Date.now()+4000; const grand=spawn(process.execPath,['--input-type=module','--eval',source,'--','leaf'],{stdio:'ignore'});
+ const expiresAt=Date.now()+4000; const grand=spawn(process.execPath,['--input-type=module','--eval',source,'--','leaf'],{stdio:'ignore',detached:true});
  grand.unref(); process.stdout.end(JSON.stringify({child:process.pid,grand:grand.pid,expiresAt})+'\n'); setTimeout(()=>{},4000);
 } else {
- const child=spawn(process.execPath,['--input-type=module','--eval',source,'--','child'],{stdio:['ignore','pipe','ignore']}); let text='';
+ const child=spawn(process.execPath,['--input-type=module','--eval',source,'--','child'],{stdio:['ignore','pipe','ignore'],detached:true}); let text='';
  child.stdout.on('data',b=>{text+=b;if(text.length>1024)process.exit(2);if(text.includes('\n')){const ids=JSON.parse(text);child.stdout.destroy();child.unref();process.stdout.write(JSON.stringify({root:process.pid,...ids})+'\n');setTimeout(()=>process.exit(0),mode==='hold'?4000:300);}});
 }
 `;

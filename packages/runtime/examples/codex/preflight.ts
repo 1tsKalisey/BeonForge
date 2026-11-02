@@ -425,7 +425,8 @@ export async function runCodexPreflight(
     profileSha256: hash(PROFILE),
     programSha256: hash(SENTINEL + TREE),
     nodeVersion: process.version,
-    selectedSandbox: 'mxc',
+    requestedSandbox: 'mxc',
+    observedBackend: 'not_verified',
     evidence: Object.fromEntries(
       Object.entries(results).map(([name, r]) => [
         name,
