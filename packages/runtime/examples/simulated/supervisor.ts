@@ -71,19 +71,56 @@ function own(value: unknown, key: string): unknown {
   if (!value || typeof value !== 'object' || types.isProxy(value))
     return undefined;
   const d = Object.getOwnPropertyDescriptor(value, key);
-  return d && 'value' in d ? d.value : undefined;
+  return d && Object.hasOwn(d, 'value') ? d.value : undefined;
 }
 const hash = (b: Uint8Array | string) =>
   createHash('sha256').update(b).digest('hex');
 function prepare(request: SimulatedRequest) {
+  let fields: PropertyDescriptorMap;
+  try {
+    if (!request || typeof request !== 'object' || types.isProxy(request))
+      throw new Error();
+    for (
+      let prototype: unknown = Object.getPrototypeOf(request);
+      prototype !== null;
+      prototype = Object.getPrototypeOf(prototype)
+    ) {
+      if (types.isProxy(prototype)) throw new Error();
+    }
+    fields = Object.getOwnPropertyDescriptors(request);
+    for (const key of ['mode', 'payload', 'timeoutMs', 'maxOutputBytes']) {
+      const descriptor = Object.hasOwn(fields, key) ? fields[key] : undefined;
+      if (descriptor && !Object.hasOwn(descriptor, 'value')) throw new Error();
+      if (!descriptor && key in request) throw new Error();
+    }
+  } catch {
+    throw new SimulationError('simulation_invalid');
+  }
+  const mode: unknown = Object.hasOwn(fields, 'mode')
+    ? fields.mode?.value
+    : undefined;
+  const rawPayload: unknown = Object.hasOwn(fields, 'payload')
+    ? fields.payload?.value
+    : undefined;
+  const rawTimeout: unknown = Object.hasOwn(fields, 'timeoutMs')
+    ? fields.timeoutMs?.value
+    : undefined;
+  const rawOutput: unknown = Object.hasOwn(fields, 'maxOutputBytes')
+    ? fields.maxOutputBytes?.value
+    : undefined;
   if (
-    !request ||
-    types.isProxy(request) ||
-    !(request.payload instanceof Uint8Array) ||
-    !modes.includes(request.mode)
+    typeof mode !== 'string' ||
+    !modes.some((value) => value === mode) ||
+    !types.isUint8Array(rawPayload) ||
+    types.isProxy(rawPayload)
   )
     throw new SimulationError('simulation_invalid');
-  const payload = Buffer.from(request.payload);
+  let payload: Buffer;
+  try {
+    payload = Buffer.from(rawPayload);
+  } catch {
+    throw new SimulationError('simulation_invalid');
+  }
   if (
     payload.length > 65536 ||
     payload.length === 0 ||
@@ -116,12 +153,14 @@ function prepare(request: SimulatedRequest) {
       .join(',') !== 'baseCommit,preimageSha256,schemaVersion'
   )
     throw new SimulationError('simulation_invalid');
-  const timeoutMs = request.timeoutMs ?? 5000;
-  const maxOutputBytes = request.maxOutputBytes ?? 65536;
+  const timeoutMs = rawTimeout === undefined ? 5000 : rawTimeout;
+  const maxOutputBytes = rawOutput === undefined ? 65536 : rawOutput;
   if (
+    typeof timeoutMs !== 'number' ||
     !Number.isSafeInteger(timeoutMs) ||
     timeoutMs < 50 ||
     timeoutMs > 5000 ||
+    typeof maxOutputBytes !== 'number' ||
     !Number.isSafeInteger(maxOutputBytes) ||
     maxOutputBytes < 1 ||
     maxOutputBytes > 65536
@@ -143,7 +182,7 @@ function prepare(request: SimulatedRequest) {
   );
   const requestSha256 = hash(
     JSON.stringify([
-      request.mode,
+      mode,
       hash(payload),
       timeoutMs,
       maxOutputBytes,
@@ -152,7 +191,7 @@ function prepare(request: SimulatedRequest) {
     ]),
   );
   return {
-    mode: request.mode,
+    mode,
     payload,
     timeoutMs,
     maxOutputBytes,
@@ -311,14 +350,19 @@ export async function runSimulatedProcess(
               ) {
                 reason = combined.aborted ? 'cancelled' : 'denied';
                 closed = true;
-                resolve({
-                  status: 'failed',
-                  outputs: [summary()],
-                  error: {
-                    code: 'permission_denied',
-                    message: 'Synthetic process dispatch denied',
-                  },
-                });
+                const outputs = [summary()];
+                resolve(
+                  combined.aborted
+                    ? { status: 'cancelled', outputs }
+                    : {
+                        status: 'failed',
+                        outputs,
+                        error: {
+                          code: 'permission_denied',
+                          message: 'Synthetic process dispatch denied',
+                        },
+                      },
+                );
                 return;
               }
               const child = spawn(

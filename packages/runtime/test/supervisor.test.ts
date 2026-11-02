@@ -1,4 +1,4 @@
-import { it, expect, afterEach } from 'vitest';
+import { it, expect, afterEach, vi } from 'vitest';
 import { mkdtempSync, realpathSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
@@ -18,6 +18,43 @@ import {
   type SimulatedRequest,
   type SimulatedGrant,
 } from '../examples/simulated/supervisor.ts';
+
+const observed = vi.hoisted(() => ({
+  delayClose: false,
+  closeDelivered: false,
+  argv: [] as string[][],
+}));
+vi.mock('node:child_process', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('node:child_process')>();
+  return {
+    ...actual,
+    spawn(...args: Parameters<typeof actual.spawn>) {
+      const child = actual.spawn(...args);
+      const argv = args[1];
+      if (Array.isArray(argv))
+        observed.argv.push(
+          argv.map((value: unknown) => {
+            if (typeof value !== 'string') throw new Error('invalid_test_argv');
+            return value;
+          }),
+        );
+      if (observed.delayClose) {
+        const emit = child.emit.bind(child);
+        child.emit = function (event: string, ...values: unknown[]) {
+          if (event === 'close') {
+            setTimeout(() => {
+              Boolean(Reflect.apply(emit, this, [event, ...values]));
+              observed.closeDelivered = true;
+            }, 1200);
+            return true;
+          }
+          return Boolean(Reflect.apply(emit, this, [event, ...values]));
+        };
+      }
+      return child;
+    },
+  };
+});
 
 const temp = realpathSync(tmpdir());
 const roots: { root: string; store: DurableStore }[] = [];
@@ -42,6 +79,8 @@ async function setup(request: SimulatedRequest = { mode: 'success', payload }) {
   return { root, path, store, grant, request };
 }
 afterEach(async () => {
+  observed.delayClose = false;
+  observed.argv.length = 0;
   for (const { root, store } of roots.splice(0)) {
     await store.close();
     expect(dirname(realpathSync(root))).toBe(temp);
@@ -276,7 +315,7 @@ it('timeout and cancellation close supported direct child, no orphan or retry', 
         f.grant,
         c.signal,
       );
-      expect(['failed', 'cancelled']).toContain(r.status);
+      expect(r.status).toBe(cancel ? 'cancelled' : 'failed');
       expect(await report(f.store, f.grant)).toMatchObject({
         reason: cancel ? 'cancelled' : 'timeout',
         closed: true,
@@ -360,10 +399,137 @@ it('getters do not authorize dispatch and cancellation before dispatch creates n
   expect(await f.store.readEvents()).toHaveLength(0);
   const c = new AbortController();
   c.abort();
-  await runSimulatedProcess(f.store, 'run', f.request, f.grant, c.signal);
+  expect(
+    (await runSimulatedProcess(f.store, 'run', f.request, f.grant, c.signal))
+      .status,
+  ).toBe('cancelled');
   expect(await report(f.store, f.grant)).toMatchObject({
     reason: 'cancelled',
     stdoutBytes: 0,
     closed: true,
   });
+});
+
+it.each(['mode', 'payload', 'timeoutMs', 'maxOutputBytes'])(
+  'request accessor %s rejected without executing getters or dispatching',
+  async (key) => {
+    const f = await setup();
+    let reads = 0;
+    const request = { ...f.request };
+    Object.defineProperty(request, key, {
+      get() {
+        reads++;
+        return key === 'mode' ? (reads === 1 ? 'success' : 'wait') : payload;
+      },
+    });
+    await expect(
+      runSimulatedProcess(f.store, 'run', request, f.grant),
+    ).rejects.toThrow('simulation_invalid');
+    expect(reads).toBe(0);
+    expect(await f.store.readEvents()).toHaveLength(0);
+  },
+);
+it('inherited request fields and proxies cannot authorize a different request', async () => {
+  const f = await setup();
+  for (const request of [
+    Object.create(f.request) as SimulatedRequest,
+    new Proxy(f.request, {}),
+  ]) {
+    await expect(
+      runSimulatedProcess(f.store, 'run', request, f.grant),
+    ).rejects.toThrow('simulation_invalid');
+  }
+  expect(await f.store.readEvents()).toHaveLength(0);
+});
+
+it('snapshot binds effective argv and copied payload despite later caller mutations', async () => {
+  const f = await setup({ mode: 'success', payload: Buffer.from(payload) });
+  const running = runSimulatedProcess(f.store, 'run', f.request, f.grant);
+  f.request.mode = 'wait';
+  f.request.payload.fill(0);
+  expect((await running).status).toBe('succeeded');
+  const argv = observed.argv.filter((args) =>
+    args.some((value) => value.endsWith('fake-agent.mjs')),
+  );
+  expect(argv).toHaveLength(1);
+  expect(argv[0]!.at(-1)).toBe('success');
+  expect(argv[0]!.slice(0, 2)).toEqual([
+    '--import',
+    expect.stringContaining('simulated-lifeline.mjs'),
+  ]);
+  expect(argv[0]).toContain('--permission');
+  expect(argv[0]).toContain('--max-old-space-size=32');
+});
+it('prototype pollution and revoked proxies produce typed denial without invoking accessors', () => {
+  const previous = Object.getOwnPropertyDescriptor(Object.prototype, 'mode');
+  try {
+    Object.defineProperty(Object.prototype, 'mode', {
+      value: 'success',
+      configurable: true,
+    });
+    expect(() =>
+      previewSimulatedRequest({ payload } as unknown as SimulatedRequest),
+    ).toThrow('simulation_invalid');
+  } finally {
+    if (previous) Object.defineProperty(Object.prototype, 'mode', previous);
+    else Reflect.deleteProperty(Object.prototype, 'mode');
+  }
+  const { proxy, revoke } = Proxy.revocable({ mode: 'success', payload }, {});
+  revoke();
+  expect(() => previewSimulatedRequest(proxy as SimulatedRequest)).toThrow(
+    'simulation_invalid',
+  );
+});
+it('unobserved close records uncertain durably and never redispatches after reopening', async () => {
+  const f = await setup({ mode: 'wait', payload, timeoutMs: 100 });
+  observed.delayClose = true;
+  const r = await runSimulatedProcess(f.store, 'run', f.request, f.grant);
+  expect(r).toMatchObject({ status: 'blocked', reason: 'uncertain' });
+  expect(await report(f.store, f.grant)).toMatchObject({
+    reason: 'unconfirmed',
+    closed: false,
+  });
+  for (let i = 0; i < 100 && !observed.closeDelivered; i++) await delay(20);
+  expect(observed.closeDelivered).toBe(true);
+  observed.delayClose = false;
+  await f.store.close();
+  f.store = await openSqlitePersistence(f.path);
+  roots[0]!.store = f.store;
+  const spawns = observed.argv.length;
+  expect(
+    (await runSimulatedProcess(f.store, 'run', f.request, f.grant)).status,
+  ).toBe('blocked');
+  expect(observed.argv).toHaveLength(spawns);
+  expect(
+    (await inspectSimulatedProcess(f.store, 'run', f.grant)).attempt?.status,
+  ).toBe('uncertain');
+});
+
+it('inherited descriptor value cannot disguise an accessor as own request data', () => {
+  let reads = 0;
+  const request: SimulatedRequest = { mode: 'success', payload };
+  Object.defineProperty(request, 'mode', {
+    get() {
+      reads++;
+      return 'wait';
+    },
+  });
+  const previous = Object.getOwnPropertyDescriptor(Object.prototype, 'value');
+  let caught: unknown;
+  try {
+    Object.defineProperty(Object.prototype, 'value', {
+      value: 'success',
+      configurable: true,
+    });
+    try {
+      previewSimulatedRequest(request);
+    } catch (error) {
+      caught = error;
+    }
+  } finally {
+    Reflect.deleteProperty(Object.prototype, 'value');
+    if (previous) Object.defineProperty(Object.prototype, 'value', previous);
+  }
+  expect(caught).toMatchObject({ code: 'simulation_invalid' });
+  expect(reads).toBe(0);
 });

@@ -95,3 +95,22 @@ D-043 for provider/model/payload/credentials, official CLI/version/profile
 compatibility, verified host/tool/filesystem/network confinement and cancellation,
 then a new synthetic Git/worktree/context and generated-code validation/tests/diff.
 The local API/Angular vertical follows D-046; neither is implemented by this block.
+
+## Request snapshot hardening
+
+Request fields mode/payload/timeoutMs/maxOutputBytes must be own data properties
+when present. Required mode/payload cannot be inherited. Accessors and proxies
+are rejected without invoking getters. Validation, grant binding and argv use
+only captured values; input bytes are copied before asynchronous work. Grants
+remain live and revocable, not snapshotted. Known cancellation before dispatch
+is persisted as cancelled with evidence and no child, never failed/uncertain
+merely because it was cancelled. Delayed/lost close confirmation still produces
+uncertain; no implicit retry. The focused tests delay close notification of a
+real terminated child, then verify durable uncertainty and no redispatch.
+
+Residual audit followups: no SIGKILL escalation is implemented (SIGTERM on POSIX,
+TerminateProcess on Windows per audit). IPC lifeline messages are not byte-bounded
+by maxOutputBytes. Both limits remain open and acceptable only for this trusted
+fixture; broader/untrusted processes or real Codex require a separately verified
+termination and IPC boundary. No new Job Object, signal escalation or generic IPC
+is implemented by this correction. Network/CPU/RSS/descendant limits remain.
