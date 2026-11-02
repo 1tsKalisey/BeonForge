@@ -5,5 +5,9 @@
     "types": ["node"],
     "allowImportingTsExtensions": true
   },
-  "include": ["test/**/*.ts", "examples/bugfix/**/*.ts"]
+  "include": [
+    "test/**/*.ts",
+    "examples/bugfix/**/*.ts",
+    "examples/simulated/**/*.ts"
+  ]
 }
