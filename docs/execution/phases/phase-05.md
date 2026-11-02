@@ -1,6 +1,25 @@
 # Fase 05 — Harness externos
 
-Estado: **PREPARADA DOCUMENTALMENTE / NO INICIADA**. Fuente normativa: master-plan, fila05, «Adaptadores soportados de OpenCode y Codex CLI, perfiles y contract tests; Claude Code independiente». Dependencia04 aceptada por propietario; cierre técnico y gates en phase-04.md. Este plan no acredita un adaptador ni autoriza ejecutarlo. D-043 sigue obligatoria, sin proyectos reales, envío, inferencias o credenciales autorizados por el cierre.
+Evidencia final B04-01a: **12/12 focalizados y685/685 globales** (62 contratos+115 persistencia+187 workspace+113 runtime+201 Ollama+7 spike). Node24.19.0/pnpm12.15.0; frozen/peers/check-final exit0, formato/lint/typecheck/build/tests incluidos. Primera pasada check exit1 conservada por timeout del test nuevo compuesto; corrección de emisión fragmentada/setImmediate y deadline20s de ese caso, sin ampliar timeout5s del hijo. Fuente actual estable en pasada final. No resolución de R-061. Logs completos/exits/hashes en `%TEMP%/beonforge-b0401a-10ac8a0cb977475a91fceb5dd836f65d/`; diff y escaneo heurístico de secretos sin hallazgos. Bloque implementado/verificado localmente, **ABIERTO para revisión independiente**, sin aceptación atribuida ni avance a b.
+
+## Ejecución autorizada acotada — B04-01a
+
+Propietario autoriza exclusivamente fixture determinista y pruebas, no supervisor, Codex, credenciales o proveedores. B04-01a en implementación local; Fase05 abierta, no integración real demostrada. Base ae49512/árbol limpio, Node24.19.0/pnpm12.15.0. No se encontró B04-01_plan_integracion_supervisada.md en checkout: texto aportado contrastado con este plan. Publicación remota no es prerrequisito técnico local y no se realiza.
+
+Desglose: a fixture/protocolo → b ciclo de vida supervisado → c JSONL/evidencia persistida → d vertical sintética → e crashes/recuperación → f paquete global. Cada bloque requiere autorización, pruebas y commit propios; sólo a se ejecuta ahora. El contrato real BlockHandler/HandlerReport/RunReport permanece intacto; JSONL del fake no añade eventos de dominio. Mocks no satisfacen el gate de integración real inferior.
+
+Cuatro condiciones de B04-01a:
+
+1. Validación: entrada v1 con campos exactos, commit SHA-1/SHA-256 y preimagen SHA-256 hex; UTF-8 fatal, JSON/argv/modo inválidos rechazados con diagnóstico estático sin eco. Protocolo local de test started/proposal, sólo src/add.ts y postimagen fija pública.
+2. Limpieza de procesos: driver de test usa Node/script canónicos, argv fijos/sin shell, entorno sólo SystemRoot, stdin cerrado, error de pipe observado, timeout5s y maxBuffer64KiB por stream. Espera close; caso wait fuerza terminación a500ms y verifica killed/close. Fake no crea descendientes. No es supervisor general ni garantiza detener árboles arbitrarios.
+3. Determinismo: misma entrada → bytes exactos; incluye Unicode y emisión por bytes que divide codepoints/líneas. Postimagen conocida de fixture, no generación por agente. No tiempos/PID/rutas variables en protocolo.
+4. Evidencia: entrada64KiB y salida de test64KiB/stream; sólo diagnósticos sintéticos estáticos, sin secretos/razonamiento privado. No CAS/eventos/workspace/patch en a. Límites por línea y parser incremental del harness se implementarán en c, no se atribuyen al driver.
+
+Archivos: test/fake-agent.test.ts y test/fixtures/fake-agent.mjs de runtime, más documentación operativa. No paquete vacío/dependencias nuevas ni repositorio objetivo necesario. D-043 vigente; únicamente código sintético propio. Tests: determinismo/propuesta, fragmentación Unicode, entradas inválidas/límites, argv, fallo de proceso/JSON negativo y espera terminada. Gates oficiales completos y revisión independiente antes de aceptación. Rollback por revert acotado conservando evidencias. No b ni posteriores.
+
+Resultado y gates: verdes según evidencia final superior; no aceptación independiente atribuida. Primera suite completa falló por deadline5s del test compuesto; emisión byte a byte con timer1ms sensible al scheduler. Sustituida por setImmediate y deadline20s del test compuesto, sin ampliar timeout5s por proceso. Focal posterior12/12 en1,47s; logs de fallo conservados. No diagnóstico/resolución de R-061.
+
+Estado: **ABIERTA — sólo B04-01a autorizado; supervisor e integración real pendientes**. Fuente normativa: master-plan, fila05, «Adaptadores soportados de OpenCode y Codex CLI, perfiles y contract tests; Claude Code independiente». Dependencia04 aceptada por propietario; cierre técnico y gates en phase-04.md. Este plan no acredita un adaptador ni autoriza ejecutarlo. D-043 sigue obligatoria, sin proyectos reales, envío, inferencias o credenciales autorizados por el cierre.
 
 ## Primer nodo propuesto — B04-01
 
