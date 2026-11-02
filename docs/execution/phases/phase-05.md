@@ -1,5 +1,30 @@
 # Fase 05 — Harness externos
 
+Gates documentales nuevos: Node24.19.0/pnpm12.15.0, frozen/peers/format:check/diff exit0; escaneo heurístico sin hallazgos y alcance sólo7 Markdown. No nuevos lint/typecheck/build/tests funcionales por ausencia de cambios de código/dependencias;685/685 sigue evidencia previa, no nueva ejecución ni suite completa atribuida a Claude. Logs/exits/hashes privados en `%TEMP%/beonforge-b0401a-auditdocs-3a2989e82c0148849c02db0271f1405c/`. Commit inverso documental permite rollback sin alterar datos.
+
+## Propuesta vertical-first — dirección aprobada, secuencia/gates pendientes
+
+Objetivo: tarea → Codex CLI → modificación en worktree sintético autorizado → tests → diff → revisión humana desde interfaz local. Reutilizar kernel, SQLite/CAS, contratos, workspace y contexto. No framework universal, nuevos subsistemas anticipados ni más simulación sin un riesgo concreto que probar.
+
+| Orden propuesto | Capacidad mínima y gate observable |
+|---|---|
+| 1 | **B04-01b propuesto, no iniciado:** supervisor acotado al perfil Codex, con pruebas de proceso simulado; spawn sin shell/binario y versión verificados, contexto autorizado, grants vivos, límites, cierre/descendientes, JSONL mínimo, errores y evidencia durable. Start antes de dispatch; pending/uncertain bloquean sin retries. Parser/evidencia se incluyen sólo hasta donde los necesite ese efecto, no framework ni eventos duplicados del kernel. |
+| 2 | Primer bugfix generado por Codex sobre Git nuevo sintético: rojo, salida del agente validada, modificación sólo permitida, verde, diff/evidencias recuperables y revisión pendiente. Sin integración automática. Prueba real separada requiere autorización específica de credenciales/envío/modelo/destino y confinamiento efectivo compatible con D-043. Mocks no la sustituyen. |
+| 3 | API local y vertical Angular mínima: crear tarea para fixture autorizado, lanzar operación autorizada, consultar estado/historial/eventos, mostrar tests/diff y aprobar/rechazar con acción explícita. Validación/autorización en backend, defensa de acceso local/orígenes y persistencia; sin merge automático ni UI ficticia. Gate: flujo completo desde interfaz y recuperación tras reinicio. |
+| 4 | OpenCode y routing determinista mínimo: adaptador soportado/contract tests y selección manual o regla simple explicable con grants independientes; sin fallbacks de permisos/envío. |
+| 5 | Coordinación multiagente/concurrencia y mejoras avanzadas sólo tras demostrar necesidad, aislamiento e integrador único. |
+
+**D-046 PROPUESTA, NO ACCEPTED:** dividir la salida de Fase05 en primera vertical Codex y ampliación posterior OpenCode/perfiles; habilitar una entrega parcial de API/Fase09 tras API estable y vertical aceptada; diferir routing/Fase06 y multiagente/Fase07 manteniendo sus dependencias. Las filas y gates originales del master-plan permanecen intactos hasta aprobación formal expresa. La dirección aprobada no equivale a aprobar esta reasignación ni eliminar OpenCode del producto.
+
+Imprescindibles MVP: ejecución supervisada verificable, autorización de datos/operaciones, worktree y commit exactos, tests/diff, durabilidad/recuperación conservadora e interfaz de revisión real. Posponibles tras primera vertical: segundo ejecutor, routing automático ampliado, multiagente, RAG/índices, plugins, entrenamiento, métricas avanzadas y dashboard amplio. OpenCode/routing básico siguen objetivos posteriores del MVP, no funcionalidades eliminadas.
+
+Primer bloque para siguiente autorización: **B04-01b — supervisor mínimo del perfil Codex con mocks, sin proveedor real**. Entradas: worktree/contexto explícitos, ejecutable/perfil pinneados y grant propio revocable. Salidas: intento registrado, propuesta/salidas saneadas y acotadas, clasificación conocida o incierta y referencias CAS. Tests: permiso denegado cero spawn, revocación, spawn/exit/stdin/JSONL/UTF8/BOM/duplicados según decisión explícita P3-4, overflow, timeout/cancelación/corte y reapertura sin replay; sentinelas sintéticos y árbol de procesos. No inventar sandbox por flags/cwd: interfaz/configuración efectiva y confinamiento del host/herramientas/red deben comprobarse antes de habilitar ejecución real. Sin autorización para implementarlo en este cierre.
+
+Bloqueos reales: incompatibilidad del ejecutable/perfil, confinamiento no demostrado, política de protocolo ambiguo antes de confiar en él, autorización ausente/revocada, checkout/contexto inválidos o resultado incierto. D-043 actual no permite servicios externos/credenciales reales por el cierre: una futura variante remota necesita decisión expresa compatible y consentimiento concreto. Ningún ajuste del roadmap relaja estas garantías.
+
+
+## Histórico / evidencia anterior
+
 Evidencia final B04-01a: **12/12 focalizados y685/685 globales** (62 contratos+115 persistencia+187 workspace+113 runtime+201 Ollama+7 spike). Node24.19.0/pnpm12.15.0; frozen/peers/check-final exit0, formato/lint/typecheck/build/tests incluidos. Primera pasada check exit1 conservada por timeout del test nuevo compuesto; corrección de emisión fragmentada/setImmediate y deadline20s de ese caso, sin ampliar timeout5s del hijo. Fuente actual estable en pasada final. No resolución de R-061. Logs completos/exits/hashes en `%TEMP%/beonforge-b0401a-10ac8a0cb977475a91fceb5dd836f65d/`; diff y escaneo heurístico de secretos sin hallazgos. Bloque implementado/verificado localmente, **ABIERTO para revisión independiente**, sin aceptación atribuida ni avance a b.
 
 ## Ejecución autorizada acotada — B04-01a
@@ -17,7 +42,7 @@ Cuatro condiciones de B04-01a:
 
 Archivos: test/fake-agent.test.ts y test/fixtures/fake-agent.mjs de runtime, más documentación operativa. No paquete vacío/dependencias nuevas ni repositorio objetivo necesario. D-043 vigente; únicamente código sintético propio. Tests: determinismo/propuesta, fragmentación Unicode, entradas inválidas/límites, argv, fallo de proceso/JSON negativo y espera terminada. Gates oficiales completos y revisión independiente antes de aceptación. Rollback por revert acotado conservando evidencias. No b ni posteriores.
 
-Resultado y gates: verdes según evidencia final superior; no aceptación independiente atribuida. Primera suite completa falló por deadline5s del test compuesto; emisión byte a byte con timer1ms sensible al scheduler. Sustituida por setImmediate y deadline20s del test compuesto, sin ampliar timeout5s por proceso. Focal posterior12/12 en1,47s; logs de fallo conservados. No diagnóstico/resolución de R-061.
+Resultado y gates: verdes según evidencia final superior; no aceptación independiente atribuida. Primera suite completa falló por deadline5s del test compuesto; emisión de354 bytes con setTimeout(1): auditor midió9,67ms de media en Windows, unos3,4–5,3s para el bucle; check.stdout registró5009ms y focal anterior5,59s. Fallo prácticamente determinista por temporización, no intermitencia ni evidencia de R-061. Sustituida por setImmediate y deadline20s del test compuesto, sin ampliar timeout5s por proceso. Focal posterior12/12 en1,47s; logs de fallo conservados. No diagnóstico/resolución de R-061.
 
 Estado: **ABIERTA — sólo B04-01a autorizado; supervisor e integración real pendientes**. Fuente normativa: master-plan, fila05, «Adaptadores soportados de OpenCode y Codex CLI, perfiles y contract tests; Claude Code independiente». Dependencia04 aceptada por propietario; cierre técnico y gates en phase-04.md. Este plan no acredita un adaptador ni autoriza ejecutarlo. D-043 sigue obligatoria, sin proyectos reales, envío, inferencias o credenciales autorizados por el cierre.
 

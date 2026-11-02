@@ -1,5 +1,26 @@
 # B04-01a — Fixture determinista, revisión pendiente
 
+Gates documentales nuevos: Node24.19.0/pnpm12.15.0, frozen/peers/format:check/diff exit0; escaneo heurístico sin hallazgos y alcance sólo7 Markdown. No nuevos lint/typecheck/build/tests funcionales por ausencia de cambios de código/dependencias;685/685 sigue evidencia previa, no nueva ejecución ni suite completa atribuida a Claude. Logs/exits/hashes privados en `%TEMP%/beonforge-b0401a-auditdocs-3a2989e82c0148849c02db0271f1405c/`. Commit inverso documental permite rollback sin alterar datos.
+
+## Auditoría B04-01a recibida — APPROVE_WITH_FOLLOWUPS
+
+Informe externo proporcionado por propietario; sin P0/P1/P2. **Recomendado para cierre por auditor; aceptación formal del propietario PENDIENTE.** Este correctivo sólo documental prepara el cierre; no declara CLOSED/ACCEPTED ni autoriza B04-01b.
+
+| Hallazgo | Estado y criterio de cierre |
+|---|---|
+| P3-1 | Corregido documentalmente: timeout prácticamente determinista del bucle354 bytes/setTimeout(1), media9,67ms Windows según auditor,3,4–5,3s,5009ms en check y5,59s focal. No scheduler intermitente ni vínculo con R-061. |
+| P3-2 | Corregido documentalmente: ejecución11/12 por señal no acreditada por log; focused.stdout acredita12/12. No afirmar que nunca ocurrió. Retirada promesa obsoleta de registrar evidencias después. |
+| P3-3 | Followup ABIERTO para B04-01c: execFile sólo verifica bytes finales; sonda independiente observó164 fragmentos. Cierre: tests del parser incremental alimentados con varios chunks, incluyendo cortes de UTF-8/líneas, verifican reconstrucción y errores/límites; no atribuir esa cobertura al test actual. |
+| P3-4 | Followup ABIERTO antes de confiar en protocolo real: BOM UTF-8 y claves duplicadas aceptados, ambos exit0 en sondas del auditor. Decidir explícitamente rechazo o aceptación documentada y probar la política en la frontera; valores hex siguen validados, sin corrección funcional ahora. |
+| P3-5 | Followup ABIERTO: faltan tests automatizados de maxBuffer, exceso de argumentos y entrada exacta65536 bytes. Auditor comprobó mediante sondas los dos últimos, no cobertura automatizada. Cierre: pruebas específicas de overflow/parada/cierre, argv extra rechazado y frontera exacta admitida si JSON válido. |
+| P3-6 | Corregido documentalmente: ausencia de operaciones de red por inspección del fixture, **no aislamiento de red** por permisos Node24. Confinamiento efectivo del futuro harness sigue pendiente. |
+
+R-057/061/065/066/067 permanecen abiertos, aceptaciones previas no los resuelven. R-061 sigue sin causa reproducida; este timeout de temporización conocido no se atribuye a esa incidencia. No código, contratos, dependencias, agentes, credenciales, proveedores o proyectos objetivo modificados. D-043 vigente.
+
+Correcciones documentales contrastables con d2f036a; evidencia anterior685/685 no se presenta como nueva ejecución ni como suite completa ejecutada por Claude.
+
+## Histórico / evidencia anterior
+
 Código B04-01a: **d19c10a**, comparar `git diff ae49512..d19c10a`. Verificado localmente, pendiente de aceptación independiente; detenerse antes de b.
 
 Evidencia final B04-01a: **12/12 focalizados y685/685 globales** (62 contratos+115 persistencia+187 workspace+113 runtime+201 Ollama+7 spike). Node24.19.0/pnpm12.15.0; frozen/peers/check-final exit0, formato/lint/typecheck/build/tests incluidos. Primera pasada check exit1 conservada por timeout del test nuevo compuesto; corrección de emisión fragmentada/setImmediate y deadline20s de ese caso, sin ampliar timeout5s del hijo. Fuente actual estable en pasada final. No resolución de R-061. Logs completos/exits/hashes en `%TEMP%/beonforge-b0401a-10ac8a0cb977475a91fceb5dd836f65d/`; diff y escaneo heurístico de secretos sin hallazgos. Bloque implementado/verificado localmente, **ABIERTO para revisión independiente**, sin aceptación atribuida ni avance a b.
@@ -8,7 +29,7 @@ Evidencia final B04-01a: **12/12 focalizados y685/685 globales** (62 contratos+1
 
 Base ae49512. Propietario autoriza sólo a; M04.1/Fase04 siguen aceptados según histórico inferior. Dos archivos de pruebas en runtime (fake-agent.test.ts y fixtures/fake-agent.mjs), sin API pública, dependencias o supervisor. Doce casos: propuesta pública exacta, determinismo/Unicode fragmentado, errores de formato/UTF8/hash/commit/campos/límite/argv, stderr estático y terminación wait con cierre observado. No proyecto objetivo ni proveedor/credenciales/inferencias, D-043 preservada.
 
-Foco: validación y límites reales del fixture, proceso hijo cerrado tras timeout, bytes deterministas frente a chunks, ninguna atribución de autorización/sandbox/generación. Primer fallo11/12 de driver por señal tratada como0 corregido;12/12 posteriores. Gates globales finales verdes; logs/hashes y commit se registrarán al terminar. No aprobación independiente atribuida ni avance a b. Riesgos/seguimientos previos conservados. Preparado para revisión suministrada por usuario, no invocar Claude.
+Foco: validación y límites reales del fixture, proceso hijo cerrado tras timeout, bytes deterministas frente a chunks, ninguna atribución de autorización/sandbox/generación. La supuesta ejecución11/12 por señal interpretada como0 no tiene log acreditativo disponible; focused.stdout muestra12/12. No se afirma que nunca sucediera. Gates globales anteriores verdes; código d19c10a/evidencias d2f036a y logs/hashes ya registrados. Auditoría independiente recibida APPROVE_WITH_FOLLOWUPS; aceptación formal pendiente y sin avance a b. Riesgos/seguimientos previos conservados. Preparado para revisión suministrada por usuario, no invocar Claude.
 
 ## Cierre de M04.1/Fase04 — aceptación independiente recibida
 

@@ -1,5 +1,13 @@
 # Plan maestro de ejecución
 
+## Dirección vertical-first aprobada; cambios formales pendientes
+
+Prioridad de planificación: supervisor Codex mínimo → bugfix generado sobre Git sintético nuevo → API local/interfaz Angular de tareas y revisión → OpenCode/routing determinista → multiagente. Reutilizar capacidades existentes; cada bloque aporta vertical observable o resuelve un bloqueo de seguridad demostrado.
+
+**D-046 PROPOSED, no ACCEPTED:** propuesta de dividir salida05 y habilitar entrega parcial09 con API estable, diferir ampliaciones06/07. [Alcance, gates, dependencias y primer B04-01b propuesto](phases/phase-05.md). Las filas/gates originales inferiores NO se modifican hasta aprobación formal. No se elimina OpenCode ni se autoriza implementación/ejecución/envío/credenciales. D-043 vigente; confinamiento y recuperación no se rebajan. B04-01a recomendado para cierre por auditor, aceptación formal pendiente.
+
+## Histórico / evidencia anterior
+
 Código B04-01a: **d19c10a**, comparar `git diff ae49512..d19c10a`. Verificado localmente, pendiente de aceptación independiente; detenerse antes de b.
 
 Evidencia final B04-01a: **12/12 focalizados y685/685 globales** (62 contratos+115 persistencia+187 workspace+113 runtime+201 Ollama+7 spike). Node24.19.0/pnpm12.15.0; frozen/peers/check-final exit0, formato/lint/typecheck/build/tests incluidos. Primera pasada check exit1 conservada por timeout del test nuevo compuesto; corrección de emisión fragmentada/setImmediate y deadline20s de ese caso, sin ampliar timeout5s del hijo. Fuente actual estable en pasada final. No resolución de R-061. Logs completos/exits/hashes en `%TEMP%/beonforge-b0401a-10ac8a0cb977475a91fceb5dd836f65d/`; diff y escaneo heurístico de secretos sin hallazgos. Bloque implementado/verificado localmente, **ABIERTO para revisión independiente**, sin aceptación atribuida ni avance a b.

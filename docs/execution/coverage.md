@@ -1,5 +1,9 @@
 # Matriz de cobertura de implementación
 
+B04-01a: **verificado localmente y recomendado para cierre por auditor APPROVE_WITH_FOLLOWUPS; aceptación formal PENDIENTE**. P3-1/2/6 documentales corregidos; P3-3/4/5 sin cobertura adicional, abiertos en risks.md.685/685 previos conservados, sin nuevos tests funcionales. No supervisor/proveedor real implementado ni autorización implícita. Roadmap vertical-first es dirección aprobada; cambio formal de secuencia/gates pendiente D-046.
+
+## Histórico / evidencia anterior
+
 Código B04-01a: **d19c10a**, comparar `git diff ae49512..d19c10a`. Verificado localmente, pendiente de aceptación independiente; detenerse antes de b.
 
 Evidencia final B04-01a: **12/12 focalizados y685/685 globales** (62 contratos+115 persistencia+187 workspace+113 runtime+201 Ollama+7 spike). Node24.19.0/pnpm12.15.0; frozen/peers/check-final exit0, formato/lint/typecheck/build/tests incluidos. Primera pasada check exit1 conservada por timeout del test nuevo compuesto; corrección de emisión fragmentada/setImmediate y deadline20s de ese caso, sin ampliar timeout5s del hijo. Fuente actual estable en pasada final. No resolución de R-061. Logs completos/exits/hashes en `%TEMP%/beonforge-b0401a-10ac8a0cb977475a91fceb5dd836f65d/`; diff y escaneo heurístico de secretos sin hallazgos. Bloque implementado/verificado localmente, **ABIERTO para revisión independiente**, sin aceptación atribuida ni avance a b.

@@ -1,12 +1,30 @@
 # Registro de riesgos
 
+## Auditoría B04-01a recibida — APPROVE_WITH_FOLLOWUPS
+
+Informe externo proporcionado por propietario; sin P0/P1/P2. **Recomendado para cierre por auditor; aceptación formal del propietario PENDIENTE.** Este correctivo sólo documental prepara el cierre; no declara CLOSED/ACCEPTED ni autoriza B04-01b.
+
+| Hallazgo | Estado y criterio de cierre |
+|---|---|
+| P3-1 | Corregido documentalmente: timeout prácticamente determinista del bucle354 bytes/setTimeout(1), media9,67ms Windows según auditor,3,4–5,3s,5009ms en check y5,59s focal. No scheduler intermitente ni vínculo con R-061. |
+| P3-2 | Corregido documentalmente: ejecución11/12 por señal no acreditada por log; focused.stdout acredita12/12. No afirmar que nunca ocurrió. Retirada promesa obsoleta de registrar evidencias después. |
+| P3-3 | Followup ABIERTO para B04-01c: execFile sólo verifica bytes finales; sonda independiente observó164 fragmentos. Cierre: tests del parser incremental alimentados con varios chunks, incluyendo cortes de UTF-8/líneas, verifican reconstrucción y errores/límites; no atribuir esa cobertura al test actual. |
+| P3-4 | Followup ABIERTO antes de confiar en protocolo real: BOM UTF-8 y claves duplicadas aceptados, ambos exit0 en sondas del auditor. Decidir explícitamente rechazo o aceptación documentada y probar la política en la frontera; valores hex siguen validados, sin corrección funcional ahora. |
+| P3-5 | Followup ABIERTO: faltan tests automatizados de maxBuffer, exceso de argumentos y entrada exacta65536 bytes. Auditor comprobó mediante sondas los dos últimos, no cobertura automatizada. Cierre: pruebas específicas de overflow/parada/cierre, argv extra rechazado y frontera exacta admitida si JSON válido. |
+| P3-6 | Corregido documentalmente: ausencia de operaciones de red por inspección del fixture, **no aislamiento de red** por permisos Node24. Confinamiento efectivo del futuro harness sigue pendiente. |
+
+R-057/061/065/066/067 permanecen abiertos, aceptaciones previas no los resuelven. R-061 sigue sin causa reproducida; este timeout de temporización conocido no se atribuye a esa incidencia. No código, contratos, dependencias, agentes, credenciales, proveedores o proyectos objetivo modificados. D-043 vigente.
+
+
+## Histórico / evidencia anterior
+
 Código B04-01a: **d19c10a**, comparar `git diff ae49512..d19c10a`. Verificado localmente, pendiente de aceptación independiente; detenerse antes de b.
 
 Evidencia final B04-01a: **12/12 focalizados y685/685 globales** (62 contratos+115 persistencia+187 workspace+113 runtime+201 Ollama+7 spike). Node24.19.0/pnpm12.15.0; frozen/peers/check-final exit0, formato/lint/typecheck/build/tests incluidos. Primera pasada check exit1 conservada por timeout del test nuevo compuesto; corrección de emisión fragmentada/setImmediate y deadline20s de ese caso, sin ampliar timeout5s del hijo. Fuente actual estable en pasada final. No resolución de R-061. Logs completos/exits/hashes en `%TEMP%/beonforge-b0401a-10ac8a0cb977475a91fceb5dd836f65d/`; diff y escaneo heurístico de secretos sin hallazgos. Bloque implementado/verificado localmente, **ABIERTO para revisión independiente**, sin aceptación atribuida ni avance a b.
 
 ## B04-01a — límites del fixture simulado
 
-Código propio conocido, sin red/lecturas de proyectos/escrituras/descendientes; no es agente ni prueba de confinamiento universal. El driver sólo prueba este ejecutable fijo, con límite5s/64KiB por stream y espera de close; no supervisor general, parser incremental ni garantía de parada de árboles arbitrarios. JSONL negativo es salida intencional de test, nunca comandos. Doce casos no acreditan autorización operativa, persistencia, rollback o generación de código. Primera prueba de autoría11/12: driver convertía terminación por señal sin error.code a0; corregido preservando signal y verificado12/12. No reproducción ni resolución de R-061. R-057/065/066/067 y los P3 de04 conservados; gate completo final verde.
+Código propio conocido: inspección estática no encuentra operaciones de red, lecturas de proyectos, escrituras o creación de descendientes; Node24 no impone aislamiento de red y esto no garantiza confinamiento de egress; no es agente ni prueba de confinamiento universal. El driver sólo prueba este ejecutable fijo, con límite5s/64KiB por stream y espera de close; no supervisor general, parser incremental ni garantía de parada de árboles arbitrarios. JSONL negativo es salida intencional de test, nunca comandos. Doce casos no acreditan autorización operativa, persistencia, rollback o generación de código. La supuesta ejecución11/12 por señal interpretada como0 no está acreditada por un log disponible; focused.stdout documenta12/12. Se retira como evidencia verificable, sin afirmar que nunca sucedió. No reproducción ni resolución de R-061. R-057/065/066/067 y los P3 de04 conservados; gate completo final verde.
 
 ## Aceptación expresa de residuales M04.1/Fase04
 
