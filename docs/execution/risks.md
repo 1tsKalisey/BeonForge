@@ -1,5 +1,13 @@
 # Registro de riesgos
 
+Código B04-01a: **d19c10a**, comparar `git diff ae49512..d19c10a`. Verificado localmente, pendiente de aceptación independiente; detenerse antes de b.
+
+Evidencia final B04-01a: **12/12 focalizados y685/685 globales** (62 contratos+115 persistencia+187 workspace+113 runtime+201 Ollama+7 spike). Node24.19.0/pnpm12.15.0; frozen/peers/check-final exit0, formato/lint/typecheck/build/tests incluidos. Primera pasada check exit1 conservada por timeout del test nuevo compuesto; corrección de emisión fragmentada/setImmediate y deadline20s de ese caso, sin ampliar timeout5s del hijo. Fuente actual estable en pasada final. No resolución de R-061. Logs completos/exits/hashes en `%TEMP%/beonforge-b0401a-10ac8a0cb977475a91fceb5dd836f65d/`; diff y escaneo heurístico de secretos sin hallazgos. Bloque implementado/verificado localmente, **ABIERTO para revisión independiente**, sin aceptación atribuida ni avance a b.
+
+## B04-01a — límites del fixture simulado
+
+Código propio conocido, sin red/lecturas de proyectos/escrituras/descendientes; no es agente ni prueba de confinamiento universal. El driver sólo prueba este ejecutable fijo, con límite5s/64KiB por stream y espera de close; no supervisor general, parser incremental ni garantía de parada de árboles arbitrarios. JSONL negativo es salida intencional de test, nunca comandos. Doce casos no acreditan autorización operativa, persistencia, rollback o generación de código. Primera prueba de autoría11/12: driver convertía terminación por señal sin error.code a0; corregido preservando signal y verificado12/12. No reproducción ni resolución de R-061. R-057/065/066/067 y los P3 de04 conservados; gate completo final verde.
+
 ## Aceptación expresa de residuales M04.1/Fase04
 
 Propietario acepta cierre M04.1/Fase04 con APPROVE_WITH_FOLLOWUPS, sin resolver los riesgos. D-043 sigue obligatoria. R-067 queda revisado independientemente/aceptado sólo para fixture confiable y efectos fijos; no se generaliza a agentes o código arbitrario. El encabezado histórico de revisión pendiente inferior corresponde a la entrega anterior.

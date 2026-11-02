@@ -1,5 +1,13 @@
 # Estado persistente
 
+Código B04-01a: **d19c10a**, comparar `git diff ae49512..d19c10a`. Verificado localmente, pendiente de aceptación independiente; detenerse antes de b.
+
+Evidencia final B04-01a: **12/12 focalizados y685/685 globales** (62 contratos+115 persistencia+187 workspace+113 runtime+201 Ollama+7 spike). Node24.19.0/pnpm12.15.0; frozen/peers/check-final exit0, formato/lint/typecheck/build/tests incluidos. Primera pasada check exit1 conservada por timeout del test nuevo compuesto; corrección de emisión fragmentada/setImmediate y deadline20s de ese caso, sin ampliar timeout5s del hijo. Fuente actual estable en pasada final. No resolución de R-061. Logs completos/exits/hashes en `%TEMP%/beonforge-b0401a-10ac8a0cb977475a91fceb5dd836f65d/`; diff y escaneo heurístico de secretos sin hallazgos. Bloque implementado/verificado localmente, **ABIERTO para revisión independiente**, sin aceptación atribuida ni avance a b.
+
+## B04-01a — fixture simulado, implementación local pendiente de revisión
+
+Único bloque autorizado: fixture determinista y doce pruebas en runtime; no supervisor B04-01b, agente real, proveedor, credencial, parche o repositorio objetivo. Base ae49512, rama preservada/main intacta. D-043 vigente. Cuatro condiciones y desglose en phase-05.md. Protocolo público fijo/validación estricta, driver de test con Node canónico/permisos FS/entorno mínimo, límites y cierre comprobado. No interfaces públicas/dependencias nuevas. Gates completos finales verdes; no aceptación independiente atribuida. R-057/061/065/066/067 y tres P3 anteriores siguen abiertos. Siguiente paso exclusivo: revisión de a suministrada por propietario, sin iniciar b.
+
 Actualizado: 2026-11-02. Posición vigente: **M04.1 y Fase04 CERRADOS / ACEPTADOS (CLOSED / ACCEPTED)**. Fases01–03 siguen aceptadas/cerradas. Propietario acepta expresamente M04.1 y cierre04 con APPROVE_WITH_FOLLOWUPS, residuales/P3 aceptados sin resolverlos. Implementación fed1763/evidencias8f921c0. Auditoría independiente:30/30 específicos,40 reproducciones (dos inicialmente inválidas repetidas correctamente),36 hashes de evidencias y8 de fuentes verificados;673 globales previos contrastados por logs, no ejecución completa atribuida a Claude.
 
 Matriz de once criterios/evidencia en [phase-04.md](phases/phase-04.md). Demo aceptada: fixture Git nuevo4 archivos sintéticos → worktree detached/commit exacto → ContextPackage/Envelope → rojo → parche fijo autorizado sólo src/add.ts → verde → diff/CAS → reinicio/lectura; review pending, integration not_performed. Descarte explícito probado en fixtures separados restaura bytes/rojo/diff limpio y origen intacto. Revisión del milestone aceptada no decide approve/discard de la demo ni autentica una identidad humana.

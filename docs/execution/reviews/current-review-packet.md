@@ -1,4 +1,14 @@
-# M04.1 — Primera vertical determinista de bugfix
+# B04-01a — Fixture determinista, revisión pendiente
+
+Código B04-01a: **d19c10a**, comparar `git diff ae49512..d19c10a`. Verificado localmente, pendiente de aceptación independiente; detenerse antes de b.
+
+Evidencia final B04-01a: **12/12 focalizados y685/685 globales** (62 contratos+115 persistencia+187 workspace+113 runtime+201 Ollama+7 spike). Node24.19.0/pnpm12.15.0; frozen/peers/check-final exit0, formato/lint/typecheck/build/tests incluidos. Primera pasada check exit1 conservada por timeout del test nuevo compuesto; corrección de emisión fragmentada/setImmediate y deadline20s de ese caso, sin ampliar timeout5s del hijo. Fuente actual estable en pasada final. No resolución de R-061. Logs completos/exits/hashes en `%TEMP%/beonforge-b0401a-10ac8a0cb977475a91fceb5dd836f65d/`; diff y escaneo heurístico de secretos sin hallazgos. Bloque implementado/verificado localmente, **ABIERTO para revisión independiente**, sin aceptación atribuida ni avance a b.
+
+## Revisión vigente — B04-01a, únicamente fixture y tests
+
+Base ae49512. Propietario autoriza sólo a; M04.1/Fase04 siguen aceptados según histórico inferior. Dos archivos de pruebas en runtime (fake-agent.test.ts y fixtures/fake-agent.mjs), sin API pública, dependencias o supervisor. Doce casos: propuesta pública exacta, determinismo/Unicode fragmentado, errores de formato/UTF8/hash/commit/campos/límite/argv, stderr estático y terminación wait con cierre observado. No proyecto objetivo ni proveedor/credenciales/inferencias, D-043 preservada.
+
+Foco: validación y límites reales del fixture, proceso hijo cerrado tras timeout, bytes deterministas frente a chunks, ninguna atribución de autorización/sandbox/generación. Primer fallo11/12 de driver por señal tratada como0 corregido;12/12 posteriores. Gates globales finales verdes; logs/hashes y commit se registrarán al terminar. No aprobación independiente atribuida ni avance a b. Riesgos/seguimientos previos conservados. Preparado para revisión suministrada por usuario, no invocar Claude.
 
 ## Cierre de M04.1/Fase04 — aceptación independiente recibida
 
@@ -857,3 +867,11 @@ No hubo hallazgos bloqueantes ni defectos de código o alcance adicionales. F-1 
 3. ¿AGENTS.md, ADRs y threat model contradicen el plan, atribuyen controles no implementados o dejan una amenaza crítica sin seguimiento?
 4. ¿Hay archivos fuera de alcance, secretos o cambios al vault entre `487d5e8` y `05b6a51`? Adjuntar ruta y evidencia.
 5. Respondida: F-1 corregido y run remoto verde observado. M00.3 puede cerrarse y queda cerrado en este paquete.
+
+
+## Hashes de fuentes B04-01a
+
+- fake-agent.test.ts SHA-256: ea4a3a8fa7f928597ed1de41dc3a45f982cac51406d48af51fae0a60560ff97b
+- fixtures/fake-agent.mjs SHA-256: 5056f0381726edb4bbcd0c2ef44ef01072490d96785a1512607ac99d9ad0b93e
+
+Índice privado sources.json/sha256.json junto a logs; check.stdout/stderr/exit conserva primera corrida fallida, check-final.* acredita suite definitiva685/685. No atribuir estas ejecuciones locales a Claude. Sin API de supervisor, permisos de proveedor ni prueba de generación de código.

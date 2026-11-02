@@ -1,5 +1,11 @@
 # Plan maestro de ejecución
 
+Código B04-01a: **d19c10a**, comparar `git diff ae49512..d19c10a`. Verificado localmente, pendiente de aceptación independiente; detenerse antes de b.
+
+Evidencia final B04-01a: **12/12 focalizados y685/685 globales** (62 contratos+115 persistencia+187 workspace+113 runtime+201 Ollama+7 spike). Node24.19.0/pnpm12.15.0; frozen/peers/check-final exit0, formato/lint/typecheck/build/tests incluidos. Primera pasada check exit1 conservada por timeout del test nuevo compuesto; corrección de emisión fragmentada/setImmediate y deadline20s de ese caso, sin ampliar timeout5s del hijo. Fuente actual estable en pasada final. No resolución de R-061. Logs completos/exits/hashes en `%TEMP%/beonforge-b0401a-10ac8a0cb977475a91fceb5dd836f65d/`; diff y escaneo heurístico de secretos sin hallazgos. Bloque implementado/verificado localmente, **ABIERTO para revisión independiente**, sin aceptación atribuida ni avance a b.
+
+Actualización B04-01a: propietario autoriza sólo fixture de proceso determinista y sus tests. Fase05 abierta para ese bloque local, sin supervisor ni integración real; desglose/condiciones en phase-05.md. Fases01–04 aceptadas/cerradas se conservan. No proveedores/credenciales/publicación ni excepción a D-043. B04-01a pendiente de revisión independiente; no avanzar a b automáticamente. El cierre histórico inferior describe la preparación previa de05.
+
 Actualizado: 2026-11-02. Fuentes operativas: `AGENTS.md`, esta memoria de ejecución y `docs/product/software-factory-objective.md`. La especificación complementaria es `knowledge/AI/18 BeonForge Agentic OS/BeonForge Agentic OS MOC.md` y sus 22 documentos, cuya lectura histórica consta en PREP-001. El vault no está disponible en este checkout; no se ha vuelto a auditar. Es de solo lectura y no se incorpora a Git por defecto.
 
 Inspección inicial y herramientas: `docs/execution/preparation-report.md`.
