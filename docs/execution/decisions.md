@@ -1,5 +1,13 @@
 # Registro de decisiones
 
+## D-047 — independencia de c.2 respecto del PASS global de c.1
+
+B04-01c.2 puede implementarse y probarse con ejecutores simulados sin esperar el PASS global de c.1. Fundamento: c.2 no despacha ni interactúa con el binario real de Codex; el ejecutor es un generador en proceso que produce JSONL sintético, usa únicamente EventStore/ArtifactStore del kernel y permisos propios ya aceptados. La decisión es acotada y trazable: cualquier simulador aceptado como 'simulated' no puede recibir ruta de binario, CODEX_HOME real, credenciales, configuración de proveedor ni destino de red; los tests negativos demuestran que no existe camino accidental de despacho real. c.3 permanece BLOQUEADO hasta que se cumplan independientemente: confinamiento efectivo del host (FS/red), terminación verificable del árbol de procesos al perder el controlador, verificación efectiva de la cadena ejecutable, proveedor/modelo/credenciales/destino/política de datos autorizados, y revisión independiente del adaptador c.2. Esta decisión no modifica el launcher c.1b ni amplía D-043. La implementación de c.2 queda condicionada a revisión independiente antes de cierre.
+
+## B04-01c.1b — cierre acotado / CLOSED / ACCEPTED — APPROVE_WITH_FOLLOWUPS
+
+Subescenario B04-01c.1b cerrado exclusivamente para control directo sintético del ciclo de vida (launcher→hijo→nieto terminan al cancelar o al matar el launcher, sin MXC). B04-01c.1 permanece globalmente BLOCKED. Riesgos explícitamente no aceptados para despachos reales: (1) el controlador puede morir antes del launcher dejando el árbol de procesos activo; (2) la verificación de la cadena ejecutable efectiva está incompleta; (3) MXC no ha demostrado ser compatible ni incompatible con el launcher de Job Object; (4) Job Object no proporciona confinamiento FS/red del anfitrión; (5) P2-1/P2-2/P3-1/P3-2 quedan abiertos. Código b9c61c3; evidencia en reviews/b04-01c1b-evidence.md. No ampliación de D-043 ni permiso de despacho real. El cierre de c.1b es prerrequisito documental, no operativo, de c.2.
+
 ## B04-01c.1 — aplicación acotada de la autorización de diagnóstico
 
 No nueva decisión arquitectónica ni ampliación de D-043/D-046. Usar únicamente comando oficial sandbox MXC con configuración privada, nunca fallback. Evaluar hechos separados del permiso operativo: informe siempre readyForAgent:false porque estos probes no acreditan frontera CLI/herramientas. Fallo de cancelación mantiene BLOCKED. No helper Job Object especulativo mientras falte probar membresía de procesos MXC antes de ejecutar y la frontera del host. c.2/c.3 no iniciados; cambios de aislamiento o setup OS requerirán decisión específica. No alterar supervisor simulado aceptado, contratos ni dependencias.

@@ -1,6 +1,10 @@
 # Fase 05 — Harness externos
 
-## B04-01c.1b — corrección acotada / BLOCKED, revisión pendiente
+## B04-01c.2 — adaptador simulado / IMPLEMENTADO, revisión independiente pendiente
+
+Implementación completada: `packages/runtime/examples/codex/jsonl-parser.ts` (parser JSONL estricto, fail-closed), `packages/runtime/examples/codex/adapter.ts` (adaptador simulado con WeakMap, sin CLI real) y `packages/runtime/test/codex-adapter.test.ts` (~40 tests: unitarios de parser, preparación/grant, ejecute/recuperación, seguridad negativa). Ejecutor exclusivamente en proceso, sin subprocess, sin red, sin credenciales. D-047 registra independencia respecto de c.1 global. Gates pendientes; cierre condicionado a revisión independiente suministrada por propietario. c.3 BLOQUEADO hasta confinamiento efectivo, terminación verificable del árbol, cadena ejecutable verificada, proveedor/credenciales/destino/política autorizados y revisión de c.2 aceptada.
+
+## B04-01c.1b — CLOSED / ACCEPTED — APPROVE_WITH_FOLLOWUPS (control directo sintético únicamente; c.1 global sigue BLOCKED)
 
 P1-1 confirmado: la sonda anterior confundía Jobs implícitos de libuv con terminación por MXC. Atribución retirada; descendientes Node detached y fixture nuevo CreateProcessW sin Jobs propios. Helper Windows C#/.NET con APIs Win32: creación suspendida, asociación/comprobación antes de reanudar, Job no heredable/sin breakaway/KILL_ON_JOB_CLOSE, pins de ejecutables y tests sintéticos. No launcher de producción ni agente autorizado. Código/pruebas **b9c61c3** sobre add2457. Gates: frozen (tras permiso lock store), peers y check exit0 (**739/739**); validación final posterior:28 focalizados y runtime completo **167/167**, lint/typecheck/formato exit0. La evidencia detalla la colección anterior de check y su repetición final, sin ocultar resultados intermedios rojos.
 

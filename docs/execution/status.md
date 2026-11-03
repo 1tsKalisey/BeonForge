@@ -1,6 +1,10 @@
 # Estado persistente
 
-## B04-01c.1b — corrección acotada / BLOCKED, revisión pendiente
+## B04-01c.2 — adaptador simulado / IMPLEMENTADO, gates y revisión pendientes
+
+Implementación B04-01c.2 completada conforme a D-047 (independencia respecto de c.1 global PASS). Archivos: `packages/runtime/examples/codex/jsonl-parser.ts`, `packages/runtime/examples/codex/adapter.ts`, `packages/runtime/test/codex-adapter.test.ts`. Ejecutor en proceso puro: sin CLI Codex, sin subprocess, sin red, sin credenciales. Parser JSONL fail-closed (BOM/truncado/UTF-8/eventos fuera de orden/campos extra/esquema desconocido → error). Adaptador rechaza explícitamente binary/codexBinary/codexHome/credentials/apiKey/token/providerConfig/provider/networkTarget/endpoint; tests negativos demuestran ausencia de camino de despacho real. Grant con WeakMap privado; active=false global previene ejecución concurrente. Gates pendientes: `pnpm.cmd install --frozen-lockfile`, `pnpm.cmd peers check`, `pnpm.cmd check`. Cierre condicionado a revisión independiente suministrada por propietario; no cerrar c.2 automáticamente. c.3 BLOQUEADO. D-043 intacta.
+
+## B04-01c.1b — CLOSED / ACCEPTED — APPROVE_WITH_FOLLOWUPS (control directo sintético únicamente; c.1 global sigue BLOCKED)
 
 P1-1 confirmado: la sonda anterior confundía Jobs implícitos de libuv con terminación por MXC. Atribución retirada; descendientes Node detached y fixture nuevo CreateProcessW sin Jobs propios. Helper Windows C#/.NET con APIs Win32: creación suspendida, asociación/comprobación antes de reanudar, Job no heredable/sin breakaway/KILL_ON_JOB_CLOSE, pins de ejecutables y tests sintéticos. No launcher de producción ni agente autorizado. Código/pruebas **b9c61c3** sobre add2457. Gates: frozen (tras permiso lock store), peers y check exit0 (**739/739**); validación final posterior:28 focalizados y runtime completo **167/167**, lint/typecheck/formato exit0. La evidencia detalla la colección anterior de check y su repetición final, sin ocultar resultados intermedios rojos.
 
