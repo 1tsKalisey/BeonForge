@@ -13,7 +13,7 @@ Token anti-CSRF que no autentica (operador = cualquier proceso local del mismo u
 
 ## B04-01c.2 — followups aceptados con el cierre
 
-- **F2 (abierto, obligatorio antes de bytes externos).** Señalado por la auditoría independiente; no bloquea el generador sintético en proceso. Criterio de cierre: corrección y test reproducible antes de que el parser reciba cualquier byte no generado en proceso (c.3 o un simulador de proceso).
+- **F2 (corregido localmente, revisión independiente pendiente).** `parseCodexJsonl` rechaza con `missing_done` un stream terminado limpiamente sin evento `done`; 4 regresiones rojas→verdes (started/message/proposal → EOF). Sólo cubre el subconjunto sintético: no presupone que el JSONL oficial de Codex use `done`; c.3 debe contrastar el evento terminal real de la versión fijada.
 - **F4 (informacional).** `inspectSimulatedCodexRun` lee `attemptId: '1'`; correcto sólo mientras `retryFailed` esté deshabilitado. Habilitar reintentos exige revisar la inspección.
 - **Formato.** El JSONL sintético no es el formato oficial completo de Codex; ninguna prueba de c.2 acredita compatibilidad con `codex exec --json`.
 - c.1 global y c.3 BLOCKED; R-057/061/065/066/067 y riesgos c.1b (P2-1/P2-2/P3-1/P3-2) vigentes.

@@ -1,5 +1,9 @@
 # Estado persistente
 
+## F2 de c.2 — `missing_done` corregido localmente (revisión independiente pendiente)
+
+2026-11-03. El parser JSONL sintético rechaza streams limpios sin `done` (`missing_done`); 4 regresiones nuevas rojas antes del cambio y verdes después. Límites y contratos sin cambios; no asume el evento terminal del JSONL oficial de Codex. Implementado por Claude Code con autorización expresa del propietario (D-049). c.1 global y c.3 siguen BLOCKED.
+
 ## B06-01 — primera vertical API + Angular sintética / CLOSED / ACCEPTED — APPROVE_WITH_FOLLOWUPS
 
 Fecha 2026-11-03. Auditoría independiente suministrada por el propietario: **APPROVE_WITH_FOLLOWUPS**; cierre documental autorizado expresamente por el propietario con los seguimientos siguientes. Aceptación limitada a ejecutores sintéticos (M04.1 y c.2 simulado); no autoriza ejecutar agentes reales, Codex real, credenciales, inferencias ni red.

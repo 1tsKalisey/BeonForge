@@ -179,5 +179,8 @@ export function parseCodexJsonl(
     }
   }
 
+  // A clean EOF is not a terminal state: the synthetic subset requires `done`.
+  if (!doneSeen) throw new ParseError('missing_done');
+
   return events;
 }

@@ -258,6 +258,41 @@ it('parser: rejects events after done', () => {
   }
 });
 
+// F2: a cleanly terminated stream (trailing newline, valid lines) without a
+// terminal `done` event must fail closed. Synthetic subset only; this does not
+// assume the official Codex JSONL uses the same terminal event.
+it.each([
+  ['started → EOF', ['started']],
+  ['started → message → EOF', ['started', 'message']],
+  ['started → proposal → EOF', ['started', 'proposal']],
+  ['started → message → proposal → EOF', ['started', 'message', 'proposal']],
+])('parser: rejects clean stream without done (%s)', (_label, kinds) => {
+  const line: Record<string, string> = {
+    started: JSON.stringify({ schemaVersion: 1, type: 'started' }),
+    message: JSON.stringify({
+      schemaVersion: 1,
+      type: 'message',
+      role: 'assistant',
+      content: 'x',
+    }),
+    proposal: JSON.stringify({
+      schemaVersion: 1,
+      type: 'proposal',
+      baseCommit: 'a'.repeat(40),
+      path: 'src/x.ts',
+      preimageSha256: 'b'.repeat(64),
+      content: 'y',
+    }),
+  };
+  const bytes = Buffer.from(kinds.map((k) => `${line[k]}\n`).join(''));
+  expect(() => parseCodexJsonl(bytes)).toThrow(ParseError);
+  try {
+    parseCodexJsonl(bytes);
+  } catch (e) {
+    expect((e as ParseError).code).toBe('missing_done');
+  }
+});
+
 it('parser: handles multibyte Unicode content in message', () => {
   const s = JSON.stringify({ schemaVersion: 1, type: 'started' });
   const m = JSON.stringify({
