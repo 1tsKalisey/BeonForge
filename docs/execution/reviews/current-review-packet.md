@@ -1,5 +1,16 @@
 # Paquete de revisión: B06-01 — primera vertical API + Angular sintética
 
+## Resultado — CLOSED / ACCEPTED — APPROVE_WITH_FOLLOWUPS (2026-11-03)
+
+Auditoría independiente suministrada por el propietario, que autoriza el cierre documental. Sin hallazgos bloqueantes. Followups abiertos:
+
+- **P3-2:** verificar con `realpath` todos los componentes de las rutas de assets, o mantener documentada la limitación mientras `webRoot` sea confiable.
+- **P3-3:** documentar el motivo de `'unsafe-inline'` en `style-src` para Angular; no relajar otras directivas CSP.
+
+Distinción de evidencia: 795/795 en `pnpm.cmd check` y e2e 10/10 son **resultados ejecutados por el implementador**. El auditor contrastó el código y las pruebas que citó; **no reejecutó** la suite completa ni el e2e. Se conservan los riesgos residuales listados abajo, B04-01c.1/c.3 BLOCKED y el followup `missing_done`/F2 de c.2. D-049 registra la excepción al escritor único. No se autoriza ejecutar agentes reales ni se inicia otro nodo.
+
+## Paquete original
+
 Revisión independiente requerida. **No declarar aceptada** hasta recibir la auditoría del propietario. El paquete anterior (B04-01c.2, cerrado) está en el historial de Git (`69e0136`).
 
 ## Alcance
@@ -46,4 +57,4 @@ Commits sobre `e5b829b`: 69e0136, ad3652e, 71adc20, de89ed0 y f974d91. Plan en [
 
 ## Siguiente paso
 
-Exclusivamente la revisión independiente suministrada por el propietario. Clasificar y reproducir los hallazgos antes de corregir. No iniciar otro nodo.
+Cumplido: revisión recibida y cierre registrado (ver Resultado). Siguiente nodo pendiente de autorización expresa del propietario.

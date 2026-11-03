@@ -1,6 +1,17 @@
 # Estado persistente
 
-## B06-01 — primera vertical API + Angular sintética / IMPLEMENTADA, revisión independiente pendiente
+## B06-01 — primera vertical API + Angular sintética / CLOSED / ACCEPTED — APPROVE_WITH_FOLLOWUPS
+
+Fecha 2026-11-03. Auditoría independiente suministrada por el propietario: **APPROVE_WITH_FOLLOWUPS**; cierre documental autorizado expresamente por el propietario con los seguimientos siguientes. Aceptación limitada a ejecutores sintéticos (M04.1 y c.2 simulado); no autoriza ejecutar agentes reales, Codex real, credenciales, inferencias ni red.
+
+- **Resultados del implementador** (Claude Code, a solicitud del propietario): `pnpm.cmd check` 795/795, frozen/peers/`git diff --check` exit 0 y e2e con navegador real 10/10 sobre f974d91. **El auditor no ejecutó** la suite completa de 795 tests ni el e2e; contrastó el código y las pruebas que citó en su revisión. Los totales anteriores siguen siendo resultados declarados por el implementador.
+- **P3-2 (abierto):** el servido estático aplica `lstat` sólo al componente final; verificar con `realpath` todos los componentes de la ruta de assets o mantener documentada la limitación mientras `webRoot` sea confiable (build local del propio checkout).
+- **P3-3 (abierto, documental):** documentar por qué `style-src` incluye `'unsafe-inline'` (estilos que Angular inyecta en tiempo de ejecución); no relajar ninguna otra directiva CSP.
+- Límites conservados: token anti-CSRF que no autentica, sin lock entre servidores sobre el mismo `--data`, `lastError` transitorio sólo en memoria y e2e separado de `pnpm check`.
+- B04-01c.1 global y B04-01c.3 **BLOCKED**; followup `missing_done`/F2 del adaptador c.2 abierto y obligatorio antes de procesar bytes externos. D-043 intacta. D-049 registra la excepción controlada al escritor único.
+- Fase 06 **no abierta globalmente**: B06-01 era su única entrega autorizada (D-048); no se inicia otro nodo en este cierre.
+
+### Histórico — B06-01 implementada, previa a la auditoría
 
 Commits 71adc20 (API), de89ed0 (UI + e2e) y f974d91 (CSP), sobre ad3652e (D-048/plan). Gates: frozen, peers y `pnpm.cmd check` exit 0 (**795/795**), `git diff --check` exit 0 y e2e con navegador real 10/10 sobre f974d91, que incluye el reinicio del backend y la reapertura independiente de SQLite/CAS. **No aceptada**: pendiente de auditoría independiente. Evidencia en [b06-01-evidence.md](reviews/b06-01-evidence.md); paquete en [current-review-packet.md](reviews/current-review-packet.md). Evidencias locales en `artifacts/evidence/` (ignorado por Git). Sólo ejecutores sintéticos; c.1 global y c.3 BLOCKED; D-043 intacta. Redactado por Claude Code a solicitud directa del propietario.
 

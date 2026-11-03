@@ -1,5 +1,21 @@
 # Registro de decisiones
 
+## D-049 — excepción controlada al escritor único (Codex / Claude Code)
+
+**ACCEPTED** por decisión expresa del propietario (2026-11-03). Modifica D-005 y la regla de AGENTS.md que designaba a Codex como único escritor.
+
+- Codex sigue siendo un ejecutor de desarrollo permitido.
+- Claude Code también puede implementar cambios en BeonForge cuando el propietario lo autorice expresamente para la tarea concreta.
+- No se permiten escritores simultáneos sobre el mismo checkout sin coordinación explícita del propietario.
+- Toda implementación, la haga quien la haga, mantiene revisión independiente suministrada por el propietario, trazabilidad, gates y commits cohesivos.
+- No modifica D-043 ni autoriza inferencias, proveedores, credenciales ni agentes bajo evaluación dentro de BeonForge.
+
+Rollback: revocar la excepción por decisión del propietario y restaurar la regla de escritor único en AGENTS.md.
+
+## Cierre B06-01 — CLOSED / ACCEPTED — APPROVE_WITH_FOLLOWUPS
+
+Autorización expresa del propietario (2026-11-03) tras auditoría independiente. D-048 cumplida en su alcance sintético. Followups P3-2/P3-3 y límites conservados en risks.md. Los 795/795 y el e2e 10/10 son resultados del implementador; el auditor no los reejecutó completos. c.1 global y c.3 BLOCKED; F2/`missing_done` de c.2 abierto.
+
 ## D-048 — entrega parcial API/Angular sobre ejecuciones exclusivamente sintéticas
 
 **ACCEPTED** por solicitud expresa del propietario (2026-11-03). Se autoriza B06-01, primera vertical de superficie de producto (API local + Angular mínima), **sin esperar al desbloqueo de Codex real**. Concreta D-046 ("API/Angular parcial") sin cambiar su orden para ejecutores reales.
@@ -91,7 +107,7 @@ Actualizado: 2026-10-28. Las decisiones de la especificación se citan, no se at
 | D-002 | Acordada | SQLite WAL para eventos/proyecciones locales y filesystem content-addressed para artefactos. | Evaluar Postgres/Temporal sólo por escala real. |
 | D-003 | Acordada | Kernel durable y demo sin IA antes de proveedores, agentes o dashboard. | Gate de Fase 01. |
 | D-004 | Acordada | pnpm workspaces, Vitest, ESLint y formato consistente; evitar orquestadores de monorepo iniciales. | Fase 00. |
-| D-005 | Acordada | Codex único escritor en fases iniciales; revisión Claude Code externa sólo cuando la entregue el usuario. | Fase 07 puede proponer evolución. |
+| D-005 | Modificada por D-049 | Codex único escritor en fases iniciales; revisión Claude Code externa sólo cuando la entregue el usuario. | Fase 07 puede proponer evolución. |
 | D-006 | Acordada | CLI y API de control antes del dashboard Angular; OpenAI-compatible queda en adaptadores. | Fases 01, 09. |
 | D-007 | Acordada | Reglas auditables antes de router aprendido; Ollama primer adapter local candidato; OmniRoute restringido y diferido. | Fases 03 y 06. |
 | D-008 | Decisión operativa reversible | Crear Git anidado propio porque el Git visible pertenece al Desktop y contiene cambios ajenos. No modificar su índice ni su historial. | Verificar raíz tras `git init`. |

@@ -1,6 +1,13 @@
 # Registro de riesgos
 
-## B06-01 — residuales abiertos (revisión pendiente)
+## B06-01 — followups aceptados con el cierre (APPROVE_WITH_FOLLOWUPS)
+
+- **P3-2 (abierto).** `server.ts` rechaza symlinks sólo en el componente final (`lstat`); un directorio intermedio enlazado bajo `webRoot` no se detecta. Cierre: verificar con `realpath` que cada ruta resuelta queda dentro de `webRoot` canónico, con test, o mantener documentada la limitación mientras `webRoot` sea el build local confiable del propio checkout. No servir `webRoot` no confiable antes del cierre.
+- **P3-3 (abierto, documental).** Documentar que `style-src 'self' 'unsafe-inline'` responde a los estilos que Angular inyecta en tiempo de ejecución; `script-src`, `default-src` y el resto de directivas no se relajan.
+- **Límites conservados:** autenticación sólo local (token anti-CSRF, no autentica), sin lock entre servidores concurrentes sobre el mismo `--data`, errores transitorios (`lastError`) no persistidos, e2e separado de `pnpm check` (requiere Chromium/Edge local).
+- B04-01c.1 global y B04-01c.3 BLOCKED; followup `missing_done`/F2 de c.2 abierto antes de bytes externos.
+
+### Residuales de la revisión
 
 Token anti-CSRF que no autentica (operador = cualquier proceso local del mismo usuario); sin lock entre procesos sobre el mismo `--data`; `lastError` sólo en memoria; caché de vistas sin detección de cambios externos; tipos del cliente duplicados; API en `runtime/examples`; reinicio a mitad de ejecución sin cubrir vía HTTP; e2e fuera de `pnpm check`; datos e2e en `%TEMP%` sin limpieza; 215 dependencias Angular con scripts deshabilitados y override WASI. No es sandbox de SO ni de red. Detalle en [current-review-packet.md](reviews/current-review-packet.md).
 

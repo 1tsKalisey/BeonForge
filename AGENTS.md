@@ -7,7 +7,7 @@ These instructions apply to the repository. The user's current request takes pre
 - Read `docs/execution/status.md` before work, then the active task in `docs/execution/phases/` and `docs/product/software-factory-objective.md`. The supplementary specification is the 23 documents under `knowledge/AI/18 BeonForge Agentic OS` when available; record its absence and consult linked vault notes only as needed.
 - Never modify files under `knowledge/`. Preserve `.claude/` and other user files. Both directories are intentionally ignored by this Git repository.
 - Work on one bounded task at a time. Record objective, files, exclusions, acceptance, gates, rollback and next node. Update status, coverage, decisions and risks after acceptance.
-- Codex is the only writer in initial phases. Do not invoke Claude Code or other agents. The user supplies independent reviews.
+- Writers (D-049): Codex is a permitted development executor; Claude Code may also implement changes when the owner expressly authorizes it for the task. Never run concurrent writers on the same checkout without owner coordination. Do not invoke other agents on your own. Every implementation keeps independent review supplied by the user, traceability, gates and cohesive commits. D-049 does not change D-043 nor authorize inference inside BeonForge.
 
 ## Synthetic-only test environments (owner mandate, D-043)
 

@@ -1,8 +1,8 @@
 # Matriz de cobertura de implementación
 
-## B06-01 — superficie de producto parcial / IMPLEMENTADA, revisión pendiente
+## B06-01 — superficie de producto parcial / CLOSED / ACCEPTED — APPROVE_WITH_FOLLOWUPS
 
-API loopback `/api/v1` y UI Angular mínima sobre ejecutores **sintéticos** (M04.1 y c.2 simulado): crear, ejecutar, consultar, recuperar tras reinicio y revisar explícitamente. Cubierta por 8 tests de integración, 5 unitarios web y el e2e con navegador real. No cubre ejecutores reales, autenticación, dashboard, routing, multiagente ni gestión de proyectos. Evidencia: [b06-01-evidence.md](reviews/b06-01-evidence.md).
+Aceptada 2026-11-03 por el propietario tras auditoría independiente; followups P3-2/P3-3 abiertos en risks.md. Totales 795/795 y e2e 10/10 ejecutados por el implementador, no por el auditor. API loopback `/api/v1` y UI Angular mínima sobre ejecutores **sintéticos** (M04.1 y c.2 simulado): crear, ejecutar, consultar, recuperar tras reinicio y revisar explícitamente. Cubierta por 8 tests de integración, 5 unitarios web y el e2e con navegador real. No cubre ejecutores reales, autenticación, dashboard, routing, multiagente ni gestión de proyectos. Evidencia: [b06-01-evidence.md](reviews/b06-01-evidence.md).
 
 ## B04-01c.2 — CLOSED / ACCEPTED — APPROVE_WITH_FOLLOWUPS
 

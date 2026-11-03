@@ -4,7 +4,9 @@ Fase **no abierta globalmente**. Sólo B06-01 autorizado por D-048 como entrega 
 
 ## B06-01 — primera vertical API + Angular sintética
 
-**Estado: IMPLEMENTADA, revisión independiente pendiente (no aceptada).** Aceptación 1–6 demostrada localmente: e2e con navegador real 10/10 y 795/795 en `pnpm.cmd check`. Evidencia: [b06-01-evidence.md](../reviews/b06-01-evidence.md). Desviación registrada: la carpeta de datos sintéticos del e2e permanece en `%TEMP%`, porque la API rechaza datos dentro del checkout (D-043); las evidencias sí se guardan en `artifacts/evidence/`.
+**Estado: CLOSED / ACCEPTED — APPROVE_WITH_FOLLOWUPS (2026-11-03).** Auditoría independiente suministrada por el propietario; cierre autorizado con followups P3-2 (realpath de componentes de assets o limitación documentada con `webRoot` confiable) y P3-3 (justificar `'unsafe-inline'` sólo en `style-src`), ver risks.md. El auditor contrastó código y pruebas citadas; no ejecutó los 795 tests ni el e2e, cuyos resultados son del implementador. No autoriza agentes reales. Siguiente nodo: ninguno iniciado; requiere autorización expresa del propietario.
+
+Estado previo: implementada, aceptación 1–6 demostrada localmente: e2e con navegador real 10/10 y 795/795 en `pnpm.cmd check`. Evidencia: [b06-01-evidence.md](../reviews/b06-01-evidence.md). Desviación registrada: la carpeta de datos sintéticos del e2e permanece en `%TEMP%`, porque la API rechaza datos dentro del checkout (D-043); las evidencias sí se guardan en `artifacts/evidence/`.
 
 ### Objetivo observable
 
