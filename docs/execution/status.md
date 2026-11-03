@@ -1,5 +1,9 @@
 # Estado persistente
 
+## B06-01 — primera vertical API + Angular sintética / AUTORIZADA (D-048), en implementación
+
+Plan, alcance, exclusiones, seguridad, aceptación y rollback en [phase-06.md](phases/phase-06.md). Sólo ejecutores sintéticos aceptados (M04.1 y c.2 simulado); c.1 global y c.3 BLOCKED; D-043 intacta. Cambios redactados por Claude Code a solicitud directa del propietario.
+
 ## B04-01c.2 — CLOSED / ACCEPTED — APPROVE_WITH_FOLLOWUPS (sólo adaptador simulado; c.1 y c.3 siguen BLOCKED)
 
 Fecha 2026-11-03. Auditoría independiente suministrada por el propietario: **APPROVE_WITH_FOLLOWUPS**. Clasificación aceptada:

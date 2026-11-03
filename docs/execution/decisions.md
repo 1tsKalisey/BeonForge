@@ -1,5 +1,16 @@
 # Registro de decisiones
 
+## D-048 — entrega parcial API/Angular sobre ejecuciones exclusivamente sintéticas
+
+**ACCEPTED** por solicitud expresa del propietario (2026-11-03). Se autoriza B06-01, primera vertical de superficie de producto (API local + Angular mínima), **sin esperar al desbloqueo de Codex real**. Concreta D-046 ("API/Angular parcial") sin cambiar su orden para ejecutores reales.
+
+- Ejecutores admitidos: sólo los ya aceptados y sintéticos — M04.1 (`synthetic-bugfix`: rojo/parche fijo/verde/diff/revisión) y el adaptador simulado c.2 (`codex-simulated`: sólo propuesta saneada). Registro fijo en el servidor con `simulated: true`; ningún campo de la API ni de la UI puede seleccionar binario, ruta, comando, proveedor, credencial o modo real.
+- API HTTP versionada `/api/v1`, ligada sólo a `127.0.0.1`; validación estricta, Host/Origin, token de sesión por proceso y serialización de mutaciones en backend. El token es anti-CSRF/DNS-rebinding, **no autenticación de usuario**: cualquier proceso local del mismo usuario se considera operador (mismo modelo de confianza que M04.1).
+- Persistencia: sólo los stores SQLite/CAS existentes de M04.1/c.2 y directorios de tarea dentro de un `--data` autorizado; sin nuevas abstracciones de persistencia ni índice propio.
+- La UI muestra tests, propuesta y diff sólo desde evidencias persistidas de **esa** tarea; nunca combina evidencias de ejecuciones distintas. Revisión pending/approve/discard reutiliza `reviewBugfixDemo`; sin merge, push, publicación ni integración.
+- Ubicación: API en `packages/runtime/examples/api/` (reutiliza ejemplos aceptados sin nuevos exports del kernel); Angular en `apps/web/` (workspace pnpm). Promover a paquete propio exige decisión posterior.
+- **No altera** D-043, D-047 ni los requisitos de c.3; c.1 global y c.3 siguen BLOCKED. No autoriza dashboard completo, plugins, routing, multiagente, autenticación empresarial ni ejecutores reales.
+
 ## Cierre B04-01c.2 — CLOSED / ACCEPTED — APPROVE_WITH_FOLLOWUPS
 
 Autorización expresa del propietario (2026-11-03) tras auditoría independiente: F1/F3 cerrados, F2 obligatorio antes de bytes externos, F4 informacional. Aceptación limitada al adaptador simulado; no autoriza despacho real, credenciales, inferencias ni red. D-047 cumplida en su alcance; c.1 global y c.3 BLOCKED con los requisitos de D-047 intactos.
