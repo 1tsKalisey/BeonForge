@@ -18,7 +18,8 @@
     "test": "vitest run",
     "cli": "node dist/cli.js",
     "demo": "vitest run test/recovery.test.ts --silent=false",
-    "demo:bugfix": "node examples/bugfix/cli.mjs"
+    "demo:bugfix": "node examples/bugfix/cli.mjs",
+    "api": "node examples/api/cli.mjs"
   },
   "dependencies": {
     "@beonforge/contracts": "workspace:*",
