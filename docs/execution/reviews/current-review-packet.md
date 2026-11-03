@@ -1,81 +1,49 @@
-# Paquete de revisión: B04-01c.2 — Adaptador simulado Codex
+# Paquete de revisión: B06-01 — primera vertical API + Angular sintética
 
-**Resultado (2026-11-03): APPROVE_WITH_FOLLOWUPS — B04-01c.2 CLOSED / ACCEPTED.** F1/F3 cerrados; F2 obligatorio antes de bytes externos; F4 informacional. Ver status.md.
-
-Revisión requerida antes de cualquier cierre de c.2. No cerrar automáticamente.
+Revisión independiente requerida. **No declarar aceptada** hasta recibir la auditoría del propietario. El paquete anterior (B04-01c.2, cerrado) está en el historial de Git (`69e0136`).
 
 ## Alcance
 
-B04-01c.2 implementa un adaptador estrecho para representar una futura ejecución de Codex. **El ejecutor es exclusivamente simulado en proceso**: ningún binario externo, ningún subprocess, ninguna red, ninguna credencial. D-043 intacta.
+Autorizado por D-048: API local loopback + UI Angular mínima sobre ejecuciones **exclusivamente sintéticas**. Ejecutores: M04.1 (`synthetic-bugfix`) y el adaptador c.2 (`codex-simulated`). Sin Codex real, credenciales, inferencias, red externa, merge ni publicación. c.1 global y c.3 BLOCKED; D-043 intacta.
 
-Commits en rama `phase/02-project-inspection` desde b9c61c3:
+Commits sobre `e5b829b`: 69e0136, ad3652e, 71adc20, de89ed0 y f974d91. Plan en [phase-06.md](../phases/phase-06.md); evidencia, gates y hashes en [b06-01-evidence.md](b06-01-evidence.md).
 
-| Hash | Descripción |
-|---|---|
-| 5810a43 | docs(c.1b): cierre B04-01c.1b APPROVE_WITH_FOLLOWUPS; registro D-047 |
-| fac980a | feat(c.2): implementación adaptador + tests |
-| 3668620 | fix(c.2): errores ESLint/typecheck |
-| af205c3 | fix(c.2): external blockId grant + fix test concurrent-store |
+## Archivos
 
-## Archivos nuevos
+- API: `packages/runtime/examples/api/{tasks.ts,server.ts,cli.mjs,README.md}` y `packages/runtime/test/api.test.ts`.
+- UI: `apps/web/` (Angular 22 standalone/zoneless), `src/app/{api.ts,view.ts,app.ts,app.html}`, tests `src/app/view.test.ts`, e2e `e2e/{run.mjs,verify-store.mjs}`.
+- Workspace: `pnpm-workspace.yaml` (`apps/*`, `allowBuilds: false`, override del fallback WASI de oxc), `eslint.config.mjs`, `.gitignore`/`.prettierignore` (`artifacts/evidence/`, `.angular/`).
 
-- `packages/runtime/examples/codex/jsonl-parser.ts` — parser JSONL estricto, fail-closed
-- `packages/runtime/examples/codex/adapter.ts` — adaptador simulado con WeakMap privado
-- `packages/runtime/test/codex-adapter.test.ts` — ~43 tests (parser, grant, execute, recuperación, seguridad negativa)
+## Resultados declarados
 
-## Archivos modificados (documentales)
+- `pnpm.cmd check`: 795/795; frozen, peers y `git diff --check` exit 0.
+- e2e con navegador real 10/10 sobre f974d91, incluido el reinicio del backend y la verificación independiente de SQLite/CAS.
 
-- `docs/execution/status.md`, `docs/execution/phases/phase-05.md`, `docs/execution/decisions.md`
+## Qué revisar
 
-## Gates
+1. **Seguridad HTTP** (`server.ts`): bind fijo `127.0.0.1`, Host (DNS rebinding), Origin/Sec-Fetch-Site, token por proceso, `Content-Type` JSON, límite de 4 KiB, CSP, ausencia de CORS y servido estático sin traversal ni symlinks.
+2. **Autorización en backend** (`tasks.ts`): DTO con claves exactas y sin getters/prototipos/Proxy; registro fijo de ejecutores con `simulated: true`; `confirmPatchSha256` igual al preview; revisión ligada a `evidenceSha256` de la propia tarea; `--data` fuera del checkout.
+3. **Sin reintentos**: sólo se ejecuta una tarea en la que ningún bloque ha empezado; pending/uncertain se muestra `blocked`; el slot de mutación se reserva antes de validar.
+4. **Evidencia no combinada**: tests/diff sólo desde el store M04.1 de esa tarea; propuesta sólo desde el store c.2 de esa tarea; `codex-simulated` nunca muestra tests ni diff.
+5. **Recuperación**: vistas derivadas del disco tras el reinicio (tests de servicio, HTTP y e2e).
+6. **UI**: no puede convertir una ejecución simulada en real; sin controles de ruta, ejecutable o proveedor.
+7. **Validez del e2e**: peticiones reales registradas y reapertura independiente del store, no mocks de frontend.
 
-| Gate | Resultado |
-|---|---|
-| `pnpm.cmd install --frozen-lockfile` | EXIT:0 |
-| `pnpm.cmd peers check` | EXIT:0 |
-| `pnpm.cmd check` (format+lint+typecheck+build+test) | EXIT:0 |
-| runtime 210/210 | verde |
+## Riesgos residuales y límites conocidos
 
-## Restricciones verificables
+- El token es anti-CSRF/DNS-rebinding, **no autenticación**: cualquier proceso local del mismo usuario actúa como operador.
+- No hay lock entre procesos: dos servidores sobre el mismo `--data` podrían competir (fuera del uso documentado; la serialización es por proceso).
+- `lastError` sólo vive en memoria; tras un reinicio el estado persistido manda.
+- La caché de vistas no detecta cambios externos en el disco hasta la siguiente mutación o reinicio.
+- Los tipos del cliente duplican los del servidor; la deriva sólo la detecta el e2e.
+- La API vive en `runtime/examples`; promoverla a paquete requiere una decisión.
+- Los tests muestran resúmenes de M04.1 (comando, exit, aserción, hash), no la salida TAP completa.
+- El reinicio en el e2e se hace con la tarea completada; la interrupción a mitad de ejecución se cubre a nivel de servicio (cierre cooperativo) y con los tests SIGKILL de M04.1, no a través de HTTP.
+- El e2e no está en `pnpm check`: requiere Edge u otro Chromium instalado.
+- Las carpetas `%TEMP%/beonforge-e2e-data-*` de los e2e no se borran automáticamente.
+- 215 dependencias nuevas de Angular con scripts de instalación deshabilitados; override del fallback WASI.
+- No es un sandbox de SO ni de red; se mantienen todos los límites de M04.1 y c.2 y el F2 de c.2 sigue abierto.
 
-El tipo/perfil `simulated` no acepta y el código lo rechaza con error explícito:
+## Siguiente paso
 
-| Campo prohibido | Código de error |
-|---|---|
-| binary, codexBinary | adapter_real_dispatch_rejected |
-| codexHome, credentials, apiKey, token | adapter_real_dispatch_rejected |
-| providerConfig, provider, networkTarget, endpoint | adapter_real_dispatch_rejected |
-| Campos adicionales desconocidos | adapter_invalid |
-| Getters/accessors | adapter_invalid |
-| Proxy | adapter_invalid |
-| mode no en SIMULATION_MODES | adapter_invalid |
-| path distinto de 'src/add.ts' | adapter_invalid |
-| baseCommit no hex-40 | adapter_invalid |
-
-Los tests negativos demuestran que no existe camino accidental de despacho real (`REAL_DISPATCH_FIELDS = new Set([...])` en adapter.ts).
-
-## Riesgos abiertos (heredados de c.1b, no resueltos aquí)
-
-- P2-1: controlador puede morir antes del launcher dejando árbol activo
-- P2-2: executables no pinneados (no aplica a c.2 simulado, pero sigue en c.1)
-- P3-1/P3-2: atribución MXC / handle Job dup
-- R-057/061/065/066/067: riesgos vigentes de fases anteriores
-
-## Qué requiere revisión independiente
-
-1. **Ausencia de camino de despacho real**: confirmar que ninguna combinación de inputs puede alcanzar un subprocess o socket.
-2. **Integridad del WeakMap privado**: el payload del grant no es accesible desde fuera del módulo.
-3. **Parser fail-closed**: BOM, truncado, UTF-8 inválido, eventos fuera de orden, campos extra — todos rechazan con ParseError.
-4. **Evidencia persistida**: la inspección lee desde EventStore sin conferir autoridad de re-despacho.
-5. **Recuperación**: estado uncertain no se redespacha; segundo proceso lee la misma evidencia.
-6. **Límites de concurrencia**: active=false global previene ejecución simultánea.
-
-## Lo que este cierre NO autoriza
-
-- c.3 (primera generación real): sigue BLOQUEADO
-- Ejecución de Codex CLI como agente
-- Credenciales, tráfico a proveedores, red
-- Modificar main, push o merge
-- Transición a entornos reales (D-043 intacta)
-
-Siguiente acción exclusiva: revisión independiente suministrada por propietario.
+Exclusivamente la revisión independiente suministrada por el propietario. Clasificar y reproducir los hallazgos antes de corregir. No iniciar otro nodo.

@@ -1,8 +1,12 @@
 # Estado persistente
 
-## B06-01 — primera vertical API + Angular sintética / AUTORIZADA (D-048), en implementación
+## B06-01 — primera vertical API + Angular sintética / IMPLEMENTADA, revisión independiente pendiente
 
-Plan, alcance, exclusiones, seguridad, aceptación y rollback en [phase-06.md](phases/phase-06.md). Sólo ejecutores sintéticos aceptados (M04.1 y c.2 simulado); c.1 global y c.3 BLOCKED; D-043 intacta. Cambios redactados por Claude Code a solicitud directa del propietario.
+Commits 71adc20 (API), de89ed0 (UI + e2e) y f974d91 (CSP), sobre ad3652e (D-048/plan). Gates: frozen, peers y `pnpm.cmd check` exit 0 (**795/795**), `git diff --check` exit 0 y e2e con navegador real 10/10 sobre f974d91, que incluye el reinicio del backend y la reapertura independiente de SQLite/CAS. **No aceptada**: pendiente de auditoría independiente. Evidencia en [b06-01-evidence.md](reviews/b06-01-evidence.md); paquete en [current-review-packet.md](reviews/current-review-packet.md). Evidencias locales en `artifacts/evidence/` (ignorado por Git). Sólo ejecutores sintéticos; c.1 global y c.3 BLOCKED; D-043 intacta. Redactado por Claude Code a solicitud directa del propietario.
+
+### Histórico — B06-01 autorizada
+
+Plan, alcance, exclusiones, seguridad, aceptación y rollback en [phase-06.md](phases/phase-06.md).
 
 ## B04-01c.2 — CLOSED / ACCEPTED — APPROVE_WITH_FOLLOWUPS (sólo adaptador simulado; c.1 y c.3 siguen BLOCKED)
 

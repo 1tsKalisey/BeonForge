@@ -1,5 +1,9 @@
 # Matriz de cobertura de implementación
 
+## B06-01 — superficie de producto parcial / IMPLEMENTADA, revisión pendiente
+
+API loopback `/api/v1` y UI Angular mínima sobre ejecutores **sintéticos** (M04.1 y c.2 simulado): crear, ejecutar, consultar, recuperar tras reinicio y revisar explícitamente. Cubierta por 8 tests de integración, 5 unitarios web y el e2e con navegador real. No cubre ejecutores reales, autenticación, dashboard, routing, multiagente ni gestión de proyectos. Evidencia: [b06-01-evidence.md](reviews/b06-01-evidence.md).
+
 ## B04-01c.2 — CLOSED / ACCEPTED — APPROVE_WITH_FOLLOWUPS
 
 Adaptador Codex **simulado** en proceso: parser JSONL estricto de un subconjunto sintético propio (no formato oficial completo), grant privado, rechazo de campos de despacho real, persistencia/recuperación con SQLite/CAS. Cubre sólo simulación; no despacho, confinamiento ni compatibilidad con Codex real. Followups F2 (obligatorio antes de bytes externos) y F4 (attemptId/retry) en risks.md. c.1/c.3 BLOCKED.

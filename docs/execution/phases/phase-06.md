@@ -4,6 +4,8 @@ Fase **no abierta globalmente**. Sólo B06-01 autorizado por D-048 como entrega 
 
 ## B06-01 — primera vertical API + Angular sintética
 
+**Estado: IMPLEMENTADA, revisión independiente pendiente (no aceptada).** Aceptación 1–6 demostrada localmente: e2e con navegador real 10/10 y 795/795 en `pnpm.cmd check`. Evidencia: [b06-01-evidence.md](../reviews/b06-01-evidence.md). Desviación registrada: la carpeta de datos sintéticos del e2e permanece en `%TEMP%`, porque la API rechaza datos dentro del checkout (D-043); las evidencias sí se guardan en `artifacts/evidence/`.
+
 ### Objetivo observable
 
 Desde el navegador: crear una tarea sintética autorizada, ejecutarla, observar estado y evidencia persistida, reiniciar el backend y seguir viéndola, y registrar una revisión explícita (pendiente/aprobada/descartada).

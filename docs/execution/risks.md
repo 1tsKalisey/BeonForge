@@ -1,5 +1,9 @@
 # Registro de riesgos
 
+## B06-01 — residuales abiertos (revisión pendiente)
+
+Token anti-CSRF que no autentica (operador = cualquier proceso local del mismo usuario); sin lock entre procesos sobre el mismo `--data`; `lastError` sólo en memoria; caché de vistas sin detección de cambios externos; tipos del cliente duplicados; API en `runtime/examples`; reinicio a mitad de ejecución sin cubrir vía HTTP; e2e fuera de `pnpm check`; datos e2e en `%TEMP%` sin limpieza; 215 dependencias Angular con scripts deshabilitados y override WASI. No es sandbox de SO ni de red. Detalle en [current-review-packet.md](reviews/current-review-packet.md).
+
 ## B04-01c.2 — followups aceptados con el cierre
 
 - **F2 (abierto, obligatorio antes de bytes externos).** Señalado por la auditoría independiente; no bloquea el generador sintético en proceso. Criterio de cierre: corrección y test reproducible antes de que el parser reciba cualquier byte no generado en proceso (c.3 o un simulador de proceso).
