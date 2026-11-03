@@ -1,6 +1,10 @@
 # Fase 05 — Harness externos
 
-## B04-01c.2 — adaptador simulado / IMPLEMENTADO, revisión independiente pendiente
+## B04-01c.2 — CLOSED / ACCEPTED — APPROVE_WITH_FOLLOWUPS
+
+Auditoría independiente APPROVE_WITH_FOLLOWUPS (2026-11-03). F1 y F3 cerrados (external es permission gate, no despacho real). F2 abierto y obligatorio antes de usar bytes externos; no bloquea el generador en proceso. F4 informacional: `attemptId: '1'` en la inspección depende de `retryFailed` deshabilitado. El JSONL sintético es un subconjunto propio, no el formato oficial completo de Codex. c.1 global y c.3 siguen BLOCKED; requisitos de c.3 sin cambios. Detalle en status.md y risks.md.
+
+## Histórico — B04-01c.2 implementado, revisión pendiente
 
 Implementación completada: `packages/runtime/examples/codex/jsonl-parser.ts` (parser JSONL estricto, fail-closed), `packages/runtime/examples/codex/adapter.ts` (adaptador simulado con WeakMap, sin CLI real) y `packages/runtime/test/codex-adapter.test.ts` (~40 tests: unitarios de parser, preparación/grant, ejecute/recuperación, seguridad negativa). Ejecutor exclusivamente en proceso, sin subprocess, sin red, sin credenciales. D-047 registra independencia respecto de c.1 global. Gates pendientes; cierre condicionado a revisión independiente suministrada por propietario. c.3 BLOQUEADO hasta confinamiento efectivo, terminación verificable del árbol, cadena ejecutable verificada, proveedor/credenciales/destino/política autorizados y revisión de c.2 aceptada.
 

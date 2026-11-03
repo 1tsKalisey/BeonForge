@@ -1,5 +1,9 @@
 # Matriz de cobertura de implementación
 
+## B04-01c.2 — CLOSED / ACCEPTED — APPROVE_WITH_FOLLOWUPS
+
+Adaptador Codex **simulado** en proceso: parser JSONL estricto de un subconjunto sintético propio (no formato oficial completo), grant privado, rechazo de campos de despacho real, persistencia/recuperación con SQLite/CAS. Cubre sólo simulación; no despacho, confinamiento ni compatibilidad con Codex real. Followups F2 (obligatorio antes de bytes externos) y F4 (attemptId/retry) en risks.md. c.1/c.3 BLOCKED.
+
 ## B04-01c.1b — corrección acotada / BLOCKED, revisión pendiente
 
 P1-1 confirmado: la sonda anterior confundía Jobs implícitos de libuv con terminación por MXC. Atribución retirada; descendientes Node detached y fixture nuevo CreateProcessW sin Jobs propios. Helper Windows C#/.NET con APIs Win32: creación suspendida, asociación/comprobación antes de reanudar, Job no heredable/sin breakaway/KILL_ON_JOB_CLOSE, pins de ejecutables y tests sintéticos. No launcher de producción ni agente autorizado. Código/pruebas **b9c61c3** sobre add2457. Gates: frozen (tras permiso lock store), peers y check exit0 (**739/739**); validación final posterior:28 focalizados y runtime completo **167/167**, lint/typecheck/formato exit0. La evidencia detalla la colección anterior de check y su repetición final, sin ocultar resultados intermedios rojos.

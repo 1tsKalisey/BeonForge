@@ -1,5 +1,7 @@
 # Paquete de revisión: B04-01c.2 — Adaptador simulado Codex
 
+**Resultado (2026-11-03): APPROVE_WITH_FOLLOWUPS — B04-01c.2 CLOSED / ACCEPTED.** F1/F3 cerrados; F2 obligatorio antes de bytes externos; F4 informacional. Ver status.md.
+
 Revisión requerida antes de cualquier cierre de c.2. No cerrar automáticamente.
 
 ## Alcance

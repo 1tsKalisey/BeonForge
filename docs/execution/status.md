@@ -1,6 +1,17 @@
 # Estado persistente
 
-## B04-01c.2 — adaptador simulado / IMPLEMENTADO, revisión independiente pendiente
+## B04-01c.2 — CLOSED / ACCEPTED — APPROVE_WITH_FOLLOWUPS (sólo adaptador simulado; c.1 y c.3 siguen BLOCKED)
+
+Fecha 2026-11-03. Auditoría independiente suministrada por el propietario: **APPROVE_WITH_FOLLOWUPS**. Clasificación aceptada:
+
+- **F1 — cerrado.** `external: ['codex-run']` es un permission gate del kernel para efectos externos; no habilita despacho real ni concede ruta/binario/credencial.
+- **F2 — abierto, no bloqueante para el adaptador simulado.** Corrección **obligatoria antes de procesar bytes externos** (salida de un proceso o fuente no generada en proceso). Mientras esté abierto, el parser sólo acepta bytes del generador sintético en proceso.
+- **F3 — cerrado.**
+- **F4 — informacional.** `attemptId: '1'` en `inspectSimulatedCodexRun` depende de que `retryFailed` siga deshabilitado; habilitar reintentos exige revisar la inspección.
+
+El protocolo JSONL sintético (`started`/`message`/`proposal`/`done`, `schemaVersion: 1`) es un subconjunto propio de BeonForge para pruebas. **No equivale al formato oficial completo de `codex exec --json`** ni acredita compatibilidad con él; c.3 exige contrastarlo con la salida oficial de la versión fijada. c.1 global y c.3 permanecen **BLOCKED**; D-043/D-046/D-047 intactas. Código fac980a/3668620/af205c3, evidencia e5b829b sin cambios. Cierre documental redactado por Claude Code a solicitud directa del propietario; no se ejecutó ningún agente ni Codex.
+
+## Histórico — B04-01c.2 implementado, previo a la auditoría
 
 Implementación B04-01c.2 completada conforme a D-047. Commits: 5810a43 (documental/D-047), fac980a (impl+tests), 3668620 (lint/typecheck), af205c3 (external grant+test fix). Archivos: `packages/runtime/examples/codex/jsonl-parser.ts`, `packages/runtime/examples/codex/adapter.ts`, `packages/runtime/test/codex-adapter.test.ts`. Ejecutor en proceso puro: sin CLI Codex, sin subprocess, sin red, sin credenciales. Parser JSONL fail-closed. Adaptador rechaza REAL_DISPATCH_FIELDS con adapter_real_dispatch_rejected; WeakMap privado; active=false previene concurrencia; external:['codex-run'] requerido para ExecuteWorkflow. Gates finales: `pnpm.cmd install --frozen-lockfile` EXIT:0, `pnpm.cmd peers check` EXIT:0, `pnpm.cmd check` EXIT:0; runtime **210/210** (8 test files). Sin modificar main, push o merge. Paquete de revisión: [current-review-packet.md](reviews/current-review-packet.md). Cierre condicionado a revisión independiente suministrada por propietario. c.3 BLOQUEADO. D-043 intacta.
 

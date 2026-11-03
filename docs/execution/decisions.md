@@ -1,5 +1,9 @@
 # Registro de decisiones
 
+## Cierre B04-01c.2 — CLOSED / ACCEPTED — APPROVE_WITH_FOLLOWUPS
+
+Autorización expresa del propietario (2026-11-03) tras auditoría independiente: F1/F3 cerrados, F2 obligatorio antes de bytes externos, F4 informacional. Aceptación limitada al adaptador simulado; no autoriza despacho real, credenciales, inferencias ni red. D-047 cumplida en su alcance; c.1 global y c.3 BLOCKED con los requisitos de D-047 intactos.
+
 ## D-047 — independencia de c.2 respecto del PASS global de c.1
 
 B04-01c.2 puede implementarse y probarse con ejecutores simulados sin esperar el PASS global de c.1. Fundamento: c.2 no despacha ni interactúa con el binario real de Codex; el ejecutor es un generador en proceso que produce JSONL sintético, usa únicamente EventStore/ArtifactStore del kernel y permisos propios ya aceptados. La decisión es acotada y trazable: cualquier simulador aceptado como 'simulated' no puede recibir ruta de binario, CODEX_HOME real, credenciales, configuración de proveedor ni destino de red; los tests negativos demuestran que no existe camino accidental de despacho real. c.3 permanece BLOQUEADO hasta que se cumplan independientemente: confinamiento efectivo del host (FS/red), terminación verificable del árbol de procesos al perder el controlador, verificación efectiva de la cadena ejecutable, proveedor/modelo/credenciales/destino/política de datos autorizados, y revisión independiente del adaptador c.2. Esta decisión no modifica el launcher c.1b ni amplía D-043. La implementación de c.2 queda condicionada a revisión independiente antes de cierre.
