@@ -6,7 +6,10 @@ node_modules/
 /.pnpm-store/
 dist/
 coverage/
+.angular/
 /.env
 .env.*
 !.env.example
 *.log
+# Evidencias locales (logs, informes, capturas); se citan por ruta relativa y SHA-256.
+/artifacts/evidence/

@@ -13,7 +13,12 @@ export default defineConfig(
     extends: [tseslint.configs.recommendedTypeChecked],
     languageOptions: {
       parserOptions: {
-        project: ['packages/*/tsconfig.json', 'packages/*/tsconfig.test.json'],
+        project: [
+          'packages/*/tsconfig.json',
+          'packages/*/tsconfig.test.json',
+          'apps/web/tsconfig.app.json',
+          'apps/web/tsconfig.test.json',
+        ],
         tsconfigRootDir: import.meta.dirname,
       },
     },

@@ -1,2 +1,13 @@
 packages:
   - 'packages/*'
+  - 'apps/*'
+# Dependency install scripts stay disabled (esbuild ships per-platform binaries).
+allowBuilds:
+  '@parcel/watcher': false
+  esbuild: false
+  lmdb: false
+  msgpackr-extract: false
+# Unused WASI fallback of oxc-parser (native win32/linux/darwin bindings are used);
+# its @emnapi alpha pins break peer checks.
+overrides:
+  '@oxc-parser/binding-wasm32-wasi': '-'

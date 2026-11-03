@@ -1,0 +1,183 @@
+<header>
+  <h1>BeonForge</h1>
+  <span class="badge" data-testid="simulated-badge"
+    >Sólo ejecuciones sintéticas — sin Codex real</span
+  >
+</header>
+
+@if (error(); as message) {
+<p class="error" role="alert" data-testid="error">{{ message }}</p>
+}
+
+<main>
+  <section class="sidebar">
+    <h2>Nueva tarea</h2>
+    <label>
+      Ejecutor
+      <select
+        data-testid="executor"
+        [value]="chosen()"
+        (change)="choose($any($event.target).value)"
+      >
+        @for (executor of executors(); track executor.id) {
+        <option [value]="executor.id">{{ executor.label }}</option>
+        }
+      </select>
+    </label>
+    <button
+      type="button"
+      data-testid="create"
+      [disabled]="pending() || busy() !== null"
+      (click)="create()"
+    >
+      Crear tarea
+    </button>
+
+    <h2>Tareas</h2>
+    @if (tasks().length === 0) {
+    <p class="muted">Todavía no hay tareas.</p>
+    }
+    <ul class="tasks">
+      @for (task of tasks(); track task.id) {
+      <li>
+        <button
+          type="button"
+          [class.active]="task.id === selectedId()"
+          [attr.data-testid]="'task-' + task.id"
+          (click)="select(task.id)"
+        >
+          <span class="mono">{{ task.id.slice(0, 15) }}</span>
+          <span class="state" [attr.data-state]="task.state"
+            >{{ label[task.state] }}</span
+          >
+        </button>
+      </li>
+      }
+    </ul>
+  </section>
+
+  <section class="detail">
+    @if (selected(); as task) {
+    <h2 data-testid="task-id" class="mono">{{ task.id }}</h2>
+    <dl>
+      <dt>Ejecutor</dt>
+      <dd>{{ executorLabel(task.executor) }} (simulado)</dd>
+      <dt>Estado</dt>
+      <dd data-testid="state" [attr.data-state]="task.state">
+        {{ label[task.state] }}
+      </dd>
+      <dt>Integración</dt>
+      <dd>No realizada (sin merge ni publicación)</dd>
+      @if (task.preview; as preview) {
+      <dt>Commit base</dt>
+      <dd class="mono">{{ short(preview.baseCommit) }}</dd>
+      <dt>Parche fijo</dt>
+      <dd class="mono" data-testid="patch">
+        {{ preview.path }} · {{ short(preview.patchSha256) }}
+      </dd>
+      } @if (task.lastError) {
+      <dt>Último error</dt>
+      <dd class="error-text mono">{{ task.lastError }}</dd>
+      }
+    </dl>
+
+    @if (canRun(task)) {
+    <button
+      type="button"
+      data-testid="run"
+      [disabled]="pending() || busy() !== null"
+      (click)="run(task)"
+    >
+      @if (task.executor === 'synthetic-bugfix') { Confirmar parche {{
+      short(task.preview!.patchSha256) }} y ejecutar } @else { Ejecutar
+      simulación }
+    </button>
+    }
+
+    <h3>Pasos</h3>
+    <table data-testid="steps">
+      <tbody>
+        @for (step of task.steps; track step.blockId) {
+        <tr>
+          <td class="mono">{{ step.blockId }}</td>
+          <td [attr.data-status]="step.status">{{ step.status }}</td>
+        </tr>
+        }
+      </tbody>
+    </table>
+
+    <h3>Tests</h3>
+    @if (panels(task).tests) {
+    <table data-testid="tests">
+      <tbody>
+        @for (test of task.tests; track test.phase) {
+        <tr>
+          <td>{{ test.phase === 'red' ? 'Rojo' : 'Verde' }}</td>
+          <td class="mono">{{ test.assertion }}</td>
+          <td>exit {{ test.exitCode }}</td>
+          <td class="mono">{{ short(test.evidenceSha256) }}</td>
+        </tr>
+        }
+      </tbody>
+    </table>
+    } @else {
+    <p class="muted" data-testid="no-tests">
+      Sin evidencia de tests en esta tarea.
+    </p>
+    }
+
+    <h3>Diff</h3>
+    @if (panels(task).diff) {
+    <pre data-testid="diff">{{ task.diff!.text }}</pre>
+    } @else {
+    <p class="muted" data-testid="no-diff">
+      Sin evidencia de diff en esta tarea.
+    </p>
+    }
+
+    <h3>Propuesta</h3>
+    @if (task.proposal; as proposal) {
+    <dl data-testid="proposal">
+      <dt>Archivo</dt>
+      <dd class="mono">{{ proposal.path }}</dd>
+      <dt>Contenido (SHA-256)</dt>
+      <dd class="mono">{{ short(proposal.contentSha256) }}</dd>
+      <dt>Coincide con postimagen conocida</dt>
+      <dd data-testid="proposal-match">
+        {{ proposal.matchesKnownPostimage ? 'Sí' : 'No' }}
+      </dd>
+    </dl>
+    <p class="muted">Propuesta simulada: no se ha aplicado ni probado.</p>
+    } @else {
+    <p class="muted" data-testid="no-proposal">
+      Sin evidencia de propuesta en esta tarea.
+    </p>
+    }
+
+    <h3>Revisión</h3>
+    <p data-testid="review">{{ reviewLabel(task) }}</p>
+    @if (canReview(task)) {
+    <div class="actions">
+      <button
+        type="button"
+        data-testid="approve"
+        [disabled]="pending() || busy() !== null"
+        (click)="review(task, 'approve')"
+      >
+        Aprobar
+      </button>
+      <button
+        type="button"
+        class="secondary"
+        data-testid="discard"
+        [disabled]="pending() || busy() !== null"
+        (click)="review(task, 'discard')"
+      >
+        Descartar
+      </button>
+    </div>
+    } } @else {
+    <p class="muted">Selecciona o crea una tarea.</p>
+    }
+  </section>
+</main>
