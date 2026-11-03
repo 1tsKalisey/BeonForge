@@ -12,9 +12,9 @@ export class ParseError extends Error {
 }
 
 export interface ParseLimits {
-  readonly maxLineBytes: number;   // per UTF-8-encoded line
-  readonly maxTotalBytes: number;  // total buffer
-  readonly maxEvents: number;      // maximum lines
+  readonly maxLineBytes: number; // per UTF-8-encoded line
+  readonly maxTotalBytes: number; // total buffer
+  readonly maxEvents: number; // maximum lines
 }
 
 export const DEFAULT_PARSE_LIMITS: ParseLimits = {
@@ -40,7 +40,11 @@ export type CodexEvent =
       readonly preimageSha256: string;
       readonly content: string;
     }
-  | { readonly schemaVersion: 1; readonly type: 'done'; readonly exitCode: number };
+  | {
+      readonly schemaVersion: 1;
+      readonly type: 'done';
+      readonly exitCode: number;
+    };
 
 const KNOWN_TYPES = new Set(['started', 'message', 'proposal', 'done']);
 const EXPECTED_KEYS: Record<string, string> = {
@@ -54,7 +58,7 @@ function dataStr(obj: Record<string, unknown>, key: string): string {
   const d = Object.getOwnPropertyDescriptor(obj, key);
   if (!d || !Object.hasOwn(d, 'value') || typeof d.value !== 'string')
     throw new ParseError('invalid_field');
-  return d.value as string;
+  return d.value;
 }
 
 function dataInt(obj: Record<string, unknown>, key: string): number {
@@ -66,7 +70,7 @@ function dataInt(obj: Record<string, unknown>, key: string): number {
     !Number.isSafeInteger(d.value)
   )
     throw new ParseError('invalid_field');
-  return d.value as number;
+  return d.value;
 }
 
 export function parseCodexJsonl(
@@ -80,9 +84,11 @@ export function parseCodexJsonl(
     bytes[2] === 0xbf
   )
     throw new ParseError('bom_rejected');
-  if (bytes.length > limits.maxTotalBytes) throw new ParseError('total_size_exceeded');
+  if (bytes.length > limits.maxTotalBytes)
+    throw new ParseError('total_size_exceeded');
   if (bytes.length === 0) throw new ParseError('empty_input');
-  if (bytes[bytes.length - 1] !== 0x0a) throw new ParseError('truncated_output');
+  if (bytes[bytes.length - 1] !== 0x0a)
+    throw new ParseError('truncated_output');
 
   let text: string;
   try {
@@ -96,7 +102,8 @@ export function parseCodexJsonl(
   if (parts[parts.length - 1] !== '') throw new ParseError('truncated_output');
   const lines = parts.slice(0, -1);
 
-  if (lines.length > limits.maxEvents) throw new ParseError('event_count_exceeded');
+  if (lines.length > limits.maxEvents)
+    throw new ParseError('event_count_exceeded');
 
   const events: CodexEvent[] = [];
   let startedSeen = false;
@@ -113,12 +120,18 @@ export function parseCodexJsonl(
       throw new ParseError('malformed_json');
     }
 
-    if (!raw || typeof raw !== 'object' || Array.isArray(raw) || types.isProxy(raw))
+    if (
+      !raw ||
+      typeof raw !== 'object' ||
+      Array.isArray(raw) ||
+      types.isProxy(raw)
+    )
       throw new ParseError('invalid_event_structure');
 
     const obj = raw as Record<string, unknown>;
 
-    if (obj['schemaVersion'] !== 1) throw new ParseError('unknown_schema_version');
+    if (obj['schemaVersion'] !== 1)
+      throw new ParseError('unknown_schema_version');
 
     const type = obj['type'];
     if (typeof type !== 'string' || !KNOWN_TYPES.has(type))
@@ -128,7 +141,8 @@ export function parseCodexJsonl(
       throw new ParseError('started_event_required_first');
 
     const sortedKeys = Object.keys(obj).sort().join(',');
-    if (sortedKeys !== EXPECTED_KEYS[type]) throw new ParseError('unexpected_fields');
+    if (sortedKeys !== EXPECTED_KEYS[type])
+      throw new ParseError('unexpected_fields');
 
     switch (type) {
       case 'started':

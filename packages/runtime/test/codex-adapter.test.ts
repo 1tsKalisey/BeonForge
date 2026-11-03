@@ -4,7 +4,10 @@ import { it, expect, afterEach } from 'vitest';
 import { mkdtempSync, realpathSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { openSqlitePersistence, type DurableStore } from '@beonforge/persistence';
+import {
+  openSqlitePersistence,
+  type DurableStore,
+} from '@beonforge/persistence';
 import {
   parseCodexJsonl,
   ParseError,
@@ -51,8 +54,20 @@ const validRequest: SimulatedCodexRequest = {
 
 it('parser: valid 4-event success sequence', () => {
   const s = JSON.stringify({ schemaVersion: 1, type: 'started' });
-  const m = JSON.stringify({ schemaVersion: 1, type: 'message', role: 'assistant', content: 'ok' });
-  const p = JSON.stringify({ schemaVersion: 1, type: 'proposal', baseCommit: BASE_COMMIT, path: 'src/add.ts', preimageSha256: PREIMAGE_SHA, content: 'x' });
+  const m = JSON.stringify({
+    schemaVersion: 1,
+    type: 'message',
+    role: 'assistant',
+    content: 'ok',
+  });
+  const p = JSON.stringify({
+    schemaVersion: 1,
+    type: 'proposal',
+    baseCommit: BASE_COMMIT,
+    path: 'src/add.ts',
+    preimageSha256: PREIMAGE_SHA,
+    content: 'x',
+  });
   const d = JSON.stringify({ schemaVersion: 1, type: 'done', exitCode: 0 });
   const events = parseCodexJsonl(Buffer.from(`${s}\n${m}\n${p}\n${d}\n`));
   expect(events).toHaveLength(4);
@@ -62,7 +77,9 @@ it('parser: valid 4-event success sequence', () => {
 
 it('parser: rejects BOM', () => {
   const bom = Buffer.from([0xef, 0xbb, 0xbf]);
-  const body = Buffer.from(JSON.stringify({ schemaVersion: 1, type: 'started' }) + '\n');
+  const body = Buffer.from(
+    JSON.stringify({ schemaVersion: 1, type: 'started' }) + '\n',
+  );
   expect(() => parseCodexJsonl(Buffer.concat([bom, body]))).toThrow(ParseError);
   try {
     parseCodexJsonl(Buffer.concat([bom, body]));
@@ -73,43 +90,73 @@ it('parser: rejects BOM', () => {
 
 it('parser: rejects empty input', () => {
   expect(() => parseCodexJsonl(Buffer.alloc(0))).toThrow(ParseError);
-  try { parseCodexJsonl(Buffer.alloc(0)); } catch (e) {
+  try {
+    parseCodexJsonl(Buffer.alloc(0));
+  } catch (e) {
     expect((e as ParseError).code).toBe('empty_input');
   }
 });
 
 it('parser: rejects truncated output (no trailing newline)', () => {
-  const bytes = Buffer.from(JSON.stringify({ schemaVersion: 1, type: 'started' }));
+  const bytes = Buffer.from(
+    JSON.stringify({ schemaVersion: 1, type: 'started' }),
+  );
   expect(() => parseCodexJsonl(bytes)).toThrow(ParseError);
-  try { parseCodexJsonl(bytes); } catch (e) {
+  try {
+    parseCodexJsonl(bytes);
+  } catch (e) {
     expect((e as ParseError).code).toBe('truncated_output');
   }
 });
 
 it('parser: rejects total size exceeded', () => {
-  const limits: ParseLimits = { maxLineBytes: 65536, maxTotalBytes: 10, maxEvents: 4096 };
-  const bytes = Buffer.from(JSON.stringify({ schemaVersion: 1, type: 'started' }) + '\n');
+  const limits: ParseLimits = {
+    maxLineBytes: 65536,
+    maxTotalBytes: 10,
+    maxEvents: 4096,
+  };
+  const bytes = Buffer.from(
+    JSON.stringify({ schemaVersion: 1, type: 'started' }) + '\n',
+  );
   expect(() => parseCodexJsonl(bytes, limits)).toThrow(ParseError);
-  try { parseCodexJsonl(bytes, limits); } catch (e) {
+  try {
+    parseCodexJsonl(bytes, limits);
+  } catch (e) {
     expect((e as ParseError).code).toBe('total_size_exceeded');
   }
 });
 
 it('parser: rejects line size exceeded', () => {
-  const limits: ParseLimits = { maxLineBytes: 5, maxTotalBytes: 1048576, maxEvents: 4096 };
-  const bytes = Buffer.from(JSON.stringify({ schemaVersion: 1, type: 'started' }) + '\n');
+  const limits: ParseLimits = {
+    maxLineBytes: 5,
+    maxTotalBytes: 1048576,
+    maxEvents: 4096,
+  };
+  const bytes = Buffer.from(
+    JSON.stringify({ schemaVersion: 1, type: 'started' }) + '\n',
+  );
   expect(() => parseCodexJsonl(bytes, limits)).toThrow(ParseError);
-  try { parseCodexJsonl(bytes, limits); } catch (e) {
+  try {
+    parseCodexJsonl(bytes, limits);
+  } catch (e) {
     expect((e as ParseError).code).toBe('line_size_exceeded');
   }
 });
 
 it('parser: rejects event count exceeded', () => {
-  const limits: ParseLimits = { maxLineBytes: 65536, maxTotalBytes: 1048576, maxEvents: 1 };
+  const limits: ParseLimits = {
+    maxLineBytes: 65536,
+    maxTotalBytes: 1048576,
+    maxEvents: 1,
+  };
   const s = JSON.stringify({ schemaVersion: 1, type: 'started' });
   const d = JSON.stringify({ schemaVersion: 1, type: 'done', exitCode: 0 });
-  expect(() => parseCodexJsonl(Buffer.from(`${s}\n${d}\n`), limits)).toThrow(ParseError);
-  try { parseCodexJsonl(Buffer.from(`${s}\n${d}\n`), limits); } catch (e) {
+  expect(() => parseCodexJsonl(Buffer.from(`${s}\n${d}\n`), limits)).toThrow(
+    ParseError,
+  );
+  try {
+    parseCodexJsonl(Buffer.from(`${s}\n${d}\n`), limits);
+  } catch (e) {
     expect((e as ParseError).code).toBe('event_count_exceeded');
   }
 });
@@ -118,7 +165,9 @@ it('parser: rejects invalid UTF-8', () => {
   // Valid-length buffer ending in \n but containing invalid UTF-8 (0xff byte)
   const bad = Buffer.from([0xff, 0xfe, 0x0a]);
   expect(() => parseCodexJsonl(bad)).toThrow(ParseError);
-  try { parseCodexJsonl(bad); } catch (e) {
+  try {
+    parseCodexJsonl(bad);
+  } catch (e) {
     expect((e as ParseError).code).toBe('invalid_utf8');
   }
 });
@@ -127,33 +176,51 @@ it('parser: rejects malformed JSON', () => {
   const s = JSON.stringify({ schemaVersion: 1, type: 'started' });
   const bytes = Buffer.from(`${s}\nnot-valid-json\n`);
   expect(() => parseCodexJsonl(bytes)).toThrow(ParseError);
-  try { parseCodexJsonl(bytes); } catch (e) {
+  try {
+    parseCodexJsonl(bytes);
+  } catch (e) {
     expect((e as ParseError).code).toBe('malformed_json');
   }
 });
 
 it('parser: rejects unknown event type', () => {
   const s = JSON.stringify({ schemaVersion: 1, type: 'started' });
-  const bad = JSON.stringify({ schemaVersion: 1, type: 'tool_call', name: 'shell' });
+  const bad = JSON.stringify({
+    schemaVersion: 1,
+    type: 'tool_call',
+    name: 'shell',
+  });
   const bytes = Buffer.from(`${s}\n${bad}\n`);
   expect(() => parseCodexJsonl(bytes)).toThrow(ParseError);
-  try { parseCodexJsonl(bytes); } catch (e) {
+  try {
+    parseCodexJsonl(bytes);
+  } catch (e) {
     expect((e as ParseError).code).toBe('unknown_event_type');
   }
 });
 
 it('parser: rejects duplicate started', () => {
   const s = JSON.stringify({ schemaVersion: 1, type: 'started' });
-  expect(() => parseCodexJsonl(Buffer.from(`${s}\n${s}\n`))).toThrow(ParseError);
-  try { parseCodexJsonl(Buffer.from(`${s}\n${s}\n`)); } catch (e) {
+  expect(() => parseCodexJsonl(Buffer.from(`${s}\n${s}\n`))).toThrow(
+    ParseError,
+  );
+  try {
+    parseCodexJsonl(Buffer.from(`${s}\n${s}\n`));
+  } catch (e) {
     expect((e as ParseError).code).toBe('duplicate_started');
   }
 });
 
 it('parser: rejects event with unexpected extra field', () => {
-  const bad = JSON.stringify({ schemaVersion: 1, type: 'started', extra: true });
+  const bad = JSON.stringify({
+    schemaVersion: 1,
+    type: 'started',
+    extra: true,
+  });
   expect(() => parseCodexJsonl(Buffer.from(`${bad}\n`))).toThrow(ParseError);
-  try { parseCodexJsonl(Buffer.from(`${bad}\n`)); } catch (e) {
+  try {
+    parseCodexJsonl(Buffer.from(`${bad}\n`));
+  } catch (e) {
     expect((e as ParseError).code).toBe('unexpected_fields');
   }
 });
@@ -161,7 +228,9 @@ it('parser: rejects event with unexpected extra field', () => {
 it('parser: rejects unknown schemaVersion', () => {
   const bad = JSON.stringify({ schemaVersion: 99, type: 'started' });
   expect(() => parseCodexJsonl(Buffer.from(`${bad}\n`))).toThrow(ParseError);
-  try { parseCodexJsonl(Buffer.from(`${bad}\n`)); } catch (e) {
+  try {
+    parseCodexJsonl(Buffer.from(`${bad}\n`));
+  } catch (e) {
     expect((e as ParseError).code).toBe('unknown_schema_version');
   }
 });
@@ -169,7 +238,9 @@ it('parser: rejects unknown schemaVersion', () => {
 it('parser: rejects non-started event first', () => {
   const d = JSON.stringify({ schemaVersion: 1, type: 'done', exitCode: 0 });
   expect(() => parseCodexJsonl(Buffer.from(`${d}\n`))).toThrow(ParseError);
-  try { parseCodexJsonl(Buffer.from(`${d}\n`)); } catch (e) {
+  try {
+    parseCodexJsonl(Buffer.from(`${d}\n`));
+  } catch (e) {
     expect((e as ParseError).code).toBe('started_event_required_first');
   }
 });
@@ -177,15 +248,24 @@ it('parser: rejects non-started event first', () => {
 it('parser: rejects events after done', () => {
   const s = JSON.stringify({ schemaVersion: 1, type: 'started' });
   const d = JSON.stringify({ schemaVersion: 1, type: 'done', exitCode: 0 });
-  expect(() => parseCodexJsonl(Buffer.from(`${s}\n${d}\n${s}\n`))).toThrow(ParseError);
-  try { parseCodexJsonl(Buffer.from(`${s}\n${d}\n${s}\n`)); } catch (e) {
+  expect(() => parseCodexJsonl(Buffer.from(`${s}\n${d}\n${s}\n`))).toThrow(
+    ParseError,
+  );
+  try {
+    parseCodexJsonl(Buffer.from(`${s}\n${d}\n${s}\n`));
+  } catch (e) {
     expect((e as ParseError).code).toBe('events_after_done');
   }
 });
 
 it('parser: handles multibyte Unicode content in message', () => {
   const s = JSON.stringify({ schemaVersion: 1, type: 'started' });
-  const m = JSON.stringify({ schemaVersion: 1, type: 'message', role: 'assistant', content: '日本語テスト' });
+  const m = JSON.stringify({
+    schemaVersion: 1,
+    type: 'message',
+    role: 'assistant',
+    content: '日本語テスト',
+  });
   const d = JSON.stringify({ schemaVersion: 1, type: 'done', exitCode: 0 });
   const events = parseCodexJsonl(Buffer.from(`${s}\n${m}\n${d}\n`));
   expect(events).toHaveLength(3);
@@ -215,10 +295,16 @@ it('prepare: rejects request with binary field', () => {
 
 it('prepare: rejects request with codexHome field', () => {
   expect(() =>
-    prepareSimulatedCodexRun({ ...validRequest, codexHome: 'C:/Users/foo/.codex' }),
+    prepareSimulatedCodexRun({
+      ...validRequest,
+      codexHome: 'C:/Users/foo/.codex',
+    }),
   ).toThrow(AdapterError);
   try {
-    prepareSimulatedCodexRun({ ...validRequest, codexHome: 'C:/Users/foo/.codex' });
+    prepareSimulatedCodexRun({
+      ...validRequest,
+      codexHome: 'C:/Users/foo/.codex',
+    });
   } catch (e) {
     expect((e as AdapterError).code).toBe('adapter_real_dispatch_rejected');
   }
@@ -272,12 +358,17 @@ it('prepare: rejects request with invalid mode value', () => {
 
 it('prepare: rejects request with getter on field', () => {
   const req = Object.create(null) as Record<string, unknown>;
-  Object.defineProperty(req, 'schemaVersion', { get: () => 1, enumerable: true });
+  Object.defineProperty(req, 'schemaVersion', {
+    get: () => 1,
+    enumerable: true,
+  });
   req['baseCommit'] = BASE_COMMIT;
   req['preimageSha256'] = PREIMAGE_SHA;
   req['path'] = 'src/add.ts';
   expect(() => prepareSimulatedCodexRun(req)).toThrow(AdapterError);
-  try { prepareSimulatedCodexRun(req); } catch (e) {
+  try {
+    prepareSimulatedCodexRun(req);
+  } catch (e) {
     expect((e as AdapterError).code).toBe('adapter_invalid');
   }
 });
@@ -285,14 +376,19 @@ it('prepare: rejects request with getter on field', () => {
 it('prepare: rejects Proxy request', () => {
   const proxy = new Proxy(validRequest, {});
   expect(() => prepareSimulatedCodexRun(proxy)).toThrow(AdapterError);
-  try { prepareSimulatedCodexRun(proxy); } catch (e) {
+  try {
+    prepareSimulatedCodexRun(proxy);
+  } catch (e) {
     expect((e as AdapterError).code).toBe('adapter_invalid');
   }
 });
 
 it('prepare: rejects wrong path', () => {
   expect(() =>
-    prepareSimulatedCodexRun({ ...validRequest, path: 'src/other.ts' as never }),
+    prepareSimulatedCodexRun({
+      ...validRequest,
+      path: 'src/other.ts' as never,
+    }),
   ).toThrow(AdapterError);
 });
 
@@ -322,7 +418,10 @@ it('execute: success mode returns succeeded with proposalRef', async () => {
 
 it('execute: truncated mode returns failed', async () => {
   const { store } = await openStore();
-  const grant = prepareSimulatedCodexRun({ ...validRequest, mode: 'truncated' });
+  const grant = prepareSimulatedCodexRun({
+    ...validRequest,
+    mode: 'truncated',
+  });
   const result = await executeSimulatedCodexRun(grant, store);
   expect(result.status).toBe('failed');
   expect(result.proposalRef).toBeNull();
@@ -330,14 +429,20 @@ it('execute: truncated mode returns failed', async () => {
 
 it('execute: malformed_json mode returns failed', async () => {
   const { store } = await openStore();
-  const grant = prepareSimulatedCodexRun({ ...validRequest, mode: 'malformed_json' });
+  const grant = prepareSimulatedCodexRun({
+    ...validRequest,
+    mode: 'malformed_json',
+  });
   const result = await executeSimulatedCodexRun(grant, store);
   expect(result.status).toBe('failed');
 }, 15000);
 
 it('execute: unknown_event mode returns failed', async () => {
   const { store } = await openStore();
-  const grant = prepareSimulatedCodexRun({ ...validRequest, mode: 'unknown_event' });
+  const grant = prepareSimulatedCodexRun({
+    ...validRequest,
+    mode: 'unknown_event',
+  });
   const result = await executeSimulatedCodexRun(grant, store);
   expect(result.status).toBe('failed');
 }, 15000);
@@ -408,7 +513,10 @@ it('recovery: evidence readable from second store instance', async () => {
 
 it('recovery: uncertain state preserved in EventStore', async () => {
   const { store } = await openStore();
-  const grant = prepareSimulatedCodexRun({ ...validRequest, mode: 'force_uncertain' });
+  const grant = prepareSimulatedCodexRun({
+    ...validRequest,
+    mode: 'force_uncertain',
+  });
   const result = await executeSimulatedCodexRun(grant, store);
   // The runner maps uncertain → blocked with reason uncertain.
   expect(result.status).toBe('blocked');
@@ -422,7 +530,10 @@ it('recovery: uncertain state preserved in EventStore', async () => {
 
 it('recovery: second execute on blocked run returns blocked', async () => {
   const { store } = await openStore();
-  const grant1 = prepareSimulatedCodexRun({ ...validRequest, mode: 'force_uncertain' });
+  const grant1 = prepareSimulatedCodexRun({
+    ...validRequest,
+    mode: 'force_uncertain',
+  });
   const result1 = await executeSimulatedCodexRun(grant1, store);
   expect(result1.status).toBe('blocked');
 
@@ -435,7 +546,10 @@ it('recovery: second execute on blocked run returns blocked', async () => {
 
 it('recovery: failed run evidence inspectable', async () => {
   const { store } = await openStore();
-  const grant = prepareSimulatedCodexRun({ ...validRequest, mode: 'truncated' });
+  const grant = prepareSimulatedCodexRun({
+    ...validRequest,
+    mode: 'truncated',
+  });
   const result = await executeSimulatedCodexRun(grant, store);
   expect(result.status).toBe('failed');
 
@@ -461,8 +575,17 @@ it('inspect: returns null for empty runId', async () => {
 
 it('grant: grant without CodexAdapterGrant instance rejected', async () => {
   const { store } = await openStore();
-  const fake = { runId: 'x', payloadSha256: 'y', profileKind: 'simulated', mode: 'success', isRevoked: false, revoke: () => {} };
-  await expect(executeSimulatedCodexRun(fake as never, store)).rejects.toMatchObject({
+  const fake = {
+    runId: 'x',
+    payloadSha256: 'y',
+    profileKind: 'simulated',
+    mode: 'success',
+    isRevoked: false,
+    revoke: () => {},
+  };
+  await expect(
+    executeSimulatedCodexRun(fake as never, store),
+  ).rejects.toMatchObject({
     code: 'adapter_invalid',
   });
 }, 5000);

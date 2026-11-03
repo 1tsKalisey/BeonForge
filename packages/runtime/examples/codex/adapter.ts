@@ -64,8 +64,9 @@ const hash = (b: Uint8Array | string): string =>
   createHash('sha256').update(b).digest('hex');
 
 function own(value: unknown, key: string): unknown {
-  if (!value || typeof value !== 'object' || types.isProxy(value)) return undefined;
-  const d = Object.getOwnPropertyDescriptor(value as object, key);
+  if (!value || typeof value !== 'object' || types.isProxy(value))
+    return undefined;
+  const d = Object.getOwnPropertyDescriptor(value, key);
   return d && Object.hasOwn(d, 'value') ? d.value : undefined;
 }
 
@@ -76,7 +77,7 @@ const grantStates = new WeakMap<CodexAdapterGrant, { revoked: boolean }>();
 export class CodexAdapterGrant {
   readonly runId: string;
   readonly payloadSha256: string;
-  readonly profileKind: 'simulated' = 'simulated';
+  readonly profileKind = 'simulated' as const;
   readonly mode: SimulationMode;
 
   constructor(runId: string, payload: Buffer, mode: SimulationMode) {
@@ -109,7 +110,7 @@ export function prepareSimulatedCodexRun(request: unknown): CodexAdapterGrant {
   )
     if (types.isProxy(proto)) throw new AdapterError('adapter_invalid');
 
-  const descriptors = Object.getOwnPropertyDescriptors(request as object);
+  const descriptors = Object.getOwnPropertyDescriptors(request);
 
   // No accessor descriptors allowed (no getters/setters).
   for (const d of Object.values(descriptors))
@@ -160,7 +161,13 @@ export function prepareSimulatedCodexRun(request: unknown): CodexAdapterGrant {
           })();
 
   const payload = Buffer.from(
-    JSON.stringify({ schemaVersion: 1, baseCommit, preimageSha256, path, mode }),
+    JSON.stringify({
+      schemaVersion: 1,
+      baseCommit,
+      preimageSha256,
+      path,
+      mode,
+    }),
   );
   return new CodexAdapterGrant(randomUUID(), payload, mode);
 }
@@ -218,7 +225,8 @@ export async function executeSimulatedCodexRun(
   store: DurableStore,
   signal?: AbortSignal,
 ): Promise<CodexRunResult> {
-  if (!(grant instanceof CodexAdapterGrant)) throw new AdapterError('adapter_invalid');
+  if (!(grant instanceof CodexAdapterGrant))
+    throw new AdapterError('adapter_invalid');
   if (grant.isRevoked) throw new AdapterError('adapter_denied');
   if (active) throw new AdapterError('adapter_busy');
   active = true;
@@ -273,18 +281,28 @@ export async function executeSimulatedCodexRun(
 
         const baseCommit = own(reqParsed, 'baseCommit');
         const preimageSha256 = own(reqParsed, 'preimageSha256');
-        if (typeof baseCommit !== 'string' || typeof preimageSha256 !== 'string')
+        if (
+          typeof baseCommit !== 'string' ||
+          typeof preimageSha256 !== 'string'
+        )
           return {
             status: 'uncertain',
             outputs: [],
-            error: { code: 'execution_failed', message: 'request_fields_invalid' },
+            error: {
+              code: 'execution_failed',
+              message: 'request_fields_invalid',
+            },
           };
 
         if (combined.aborted || grant.isRevoked)
           return { status: 'cancelled', outputs: [] };
 
         // In-process simulation only — no subprocess, no network, no binary.
-        const jsonlBytes = generateEvents(baseCommit, preimageSha256, capturedMode);
+        const jsonlBytes = generateEvents(
+          baseCommit,
+          preimageSha256,
+          capturedMode,
+        );
 
         let events: CodexEvent[];
         try {
@@ -350,7 +368,7 @@ export async function executeSimulatedCodexRun(
         ],
       },
       [handler],
-      { signal, timeoutMs: 30000 },
+      { ...(signal !== undefined && { signal }), timeoutMs: 30000 },
     );
 
     return {
