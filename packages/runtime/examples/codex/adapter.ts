@@ -368,7 +368,11 @@ export async function executeSimulatedCodexRun(
         ],
       },
       [handler],
-      { ...(signal !== undefined && { signal }), timeoutMs: 30000 },
+      {
+        ...(signal !== undefined && { signal }),
+        external: ['codex-run'],
+        timeoutMs: 30000,
+      },
     );
 
     return {

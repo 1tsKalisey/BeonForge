@@ -481,7 +481,9 @@ it('execute: rejects concurrent execute with adapter_busy', async () => {
 // ─── recovery and evidence tests ─────────────────────────────────────────────
 
 it('recovery: evidence readable from second store instance', async () => {
-  const { root } = await openStore();
+  // Create an empty dir without opening a store (openStore keeps a connection
+  // open which would conflict with store1 on the same SQLite file).
+  const root = mkdtempSync(join(temp, 'beonforge-adapter-'));
   const dbPath = join(root, 'events.sqlite');
 
   // First store: execute and close.
